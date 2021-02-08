@@ -1,4 +1,7 @@
-use anyhow::Result;
+mod application;
+
+use anyhow::{Context, Result};
+use application::Application;
 use flexi_logger::{DeferredNow, Logger, Record};
 use std::fmt::Write as FmtWrite;
 use textwrap::{termwidth, Options};
@@ -23,9 +26,14 @@ fn run() -> Result<()> {
     Logger::with_env_or_str("info")
         .format(multiline_format)
         .start()?;
+    log::info!(
+        "adjust log level by setting the RUST_LOG env var - RUST_LOG = 'info'"
+    );
 
-    log::info!("Hello World!");
-    Ok(())
+    Application::new()
+        .context("failed to construct the application!")?
+        .run()
+        .context("application exited with an error")
 }
 
 /// A formatting function for lines which automaticaly wrap on the terminal
