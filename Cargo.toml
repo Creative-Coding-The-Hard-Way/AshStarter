@@ -8,6 +8,7 @@ edition = "2018"
 anyhow = "1.0.38"
 flexi_logger = "0.17.1"
 log = "0.4.13"
+ash = "0.31.0"
 
 
 [dependencies.glfw]

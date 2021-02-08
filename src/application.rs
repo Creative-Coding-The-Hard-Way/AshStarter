@@ -1,4 +1,7 @@
+mod instance;
+
 use anyhow::{bail, Context, Result};
+use ash::{version::InstanceV1_0, Entry, Instance};
 use glfw::Glfw;
 use std::sync::mpsc::Receiver;
 
@@ -7,6 +10,8 @@ pub struct Application {
     glfw: Glfw,
     window: glfw::Window,
     events: Option<Receiver<(f64, glfw::WindowEvent)>>,
+    entry: Entry,
+    instance: Instance,
 }
 
 impl Application {
@@ -29,10 +34,18 @@ impl Application {
 
         window.set_key_polling(true);
 
+        let (instance, entry) = instance::create_instance(
+            &glfw
+                .get_required_instance_extensions()
+                .context("unable to get the required vulkan extensions")?,
+        )?;
+
         Ok(Self {
             glfw,
             window,
             events: Some(events),
+            entry,
+            instance,
         })
     }
 
@@ -81,5 +94,8 @@ impl Application {
 impl Drop for Application {
     fn drop(&mut self) {
         log::debug!("cleanup application");
+        unsafe {
+            self.instance.destroy_instance(None);
+        }
     }
 }
