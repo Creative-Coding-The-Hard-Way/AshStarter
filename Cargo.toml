@@ -9,6 +9,11 @@ anyhow = "1.0.38"
 flexi_logger = "0.17.1"
 log = "0.4.13"
 
+
+[dependencies.glfw]
+version = "0.41.0"
+features = [ "vulkan" ]
+
 [dependencies.textwrap]
 features = ["terminal_size"]
 version = "0.13.2"
