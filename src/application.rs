@@ -7,19 +7,23 @@
 //! app.run()?;
 //! ```
 
+mod device;
 mod instance;
+
+use device::Device;
+use instance::Instance;
 
 use anyhow::{bail, Context, Result};
 use glfw::Glfw;
-use instance::Instance;
-use std::sync::mpsc::Receiver;
+use std::sync::{mpsc::Receiver, Arc};
 
 /// The application's state.
 pub struct Application {
     glfw: Glfw,
     window: glfw::Window,
     events: Option<Receiver<(f64, glfw::WindowEvent)>>,
-    instance: Instance,
+    instance: Arc<Instance>,
+    device: Arc<Device>,
 }
 
 impl Application {
@@ -47,12 +51,14 @@ impl Application {
             Instance::new(&glfw.get_required_instance_extensions().context(
                 "unable to get required vulkan extensions for this platform",
             )?)?;
+        let device = Device::new(&instance)?;
 
         Ok(Self {
             glfw,
             window,
             events: Some(events),
             instance,
+            device,
         })
     }
 

@@ -31,6 +31,7 @@ use std::{
     borrow::Cow,
     ffi::{CStr, CString},
     os::raw::c_char,
+    sync::Arc,
 };
 
 /// Hold all of the instance-related objects and drop them in the correct order.
@@ -46,17 +47,17 @@ impl Instance {
     ///
     /// Debug and validation layers are automatically setup along with the
     /// debug callback.
-    pub fn new(required_extensions: &Vec<String>) -> Result<Self> {
+    pub fn new(required_extensions: &Vec<String>) -> Result<Arc<Self>> {
         let (instance, entry) = Self::create_instance(required_extensions)?;
         let (debug, debug_messenger) =
             Self::create_debug_callback(&entry, &instance)?;
 
-        Ok(Self {
+        Ok(Arc::new(Self {
             ash: instance,
             entry,
             debug,
             debug_messenger,
-        })
+        }))
     }
 
     /// Create a Vulkan instance with the required extensions.
