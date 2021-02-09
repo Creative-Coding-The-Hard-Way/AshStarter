@@ -1,3 +1,11 @@
+//! A Vulkan demo written in Rust.
+//!
+//! # How To Run
+//!
+//! ```
+//! cargo run --release
+//! ```
+
 mod application;
 
 use anyhow::{Context, Result};
@@ -36,7 +44,7 @@ fn run() -> Result<()> {
         .context("application exited with an error")
 }
 
-/// A formatting function for lines which automaticaly wrap on the terminal
+/// A formatting function for logs which automaticaly wrap to the terminal
 /// width.
 fn multiline_format(
     w: &mut dyn std::io::Write,

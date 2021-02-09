@@ -1,3 +1,12 @@
+//! The main application state.
+//!
+//! # Example
+//!
+//! ```
+//! let mut app = Application::new()?;
+//! app.run()?;
+//! ```
+
 mod instance;
 
 use anyhow::{bail, Context, Result};
@@ -5,7 +14,7 @@ use ash::{version::InstanceV1_0, Entry, Instance};
 use glfw::Glfw;
 use std::sync::mpsc::Receiver;
 
-/// This struct represents the application's main state.
+/// The application's state.
 pub struct Application {
     glfw: Glfw,
     window: glfw::Window,
@@ -15,8 +24,9 @@ pub struct Application {
 }
 
 impl Application {
-    /// Build a new instance of the application. This is allowed to fail if
-    /// anything goes wrong or cannot be created.
+    /// Build a new instance of the application.
+    ///
+    /// Returns `Err()` if anything goes wrong while building the app.
     pub fn new() -> Result<Self> {
         let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS)
             .context("unable to initialize the glfw library")?;
@@ -49,14 +59,11 @@ impl Application {
         })
     }
 
-    /// Main application loop
+    /// Run the application, blocks until the main event loop exits.
     pub fn run(mut self) -> Result<()> {
-        self.init_vulkan();
         self.main_loop()?;
         Ok(())
     }
-
-    fn init_vulkan(&self) {}
 
     /// Main window event loop. Events are dispatched via handle_event.
     fn main_loop(&mut self) -> Result<()> {
@@ -73,6 +80,7 @@ impl Application {
         Ok(())
     }
 
+    /// Handle window events and update the application state as needed.
     fn handle_event(&mut self, event: glfw::WindowEvent) -> Result<()> {
         match event {
             glfw::WindowEvent::Key(

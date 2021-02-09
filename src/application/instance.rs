@@ -1,9 +1,22 @@
+//! Functions for creating an instance with extensions.
+//!
+//! Instances are not managed and must be destroyed by the caller in a Drop
+//! implementation.
+//!
+//! # Example
+//!
+//! ```
+//! let instance = instance::create_instance(
+//!     &glfw.get_required_instance_extensions().unwrap()
+//! )?;
+//! ```
+
 use anyhow::{bail, Result};
 use ash::{version::EntryV1_0, vk, Entry, Instance};
 use std::ffi::CString;
 
 /// Create a Vulkan instance with the required extensions.
-/// Yields an error if any required extensions are unavailable.
+/// Returns an `Err()` if any required extensions are unavailable.
 pub fn create_instance(
     required_extensions: &Vec<String>,
 ) -> Result<(Instance, Entry)> {
@@ -42,7 +55,7 @@ pub fn create_instance(
     Ok((instance, entry))
 }
 
-/// Check that all required extensions are available or else bail.
+/// Bail if there are any unsupported extensions which are required.
 fn check_extensions(
     entry: &Entry,
     required_extensions: &Vec<String>,
