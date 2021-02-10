@@ -6,6 +6,7 @@ mod queue_family_indices;
 use crate::application::instance::Instance;
 use anyhow::{Context, Result};
 use ash::{version::InstanceV1_0, vk};
+use queue_family_indices::QueueFamilyIndices;
 use std::sync::Arc;
 
 /// This struct holds all device-specific resources, the physical device and
@@ -51,7 +52,9 @@ impl Device {
                 .ash
                 .get_physical_device_properties(*physical_device)
         };
-        features.geometry_shader == vk::TRUE
+
+        QueueFamilyIndices::find(physical_device, &instance.ash).is_ok()
+            && features.geometry_shader == vk::TRUE
             && properties.device_type == vk::PhysicalDeviceType::DISCRETE_GPU
     }
 }
