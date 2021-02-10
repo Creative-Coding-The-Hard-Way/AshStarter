@@ -9,11 +9,14 @@
 
 mod device;
 mod instance;
+mod window_surface;
 
-use device::Device;
-use instance::Instance;
+use crate::application::{
+    device::Device, instance::Instance, window_surface::WindowSurface,
+};
 
 use anyhow::{bail, Context, Result};
+use ash::vk;
 use glfw::Glfw;
 use std::sync::{mpsc::Receiver, Arc};
 
@@ -28,6 +31,9 @@ pub struct Application {
 
     #[allow(dead_code)]
     device: Arc<Device>,
+
+    #[allow(dead_code)]
+    window_surface: Arc<WindowSurface>,
 }
 
 impl Application {
@@ -37,25 +43,19 @@ impl Application {
     pub fn new() -> Result<Self> {
         let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS)
             .context("unable to initialize the glfw library")?;
-
-        if !glfw.vulkan_supported() {
-            bail!("vulkan is not supported on this device!");
-        }
-        glfw.window_hint(glfw::WindowHint::ClientApi(
-            glfw::ClientApiHint::NoApi,
-        ));
-        glfw.window_hint(glfw::WindowHint::Resizable(false));
-        let (mut window, events) = glfw
-            .create_window(1366, 768, "Ash Starter", glfw::WindowMode::Windowed)
-            .context("unable to create the glfw window")?;
-
-        window.set_key_polling(true);
-
+        let (window, events) = Self::create_window(&mut glfw)?;
         let instance =
             Instance::new(&glfw.get_required_instance_extensions().context(
                 "unable to get required vulkan extensions for this platform",
             )?)?;
+        let window_surface = WindowSurface::new(&window, instance.clone())?;
         let device = Device::new(&instance)?;
+
+        device.name_vulkan_object(
+            "main application surface",
+            vk::ObjectType::SURFACE_KHR,
+            &window_surface.surface,
+        )?;
 
         Ok(Self {
             glfw,
@@ -63,7 +63,23 @@ impl Application {
             events: Some(events),
             instance,
             device,
+            window_surface,
         })
+    }
+
+    /// Create this application's glfw window
+    fn create_window(
+        glfw: &mut Glfw,
+    ) -> Result<(glfw::Window, Receiver<(f64, glfw::WindowEvent)>)> {
+        if !glfw.vulkan_supported() {
+            bail!("vulkan is not supported on this device!");
+        }
+        glfw.window_hint(glfw::WindowHint::ClientApi(
+            glfw::ClientApiHint::NoApi,
+        ));
+        glfw.window_hint(glfw::WindowHint::Resizable(false));
+        glfw.create_window(1366, 768, "Ash Starter", glfw::WindowMode::Windowed)
+            .context("unable to create the glfw window")
     }
 
     /// Run the application, blocks until the main event loop exits.
@@ -74,6 +90,8 @@ impl Application {
 
     /// Main window event loop. Events are dispatched via handle_event.
     fn main_loop(&mut self) -> Result<()> {
+        self.window.set_key_polling(true);
+
         let events =
             self.events.take().context("event reciever is missing?!")?;
 
