@@ -7,6 +7,7 @@
 //! ```
 
 mod application;
+mod ffi;
 
 use anyhow::{Context, Result};
 use application::Application;

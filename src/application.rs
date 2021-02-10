@@ -22,7 +22,11 @@ pub struct Application {
     glfw: Glfw,
     window: glfw::Window,
     events: Option<Receiver<(f64, glfw::WindowEvent)>>,
+
+    #[allow(dead_code)]
     instance: Arc<Instance>,
+
+    #[allow(dead_code)]
     device: Arc<Device>,
 }
 

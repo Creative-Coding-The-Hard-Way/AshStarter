@@ -7,7 +7,7 @@ use ash::{version::InstanceV1_0, vk};
 /// This struct holds all of the queue indices required by this application.
 pub struct QueueFamilyIndices {
     /// the index for the graphics queue
-    graphics_family_index: usize,
+    graphics_family_index: u32,
 }
 
 impl QueueFamilyIndices {
@@ -29,7 +29,7 @@ impl QueueFamilyIndices {
 
         queue_families.iter().enumerate().for_each(|(i, family)| {
             if family.queue_flags.contains(vk::QueueFlags::GRAPHICS) {
-                graphics_family = Some(i);
+                graphics_family = Some(i as u32);
             }
         });
 
@@ -39,5 +39,15 @@ impl QueueFamilyIndices {
         Ok(Self {
             graphics_family_index,
         })
+    }
+
+    /// Create a vector of queue create info structs based on the indices.
+    ///
+    /// Automatically handles duplicate indices
+    pub fn as_queue_create_infos(&self) -> Vec<vk::DeviceQueueCreateInfo> {
+        vec![vk::DeviceQueueCreateInfo::builder()
+            .queue_family_index(self.graphics_family_index)
+            .queue_priorities(&[1.0])
+            .build()]
     }
 }
