@@ -2,7 +2,10 @@
 //! this application.
 
 use anyhow::{Context, Result};
-use ash::{version::InstanceV1_0, vk};
+use ash::{
+    version::{DeviceV1_0, InstanceV1_0},
+    vk,
+};
 
 /// This struct holds all of the queue indices required by this application.
 pub struct QueueFamilyIndices {
@@ -49,5 +52,18 @@ impl QueueFamilyIndices {
             .queue_family_index(self.graphics_family_index)
             .queue_priorities(&[1.0])
             .build()]
+    }
+
+    /// Return a tuple of the actual vulkan queues.
+    ///
+    /// Handles duplicate queue family indices automatically.
+    pub fn get_queues(
+        &self,
+        logical_device: &ash::Device,
+    ) -> Result<(vk::Queue)> {
+        let graphics_queue = unsafe {
+            logical_device.get_device_queue(self.graphics_family_index, 0)
+        };
+        Ok((graphics_queue))
     }
 }

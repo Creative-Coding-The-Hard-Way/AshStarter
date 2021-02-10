@@ -1,9 +1,19 @@
 //! This module provides functions for picking a physical device and creating
 //! the logical device.
 
+mod physical_device;
 mod queue_family_indices;
 
-use crate::{application::instance::Instance, ffi::to_os_ptrs};
+use crate::{
+    application::{
+        device::physical_device::{
+            pick_physical_device, required_device_features,
+        },
+        instance::Instance,
+    },
+    ffi::to_os_ptrs,
+};
+
 use anyhow::{Context, Result};
 use ash::{
     version::{DeviceV1_0, InstanceV1_0},
@@ -18,6 +28,8 @@ pub struct Device {
     pub physical_device: vk::PhysicalDevice,
     pub logical_device: ash::Device,
 
+    pub graphics_queue: vk::Queue,
+
     /// the instance must live longer than the devices which depend on it
     instance: Arc<Instance>,
 }
@@ -27,17 +39,36 @@ impl Device {
     /// properties.
     pub fn new(instance: &Arc<Instance>) -> Result<Arc<Device>> {
         let physical_device = pick_physical_device(instance)?;
-        let logical_device = create_logical_device(instance, &physical_device)?;
+
+        let queue_family_indices =
+            QueueFamilyIndices::find(&physical_device, &instance.ash)?;
+
+        let logical_device = create_logical_device(
+            instance,
+            &physical_device,
+            &queue_family_indices,
+        )?;
+
+        let (graphics_queue) =
+            queue_family_indices.get_queues(&logical_device)?;
 
         let device = Arc::new(Self {
             physical_device,
             logical_device,
+            graphics_queue,
             instance: instance.clone(),
         });
 
         device.name_vulkan_object(
             "Application Logical Device",
+            vk::ObjectType::DEVICE,
             &device.logical_device.handle(),
+        )?;
+
+        device.name_vulkan_object(
+            "Graphics Queue",
+            vk::ObjectType::QUEUE,
+            &device.graphics_queue,
         )?;
 
         Ok(device)
@@ -52,14 +83,16 @@ impl Device {
     ///
     /// ```
     /// device.name_vulkan_object(
-    ///     "Application Logical Device",
-    ///     &device.logical_device.handle()
+    ///     "Graphics Queue",
+    ///     vk::ObjectType::QUEUE,
+    ///     &device.graphics_queue()
     /// )?;
     /// ```
     ///
     pub fn name_vulkan_object<Name, Handle>(
         &self,
         name: Name,
+        object_type: vk::ObjectType,
         handle: &Handle,
     ) -> Result<()>
     where
@@ -70,7 +103,7 @@ impl Device {
 
         let name_info = vk::DebugUtilsObjectNameInfoEXT::builder()
             .object_name(&cname)
-            .object_type(vk::ObjectType::DEVICE)
+            .object_type(object_type)
             .object_handle(handle.as_raw());
 
         unsafe {
@@ -101,10 +134,8 @@ impl Drop for Device {
 fn create_logical_device(
     instance: &Instance,
     physical_device: &vk::PhysicalDevice,
+    queue_family_indices: &QueueFamilyIndices,
 ) -> Result<ash::Device> {
-    let queue_family_indices =
-        QueueFamilyIndices::find(physical_device, &instance.ash)?;
-
     let queue_create_infos = queue_family_indices.as_queue_create_infos();
     let features = required_device_features();
     let (_c_names, layer_name_ptrs) =
@@ -123,43 +154,4 @@ fn create_logical_device(
     };
 
     Ok(logical_device)
-}
-
-/// Pick a physical device based on suitability criteria.
-fn pick_physical_device(instance: &Instance) -> Result<vk::PhysicalDevice> {
-    let physical_devices =
-        unsafe { instance.ash.enumerate_physical_devices()? };
-    let physical_device = physical_devices
-        .iter()
-        .find(|device| is_device_suitable(&instance, device))
-        .context("unable to pick a suitable device")?;
-    Ok(*physical_device)
-}
-
-/// Return true when the device is suitable for this application.
-fn is_device_suitable(
-    instance: &Instance,
-    physical_device: &vk::PhysicalDevice,
-) -> bool {
-    let features =
-        unsafe { instance.ash.get_physical_device_features(*physical_device) };
-    let properties = unsafe {
-        instance
-            .ash
-            .get_physical_device_properties(*physical_device)
-    };
-
-    QueueFamilyIndices::find(physical_device, &instance.ash).is_ok()
-        && features.geometry_shader == vk::TRUE
-        && properties.device_type == vk::PhysicalDeviceType::DISCRETE_GPU
-}
-
-/// Return the set of required device features for this application.
-///
-/// `is_device_suitable` should verify that all required features are supported
-/// by the chosen physical device.
-fn required_device_features() -> vk::PhysicalDeviceFeatures {
-    vk::PhysicalDeviceFeatures::builder()
-        .geometry_shader(true)
-        .build()
 }
