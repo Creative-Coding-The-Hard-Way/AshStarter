@@ -28,6 +28,42 @@ impl WindowSurface {
             _instance: instance,
         }))
     }
+
+    /// Returns the set of all supported formats for this device.
+    ///
+    /// Unsafe because the device's supported extensions must be checked prior
+    /// to querying the surface formats.
+    pub unsafe fn supported_formats(
+        &self,
+        physical_device: &vk::PhysicalDevice,
+    ) -> Vec<vk::SurfaceFormatKHR> {
+        self.surface_loader
+            .get_physical_device_surface_formats(*physical_device, self.surface)
+            .unwrap_or_else(|_| vec![])
+    }
+
+    /// Returns the set of all supported presentation modes for this device.
+    ///
+    /// Unsafe because the device's supported extensions must be checked prior
+    /// to querying the presentation modes.
+    pub unsafe fn supported_presentation_modes(
+        &self,
+        physical_device: &vk::PhysicalDevice,
+    ) -> Vec<vk::PresentModeKHR> {
+        self.surface_loader
+            .get_physical_device_surface_present_modes(
+                *physical_device,
+                self.surface,
+            )
+            .unwrap_or_else(|_| vec![])
+    }
+
+    /// This application's required surface format.
+    pub fn required_format(&self) -> vk::SurfaceFormatKHR {
+        vk::SurfaceFormatKHR::builder()
+            .format(vk::Format::B8G8R8A8_SRGB)
+            .build()
+    }
 }
 
 impl Drop for WindowSurface {

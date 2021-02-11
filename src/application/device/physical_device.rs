@@ -26,12 +26,39 @@ fn is_device_suitable(
     physical_device: &vk::PhysicalDevice,
     window_surface: &WindowSurface,
 ) -> bool {
+    let queues_supported = QueueFamilyIndices::find(
+        physical_device,
+        &instance.ash,
+        &window_surface,
+    )
+    .is_ok();
+
     let features =
         unsafe { instance.ash.get_physical_device_features(*physical_device) };
 
-    QueueFamilyIndices::find(physical_device, &instance.ash, &window_surface)
-        .is_ok()
-        && check_required_extensions(&instance, physical_device)
+    let extensions_supported =
+        check_required_extensions(&instance, physical_device);
+
+    let format_available = if extensions_supported {
+        unsafe { !window_surface.supported_formats(physical_device).is_empty() }
+    } else {
+        false
+    };
+
+    let presentation_mode_available = if extensions_supported {
+        unsafe {
+            !window_surface
+                .supported_presentation_modes(physical_device)
+                .is_empty()
+        }
+    } else {
+        false
+    };
+
+    queues_supported
+        && extensions_supported
+        && format_available
+        && presentation_mode_available
         && features.geometry_shader == vk::TRUE
 }
 
