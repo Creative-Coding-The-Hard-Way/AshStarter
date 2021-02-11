@@ -11,7 +11,7 @@ mod device;
 mod instance;
 mod window_surface;
 
-use crate::application::{
+pub use self::{
     device::Device, instance::Instance, window_surface::WindowSurface,
 };
 
@@ -49,7 +49,7 @@ impl Application {
                 "unable to get required vulkan extensions for this platform",
             )?)?;
         let window_surface = WindowSurface::new(&window, instance.clone())?;
-        let device = Device::new(&instance)?;
+        let device = Device::new(&instance, &window_surface)?;
 
         device.name_vulkan_object(
             "main application surface",

@@ -2,15 +2,16 @@
 //! the logical device.
 
 mod physical_device;
+mod queue;
 mod queue_family_indices;
 
+pub use self::{queue::Queue, queue_family_indices::QueueFamilyIndices};
+
+use self::physical_device::{
+    pick_physical_device, required_device_extensions, required_device_features,
+};
 use crate::{
-    application::{
-        device::physical_device::{
-            pick_physical_device, required_device_features,
-        },
-        instance::Instance,
-    },
+    application::{instance::Instance, window_surface::WindowSurface},
     ffi::to_os_ptrs,
 };
 
@@ -19,7 +20,6 @@ use ash::{
     version::{DeviceV1_0, InstanceV1_0},
     vk,
 };
-use queue_family_indices::QueueFamilyIndices;
 use std::{ffi::CString, sync::Arc};
 
 /// This struct holds all device-specific resources, the physical device and
@@ -28,34 +28,42 @@ pub struct Device {
     pub physical_device: vk::PhysicalDevice,
     pub logical_device: ash::Device,
 
-    pub graphics_queue: vk::Queue,
+    pub graphics_queue: Arc<Queue>,
+    pub present_queue: Arc<Queue>,
 
-    /// the instance must live longer than the devices which depend on it
+    #[allow(dead_code)]
+    window_surface: Arc<WindowSurface>,
+
     instance: Arc<Instance>,
 }
 
 impl Device {
     /// Create a new device based on this application's required features and
     /// properties.
-    pub fn new(instance: &Arc<Instance>) -> Result<Arc<Device>> {
-        let physical_device = pick_physical_device(instance)?;
-
-        let queue_family_indices =
-            QueueFamilyIndices::find(&physical_device, &instance.ash)?;
-
+    pub fn new(
+        instance: &Arc<Instance>,
+        window_surface: &Arc<WindowSurface>,
+    ) -> Result<Arc<Device>> {
+        let physical_device = pick_physical_device(instance, window_surface)?;
+        let queue_family_indices = QueueFamilyIndices::find(
+            &physical_device,
+            &instance.ash,
+            window_surface,
+        )?;
         let logical_device = create_logical_device(
             instance,
             &physical_device,
             &queue_family_indices,
         )?;
-
-        let (graphics_queue) =
+        let (graphics_queue, present_queue) =
             queue_family_indices.get_queues(&logical_device)?;
 
         let device = Arc::new(Self {
             physical_device,
             logical_device,
             graphics_queue,
+            present_queue,
+            window_surface: window_surface.clone(),
             instance: instance.clone(),
         });
 
@@ -65,11 +73,18 @@ impl Device {
             &device.logical_device.handle(),
         )?;
 
-        device.name_vulkan_object(
-            "Graphics Queue",
-            vk::ObjectType::QUEUE,
-            &device.graphics_queue,
-        )?;
+        if device.graphics_queue.is_same(&device.present_queue) {
+            device
+                .graphics_queue
+                .name_vulkan_object("graphics/present queue", &device)?;
+        } else {
+            device
+                .graphics_queue
+                .name_vulkan_object("graphics queue", &device)?;
+            device
+                .present_queue
+                .name_vulkan_object("present queue", &device)?;
+        }
 
         Ok(device)
     }
@@ -140,11 +155,14 @@ fn create_logical_device(
     let features = required_device_features();
     let (_c_names, layer_name_ptrs) =
         unsafe { to_os_ptrs(&instance.enabled_layer_names) };
+    let (_c_ext_names, ext_name_ptrs) =
+        unsafe { to_os_ptrs(&required_device_extensions()) };
 
     let create_info = vk::DeviceCreateInfo::builder()
         .queue_create_infos(&queue_create_infos)
         .enabled_features(&features)
-        .enabled_layer_names(&layer_name_ptrs);
+        .enabled_layer_names(&layer_name_ptrs)
+        .enabled_extension_names(&ext_name_ptrs);
 
     let logical_device = unsafe {
         instance
