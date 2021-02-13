@@ -11,7 +11,8 @@ pub struct WindowSurface {
     pub surface_loader: Surface,
 
     /// The instance must not be destroyed before the WindowSurface
-    _instance: Arc<Instance>,
+    #[allow(dead_code)]
+    instance: Arc<Instance>,
 }
 
 impl WindowSurface {
@@ -26,7 +27,7 @@ impl WindowSurface {
         Ok(Arc::new(Self {
             surface,
             surface_loader,
-            _instance: instance,
+            instance,
         }))
     }
 
@@ -73,13 +74,6 @@ impl WindowSurface {
                 self.surface,
             )
             .context("unable to get surface capabiliities for this device")
-    }
-
-    /// This application's required surface format.
-    pub fn required_format(&self) -> vk::SurfaceFormatKHR {
-        vk::SurfaceFormatKHR::builder()
-            .format(vk::Format::B8G8R8A8_SRGB)
-            .build()
     }
 }
 

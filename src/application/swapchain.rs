@@ -1,14 +1,27 @@
 use crate::application::{Device, WindowSurface};
 
-use anyhow::Result;
-use ash::{extensions::khr, vk, vk::SwapchainCreateInfoKHR};
+use anyhow::{Context, Result};
+use ash::{
+    extensions::khr, version::DeviceV1_0, vk, vk::SwapchainCreateInfoKHR,
+};
 use std::sync::Arc;
+use vk::ComponentMapping;
 
 /// Bundle up the raw swapchain and the extension functions which are used
 /// to operate it.
 pub struct Swapchain {
     swapchain_loader: khr::Swapchain,
     swapchain: vk::SwapchainKHR,
+
+    #[allow(dead_code)]
+    swapchain_images: Vec<vk::Image>,
+
+    #[allow(dead_code)]
+    swapchain_image_views: Vec<vk::ImageView>,
+
+    pub extent: vk::Extent2D,
+    pub format: vk::Format,
+    pub color_space: vk::ColorSpaceKHR,
 
     #[allow(dead_code)]
     device: Arc<Device>,
@@ -70,9 +83,23 @@ impl Swapchain {
             swapchain_loader.create_swapchain(&with_sharing_mode, None)?
         };
 
+        let swapchain_images = unsafe {
+            swapchain_loader
+                .get_swapchain_images(swapchain)
+                .context("unable to get swapchain images")?
+        };
+
+        let swapchain_image_views =
+            create_image_views(device, image_format.format, &swapchain_images)?;
+
         Ok(Arc::new(Self {
             swapchain_loader,
             swapchain,
+            swapchain_images,
+            swapchain_image_views,
+            extent,
+            format: image_format.format,
+            color_space: image_format.color_space,
             device: device.clone(),
         }))
     }
@@ -81,10 +108,60 @@ impl Swapchain {
 impl Drop for Swapchain {
     fn drop(&mut self) {
         unsafe {
+            let logical_device = &self.device.logical_device;
+            self.swapchain_image_views.drain(..).for_each(|view| {
+                logical_device.destroy_image_view(view, None);
+            });
             self.swapchain_loader
                 .destroy_swapchain(self.swapchain, None);
         }
     }
+}
+
+/// Create image views for each of the swapchain images
+fn create_image_views(
+    device: &Device,
+    format: vk::Format,
+    swapchain_images: &Vec<vk::Image>,
+) -> Result<Vec<vk::ImageView>> {
+    let mut image_views = vec![];
+    for (i, image) in swapchain_images.iter().enumerate() {
+        let create_info = vk::ImageViewCreateInfo::builder()
+            .image(*image)
+            .format(format)
+            .view_type(vk::ImageViewType::TYPE_2D)
+            .subresource_range(
+                vk::ImageSubresourceRange::builder()
+                    .aspect_mask(vk::ImageAspectFlags::COLOR)
+                    .base_mip_level(0)
+                    .level_count(1)
+                    .base_array_layer(0)
+                    .layer_count(1)
+                    .build(),
+            )
+            .components(
+                ComponentMapping::builder()
+                    .r(vk::ComponentSwizzle::IDENTITY)
+                    .g(vk::ComponentSwizzle::IDENTITY)
+                    .b(vk::ComponentSwizzle::IDENTITY)
+                    .a(vk::ComponentSwizzle::IDENTITY)
+                    .build(),
+            );
+        let view = unsafe {
+            device
+                .logical_device
+                .create_image_view(&create_info, None)
+                .context("unable to create image view for swapchain image")?
+        };
+        device.name_vulkan_object(
+            format!("Swapchain Image View {}", i),
+            vk::ObjectType::IMAGE_VIEW,
+            &view,
+        )?;
+        image_views.push(view);
+    }
+
+    Ok(image_views)
 }
 
 /// Choose the number of images to use in the swapchain based on the min and
