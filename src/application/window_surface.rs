@@ -1,8 +1,9 @@
 use crate::application::instance::Instance;
 
-use anyhow::{bail, Result};
+use anyhow::{bail, Context, Result};
 use ash::{extensions::khr::Surface, version::InstanceV1_0, vk, vk::Handle};
 use std::{ptr::null, sync::Arc};
+use vk::SurfaceCapabilitiesKHR;
 
 /// Presentation related resources.
 pub struct WindowSurface {
@@ -56,6 +57,22 @@ impl WindowSurface {
                 self.surface,
             )
             .unwrap_or_else(|_| vec![])
+    }
+
+    /// Returns the set of all supported surface capabilities.
+    ///
+    /// Unsafe because the device's supported extensions must be checked prior
+    /// to querying the surface capabilities.
+    pub unsafe fn surface_capabilities(
+        &self,
+        physical_device: &vk::PhysicalDevice,
+    ) -> Result<SurfaceCapabilitiesKHR> {
+        self.surface_loader
+            .get_physical_device_surface_capabilities(
+                *physical_device,
+                self.surface,
+            )
+            .context("unable to get surface capabiliities for this device")
     }
 
     /// This application's required surface format.

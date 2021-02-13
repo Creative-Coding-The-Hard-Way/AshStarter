@@ -9,8 +9,8 @@ use std::sync::{Arc, Mutex, MutexGuard};
 #[derive(Debug)]
 pub struct Queue {
     queue: Mutex<vk::Queue>,
-    family_id: u32,
-    index: u32,
+    pub family_id: u32,
+    pub index: u32,
 }
 
 impl Queue {

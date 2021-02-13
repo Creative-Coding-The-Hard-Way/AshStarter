@@ -32,9 +32,9 @@ pub struct Device {
     pub present_queue: Arc<Queue>,
 
     #[allow(dead_code)]
-    window_surface: Arc<WindowSurface>,
+    pub window_surface: Arc<WindowSurface>,
 
-    instance: Arc<Instance>,
+    pub instance: Arc<Instance>,
 }
 
 impl Device {

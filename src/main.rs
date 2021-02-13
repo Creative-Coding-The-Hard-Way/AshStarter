@@ -5,6 +5,7 @@
 //! ```
 //! cargo run --release
 //! ```
+//!
 
 mod application;
 mod ffi;

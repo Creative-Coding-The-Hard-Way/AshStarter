@@ -9,10 +9,12 @@
 
 mod device;
 mod instance;
+mod swapchain;
 mod window_surface;
 
 pub use self::{
-    device::Device, instance::Instance, window_surface::WindowSurface,
+    device::Device, instance::Instance, swapchain::Swapchain,
+    window_surface::WindowSurface,
 };
 
 use anyhow::{bail, Context, Result};
@@ -20,20 +22,60 @@ use ash::vk;
 use glfw::Glfw;
 use std::sync::{mpsc::Receiver, Arc};
 
+#[cfg_attr(doc, aquamarine::aquamarine)]
 /// The application's state.
+///
+/// # Ownership Diagram
+///
+///```mermaid
+///  classDiagram
+///      class Instance {
+///        vulkan ptrs
+///        ash instance
+///      }
+///      class Device {
+///        logical_device
+///        physical_device
+///        queues
+///      }
+///      class Swapchain {
+///        swapchain handle
+///      }
+///      class WindowSurface {
+///        surface handle
+///      }
+///
+///      class Application {
+///      }
+///
+///      Application --|> Instance: has a
+///      Application --|> Swapchain: has a
+///
+///      Device --|> WindowSurface: has a
+///      Swapchain --|> WindowSurface: has a
+///      Application --|> WindowSurface: has a
+///      Application --|> Device: has a
+///
+///      Device --|> Instance: has a
+///      Swapchain --|> Device: has a
+///      WindowSurface --|> Instance: has a
+///```
 pub struct Application {
     glfw: Glfw,
     window: glfw::Window,
     events: Option<Receiver<(f64, glfw::WindowEvent)>>,
 
     #[allow(dead_code)]
-    instance: Arc<Instance>,
+    swapchain: Arc<Swapchain>,
 
     #[allow(dead_code)]
     device: Arc<Device>,
 
     #[allow(dead_code)]
     window_surface: Arc<WindowSurface>,
+
+    #[allow(dead_code)]
+    instance: Arc<Instance>,
 }
 
 impl Application {
@@ -42,7 +84,7 @@ impl Application {
     /// Returns `Err()` if anything goes wrong while building the app.
     pub fn new() -> Result<Self> {
         let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS)
-            .context("unable to initialize the glfw library")?;
+            .context("unable to setup glfw for this application")?;
         let (window, events) = Self::create_window(&mut glfw)?;
         let instance =
             Instance::new(&glfw.get_required_instance_extensions().context(
@@ -57,6 +99,13 @@ impl Application {
             &window_surface.surface,
         )?;
 
+        let (fbwidth, fbheight) = window.get_framebuffer_size();
+        let swapchain = Swapchain::new(
+            &device,
+            &window_surface,
+            (fbwidth as u32, fbheight as u32),
+        )?;
+
         Ok(Self {
             glfw,
             window,
@@ -64,6 +113,7 @@ impl Application {
             instance,
             device,
             window_surface,
+            swapchain,
         })
     }
 
