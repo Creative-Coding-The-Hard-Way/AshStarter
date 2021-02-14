@@ -123,7 +123,7 @@ impl Application {
 
         let pipeline = GraphicsPipeline::new(&device, &swapchain)?;
 
-        let frame = Frame::new(&device)?;
+        let frame = Frame::new(&device, &swapchain)?;
 
         Ok(Self {
             glfw,

@@ -21,7 +21,7 @@ pub struct Swapchain {
     swapchain_image_views: Vec<vk::ImageView>,
 
     #[allow(dead_code)]
-    framebuffers: Vec<vk::Framebuffer>,
+    pub framebuffers: Vec<vk::Framebuffer>,
 
     pub render_pass: vk::RenderPass,
     pub extent: vk::Extent2D,
