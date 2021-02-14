@@ -77,8 +77,7 @@ pub struct Application {
 
     pipeline: Arc<GraphicsPipeline>,
 
-    #[allow(dead_code)]
-    frame: Arc<Frame>,
+    frame: Frame,
 
     #[allow(dead_code)]
     swapchain: Arc<Swapchain>,

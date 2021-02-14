@@ -2,14 +2,83 @@ use crate::application::{Device, GraphicsPipeline, Swapchain};
 
 use anyhow::{Context, Result};
 use ash::{version::DeviceV1_0, vk};
-use std::sync::Arc;
+use std::{iter::Cycle, slice::Iter, sync::Arc};
+
+/// Synchronization primitives used to coordinate rendering each frame without
+/// accidentally sharing resources.
+struct FrameSync {
+    pub image_available_semaphore: vk::Semaphore,
+    pub render_finished_semaphore: vk::Semaphore,
+}
+
+impl FrameSync {
+    /// Create a vector of named frame sync objects.
+    pub fn for_n_frames(
+        device: &Device,
+        max_frames_in_flight: usize,
+    ) -> Result<Vec<Self>> {
+        let mut frames_in_flight = vec![];
+        for i in 0..max_frames_in_flight {
+            frames_in_flight
+                .push(FrameSync::new(device, format!("FrameSync {}", i))?);
+        }
+        Ok(frames_in_flight)
+    }
+
+    /// Create the synchronization primitives used for each frame.
+    ///
+    pub fn new<Name>(device: &Device, name: Name) -> Result<Self>
+    where
+        Name: Into<String>,
+    {
+        let owned_name = name.into();
+        let image_available_semaphore = unsafe {
+            device
+                .logical_device
+                .create_semaphore(&vk::SemaphoreCreateInfo::builder(), None)?
+        };
+        device.name_vulkan_object(
+            format!("{} Swapchain Image Available", &owned_name),
+            vk::ObjectType::SEMAPHORE,
+            &image_available_semaphore,
+        )?;
+
+        let render_finished_semaphore = unsafe {
+            device
+                .logical_device
+                .create_semaphore(&vk::SemaphoreCreateInfo::builder(), None)?
+        };
+        device.name_vulkan_object(
+            format!("{} Render Finished", &owned_name),
+            vk::ObjectType::SEMAPHORE,
+            &render_finished_semaphore,
+        )?;
+
+        Ok(Self {
+            image_available_semaphore,
+            render_finished_semaphore,
+        })
+    }
+
+    /// Called by the owner when all sync resources should be destroyed.
+    pub unsafe fn destroy(self, device: &Device) {
+        //! This function does no checking that the semaphores are done being used,
+        //! that is up to the owner. (for example, wait for the device to idle)
+        device
+            .logical_device
+            .destroy_semaphore(self.image_available_semaphore, None);
+        device
+            .logical_device
+            .destroy_semaphore(self.render_finished_semaphore, None);
+    }
+}
 
 pub struct Frame {
     command_pool: vk::CommandPool,
     command_buffers: Vec<vk::CommandBuffer>,
 
-    image_available_semaphore: vk::Semaphore,
-    render_finished_semaphore: vk::Semaphore,
+    frames_in_flight: Vec<FrameSync>,
+    current_frame: usize,
 
     graphics_pipeline: Arc<GraphicsPipeline>,
     swapchain: Arc<Swapchain>,
@@ -21,43 +90,24 @@ impl Frame {
         device: &Arc<Device>,
         swapchain: &Arc<Swapchain>,
         graphics_pipeline: &Arc<GraphicsPipeline>,
-    ) -> Result<Arc<Self>> {
+    ) -> Result<Self> {
         let command_pool = create_command_pool(device)?;
         let command_buffers =
             create_command_buffers(device, swapchain, &command_pool)?;
 
-        let image_available_semaphore = unsafe {
-            device
-                .logical_device
-                .create_semaphore(&vk::SemaphoreCreateInfo::builder(), None)?
-        };
-        device.name_vulkan_object(
-            "Swapchain Image Ready Semaphore",
-            vk::ObjectType::SEMAPHORE,
-            &image_available_semaphore,
-        )?;
+        let frames_in_flight = FrameSync::for_n_frames(device, 3)?;
+        let current_frame = 0;
 
-        let render_finished_semaphore = unsafe {
-            device
-                .logical_device
-                .create_semaphore(&vk::SemaphoreCreateInfo::builder(), None)?
-        };
-        device.name_vulkan_object(
-            "Render Finished Semaphore",
-            vk::ObjectType::SEMAPHORE,
-            &render_finished_semaphore,
-        )?;
-
-        let frame = Arc::new(Self {
+        let frame = Self {
             command_pool,
             command_buffers,
-            image_available_semaphore,
-            render_finished_semaphore,
+            frames_in_flight,
+            current_frame,
 
             graphics_pipeline: graphics_pipeline.clone(),
             swapchain: swapchain.clone(),
             device: device.clone(),
-        });
+        };
 
         frame.record_buffer_commands()?;
 
@@ -65,21 +115,25 @@ impl Frame {
     }
 
     /// Render a single application frame.
-    pub fn draw_frame(&self) -> Result<()> {
+    pub fn draw_frame(&mut self) -> Result<()> {
+        self.current_frame =
+            (self.current_frame + 1) % self.frames_in_flight.len();
+        let frame_sync = &self.frames_in_flight[self.current_frame];
+
         let (index, _needs_rebuild) = unsafe {
             self.swapchain.swapchain_loader.acquire_next_image(
                 self.swapchain.swapchain,
                 u64::MAX,
-                self.image_available_semaphore,
+                frame_sync.image_available_semaphore,
                 vk::Fence::null(),
             )?
         };
 
-        let wait_semaphores = [self.image_available_semaphore];
+        let wait_semaphores = [frame_sync.image_available_semaphore];
         let wait_stages = [vk::PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT];
         let command_buffers = [self.command_buffers[index as usize]];
         let render_finished_signal_semaphores =
-            [self.render_finished_semaphore];
+            [frame_sync.render_finished_semaphore];
         let submit_info = [vk::SubmitInfo::builder()
             .wait_semaphores(&wait_semaphores)
             .wait_dst_stage_mask(&wait_stages)
@@ -112,12 +166,12 @@ impl Frame {
                 .queue_present(*present_queue, &present_info)?
         };
 
-        unsafe {
-            self.device
-                .logical_device
-                .queue_wait_idle(*graphics_queue)?;
-            self.device.logical_device.queue_wait_idle(*present_queue)?;
-        }
+        // unsafe {
+        //     self.device
+        //         .logical_device
+        //         .queue_wait_idle(*graphics_queue)?;
+        //     self.device.logical_device.queue_wait_idle(*present_queue)?;
+        // }
 
         Ok(())
     }
@@ -203,13 +257,12 @@ impl Drop for Frame {
                 .device_wait_idle()
                 .expect("wait for device to idle");
 
+            let device = &self.device;
+            self.frames_in_flight
+                .drain(..)
+                .for_each(|frame| frame.destroy(device));
+
             // safe to delete now
-            self.device
-                .logical_device
-                .destroy_semaphore(self.image_available_semaphore, None);
-            self.device
-                .logical_device
-                .destroy_semaphore(self.render_finished_semaphore, None);
             self.device
                 .logical_device
                 .free_command_buffers(self.command_pool, &self.command_buffers);
