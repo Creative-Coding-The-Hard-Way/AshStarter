@@ -8,14 +8,15 @@
 //! ```
 
 mod device;
+mod frame;
 mod graphics_pipeline;
 mod instance;
 mod swapchain;
 mod window_surface;
 
 pub use self::{
-    device::Device, graphics_pipeline::GraphicsPipeline, instance::Instance,
-    swapchain::Swapchain, window_surface::WindowSurface,
+    device::Device, frame::Frame, graphics_pipeline::GraphicsPipeline,
+    instance::Instance, swapchain::Swapchain, window_surface::WindowSurface,
 };
 
 use anyhow::{bail, Context, Result};
@@ -77,6 +78,9 @@ pub struct Application {
     pipeline: Arc<GraphicsPipeline>,
 
     #[allow(dead_code)]
+    frame: Arc<Frame>,
+
+    #[allow(dead_code)]
     swapchain: Arc<Swapchain>,
 
     #[allow(dead_code)]
@@ -119,10 +123,13 @@ impl Application {
 
         let pipeline = GraphicsPipeline::new(&device, &swapchain)?;
 
+        let frame = Frame::new(&device)?;
+
         Ok(Self {
             glfw,
             window,
             events: Some(events),
+            frame,
             pipeline,
             instance,
             device,
