@@ -11,8 +11,8 @@ use std::sync::Arc;
 /// Bundle up the raw swapchain and the extension functions which are used
 /// to operate it.
 pub struct Swapchain {
-    swapchain_loader: khr::Swapchain,
-    swapchain: vk::SwapchainKHR,
+    pub swapchain_loader: khr::Swapchain,
+    pub swapchain: vk::SwapchainKHR,
 
     #[allow(dead_code)]
     swapchain_images: Vec<vk::Image>,
@@ -133,7 +133,22 @@ impl Swapchain {
 
 impl Drop for Swapchain {
     fn drop(&mut self) {
+        let graphics_queue = self.device.graphics_queue.acquire();
+        let present_queue = self.device.present_queue.acquire();
         unsafe {
+            self.device
+                .logical_device
+                .queue_wait_idle(*graphics_queue)
+                .expect("wait for graphics queue to drain");
+            self.device
+                .logical_device
+                .queue_wait_idle(*present_queue)
+                .expect("wait for presentation queue to drain");
+            self.device
+                .logical_device
+                .device_wait_idle()
+                .expect("wait for device to idle");
+
             let logical_device = &self.device.logical_device;
             self.framebuffers.drain(..).for_each(|framebuffer| {
                 logical_device.destroy_framebuffer(framebuffer, None);

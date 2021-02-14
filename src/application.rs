@@ -123,7 +123,7 @@ impl Application {
 
         let pipeline = GraphicsPipeline::new(&device, &swapchain)?;
 
-        let frame = Frame::new(&device, &swapchain)?;
+        let frame = Frame::new(&device, &swapchain, &pipeline)?;
 
         Ok(Self {
             glfw,
@@ -172,6 +172,7 @@ impl Application {
                 log::debug!("{:?}", event);
                 self.handle_event(event)?;
             }
+            self.frame.draw_frame()?;
         }
         Ok(())
     }

@@ -11,7 +11,7 @@ pub fn create_render_pass(
     device: &Device,
     format: vk::Format,
 ) -> Result<vk::RenderPass> {
-    let attachments = vec![vk::AttachmentDescription::builder()
+    let attachments = [vk::AttachmentDescription::builder()
         .format(format)
         .samples(vk::SampleCountFlags::TYPE_1)
         .load_op(vk::AttachmentLoadOp::CLEAR)
@@ -22,19 +22,29 @@ pub fn create_render_pass(
         .final_layout(vk::ImageLayout::PRESENT_SRC_KHR)
         .build()];
 
-    let color_references = vec![vk::AttachmentReference::builder()
+    let color_references = [vk::AttachmentReference::builder()
         .attachment(0)
         .layout(vk::ImageLayout::COLOR_ATTACHMENT_OPTIMAL)
         .build()];
 
-    let subpasses = vec![vk::SubpassDescription::builder()
+    let subpasses = [vk::SubpassDescription::builder()
         .pipeline_bind_point(vk::PipelineBindPoint::GRAPHICS)
         .color_attachments(&color_references)
         .build()];
 
+    let dependency = [vk::SubpassDependency::builder()
+        .src_subpass(vk::SUBPASS_EXTERNAL)
+        .src_stage_mask(vk::PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT)
+        .src_access_mask(vk::AccessFlags::empty())
+        .dst_subpass(0)
+        .dst_stage_mask(vk::PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT)
+        .dst_access_mask(vk::AccessFlags::COLOR_ATTACHMENT_WRITE)
+        .build()];
+
     let create_info = vk::RenderPassCreateInfo::builder()
         .attachments(&attachments)
-        .subpasses(&subpasses);
+        .subpasses(&subpasses)
+        .dependencies(&dependency);
 
     let render_pass = unsafe {
         device
