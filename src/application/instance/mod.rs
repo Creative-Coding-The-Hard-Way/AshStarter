@@ -171,7 +171,7 @@ unsafe extern "system" fn debug_callback(
 
     let message_number = callback_data.message_id_number;
 
-    let full_message = std::format!(
+    let raw_message = std::format!(
         "Vulkan Debug Callback - {:?} :: {:?} [{} ({})]\n{}",
         message_severity,
         message_type,
@@ -179,6 +179,8 @@ unsafe extern "system" fn debug_callback(
         message_number,
         message
     );
+
+    let full_message = raw_message.replace("; ", ";\n\n");
 
     match message_severity {
         DebugUtilsMessageSeverityFlagsEXT::VERBOSE => {
