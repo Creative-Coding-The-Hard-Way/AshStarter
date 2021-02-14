@@ -45,17 +45,25 @@ use std::sync::{mpsc::Receiver, Arc};
 ///      class WindowSurface {
 ///        surface handle
 ///      }
+///      class GraphicsPipeline {
+///      }
 ///
 ///      class Application {
 ///      }
 ///
 ///      Application --|> Instance: has a
-///      Application --|> Swapchain: has a
+///      Application --|> GraphicsPipeline: has a
 ///
 ///      Device --|> WindowSurface: has a
 ///      Swapchain --|> WindowSurface: has a
-///      Application --|> WindowSurface: has a
+///
 ///      Application --|> Device: has a
+///      Application --|> WindowSurface: has a
+///
+///      GraphicsPipeline --|> Device: has a
+///      GraphicsPipeline --|> Swapchain: has a
+///
+///      Application --|> Swapchain: has a
 ///
 ///      Device --|> Instance: has a
 ///      Swapchain --|> Device: has a

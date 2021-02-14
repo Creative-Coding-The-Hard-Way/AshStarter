@@ -1,7 +1,7 @@
 mod render_pass;
 mod shader_module;
 
-use self::{render_pass::create_render_pass, shader_module::ShaderModule};
+use self::shader_module::ShaderModule;
 use crate::application::{Device, Swapchain};
 
 use anyhow::{Context, Result};
@@ -12,8 +12,11 @@ use std::{ffi::CString, sync::Arc};
 pub struct GraphicsPipeline {
     pipeline_layout: vk::PipelineLayout,
     render_pass: vk::RenderPass,
+    pipeline: vk::Pipeline,
 
     device: Arc<Device>,
+
+    #[allow(dead_code)]
     swapchain: Arc<Swapchain>,
 }
 
@@ -49,29 +52,33 @@ impl GraphicsPipeline {
 
         let vertex_input_state =
             vk::PipelineVertexInputStateCreateInfo::builder()
-                .vertex_binding_descriptions(&vec![])
-                .vertex_attribute_descriptions(&vec![]);
+                .vertex_binding_descriptions(&[])
+                .vertex_attribute_descriptions(&[]);
 
         let input_assembly =
             vk::PipelineInputAssemblyStateCreateInfo::builder()
                 .topology(vk::PrimitiveTopology::TRIANGLE_LIST)
                 .primitive_restart_enable(false);
 
+        let viewports = &[vk::Viewport::builder()
+            .x(0.0)
+            .y(0.0)
+            .width(swapchain.extent.width as f32)
+            .height(swapchain.extent.height as f32)
+            .min_depth(0.0)
+            .max_depth(1.0)
+            .build()];
+
+        let scissors = &[vk::Rect2D::builder()
+            .offset(vk::Offset2D { x: 0, y: 0 })
+            .extent(swapchain.extent)
+            .build()];
+
         let viewport_state = vk::PipelineViewportStateCreateInfo::builder()
             .viewport_count(1)
-            .viewports(&vec![vk::Viewport::builder()
-                .x(0.0)
-                .y(0.0)
-                .width(swapchain.extent.width as f32)
-                .height(swapchain.extent.height as f32)
-                .min_depth(0.0)
-                .max_depth(1.0)
-                .build()])
+            .viewports(viewports)
             .scissor_count(1)
-            .scissors(&vec![vk::Rect2D::builder()
-                .offset(vk::Offset2D { x: 0, y: 0 })
-                .extent(swapchain.extent)
-                .build()]);
+            .scissors(scissors);
 
         let raster_state = vk::PipelineRasterizationStateCreateInfo::builder()
             .depth_clamp_enable(false)
@@ -90,31 +97,32 @@ impl GraphicsPipeline {
                 .sample_shading_enable(false)
                 .rasterization_samples(vk::SampleCountFlags::TYPE_1)
                 .min_sample_shading(1.0)
-                .sample_mask(&vec![])
+                .sample_mask(&[])
                 .alpha_to_coverage_enable(false)
                 .alpha_to_one_enable(false);
+
+        let blend_attachments =
+            &[vk::PipelineColorBlendAttachmentState::builder()
+                .color_write_mask(
+                    vk::ColorComponentFlags::R
+                        | vk::ColorComponentFlags::G
+                        | vk::ColorComponentFlags::B
+                        | vk::ColorComponentFlags::A,
+                )
+                .blend_enable(false)
+                .src_color_blend_factor(vk::BlendFactor::ONE)
+                .dst_color_blend_factor(vk::BlendFactor::ZERO)
+                .color_blend_op(vk::BlendOp::ADD)
+                .src_alpha_blend_factor(vk::BlendFactor::ONE)
+                .dst_alpha_blend_factor(vk::BlendFactor::ZERO)
+                .alpha_blend_op(vk::BlendOp::ADD)
+                .build()];
 
         let blend_state = vk::PipelineColorBlendStateCreateInfo::builder()
             .logic_op_enable(false)
             .logic_op(vk::LogicOp::COPY)
             .blend_constants([0.0, 0.0, 0.0, 0.0])
-            .attachments(&vec![
-                vk::PipelineColorBlendAttachmentState::builder()
-                    .color_write_mask(
-                        vk::ColorComponentFlags::R
-                            | vk::ColorComponentFlags::G
-                            | vk::ColorComponentFlags::B
-                            | vk::ColorComponentFlags::A,
-                    )
-                    .blend_enable(false)
-                    .src_color_blend_factor(vk::BlendFactor::ONE)
-                    .dst_color_blend_factor(vk::BlendFactor::ZERO)
-                    .color_blend_op(vk::BlendOp::ADD)
-                    .src_alpha_blend_factor(vk::BlendFactor::ONE)
-                    .dst_alpha_blend_factor(vk::BlendFactor::ZERO)
-                    .alpha_blend_op(vk::BlendOp::ADD)
-                    .build(),
-            ]);
+            .attachments(blend_attachments);
 
         let layouts = vec![];
         let push_constant_ranges = vec![];
@@ -136,10 +144,46 @@ impl GraphicsPipeline {
 
         let render_pass = render_pass::create_render_pass(&device, &swapchain)?;
 
+        let pipeline_create_info = vk::GraphicsPipelineCreateInfo::builder()
+            .stages(&[vertex_create_info.build(), fragment_create_info.build()])
+            .vertex_input_state(&vertex_input_state)
+            .input_assembly_state(&input_assembly)
+            .viewport_state(&viewport_state)
+            .rasterization_state(&raster_state)
+            .multisample_state(&multisample_state)
+            //.depth_stencil_state(&depth_stencil_state)
+            .color_blend_state(&blend_state)
+            //.dynamic_state(&dynamic_state)
+            .layout(pipeline_layout)
+            .render_pass(render_pass)
+            .subpass(0)
+            .base_pipeline_index(-1)
+            .base_pipeline_handle(vk::Pipeline::null())
+            .build();
+
+        let pipelines = unsafe {
+            device
+                .logical_device
+                .create_graphics_pipelines(
+                    vk::PipelineCache::null(),
+                    &[pipeline_create_info],
+                    None,
+                )
+                .map_err(|(_, err)| err)
+                .context("unable to create graphics pipeline")?
+        };
+        let pipeline = pipelines[0];
+        device.name_vulkan_object(
+            "Application Graphics Pipeline",
+            vk::ObjectType::PIPELINE,
+            &pipeline,
+        )?;
+
         // build pipeline object
 
         Ok(Arc::new(Self {
             pipeline_layout,
+            pipeline,
             render_pass,
             device: device.clone(),
             swapchain: swapchain.clone(),
@@ -150,6 +194,9 @@ impl GraphicsPipeline {
 impl Drop for GraphicsPipeline {
     fn drop(&mut self) {
         unsafe {
+            self.device
+                .logical_device
+                .destroy_pipeline(self.pipeline, None);
             self.device
                 .logical_device
                 .destroy_render_pass(self.render_pass, None);
