@@ -1,14 +1,17 @@
+mod render_pass;
 mod shader_module;
 
-use self::shader_module::ShaderModule;
+use self::{render_pass::create_render_pass, shader_module::ShaderModule};
 use crate::application::{Device, Swapchain};
 
 use anyhow::{Context, Result};
 use ash::{version::DeviceV1_0, vk};
 use std::{ffi::CString, sync::Arc};
 
+/// All vulkan resources related to the graphics pipeline.
 pub struct GraphicsPipeline {
     pipeline_layout: vk::PipelineLayout,
+    render_pass: vk::RenderPass,
 
     device: Arc<Device>,
     swapchain: Arc<Swapchain>,
@@ -131,10 +134,13 @@ impl GraphicsPipeline {
             &pipeline_layout,
         )?;
 
+        let render_pass = render_pass::create_render_pass(&device, &swapchain)?;
+
         // build pipeline object
 
         Ok(Arc::new(Self {
             pipeline_layout,
+            render_pass,
             device: device.clone(),
             swapchain: swapchain.clone(),
         }))
@@ -144,6 +150,9 @@ impl GraphicsPipeline {
 impl Drop for GraphicsPipeline {
     fn drop(&mut self) {
         unsafe {
+            self.device
+                .logical_device
+                .destroy_render_pass(self.render_pass, None);
             self.device
                 .logical_device
                 .destroy_pipeline_layout(self.pipeline_layout, None);
