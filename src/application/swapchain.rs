@@ -1,11 +1,12 @@
+mod images;
+mod render_pass;
+mod selection;
+
 use crate::application::{Device, WindowSurface};
 
 use anyhow::{Context, Result};
-use ash::{
-    extensions::khr, version::DeviceV1_0, vk, vk::SwapchainCreateInfoKHR,
-};
+use ash::{extensions::khr, version::DeviceV1_0, vk};
 use std::sync::Arc;
-use vk::ComponentMapping;
 
 /// Bundle up the raw swapchain and the extension functions which are used
 /// to operate it.
@@ -19,6 +20,10 @@ pub struct Swapchain {
     #[allow(dead_code)]
     swapchain_image_views: Vec<vk::ImageView>,
 
+    #[allow(dead_code)]
+    framebuffers: Vec<vk::Framebuffer>,
+
+    pub render_pass: vk::RenderPass,
     pub extent: vk::Extent2D,
     pub format: vk::Format,
     pub color_space: vk::ColorSpaceKHR,
@@ -35,19 +40,25 @@ impl Swapchain {
         window_surface: &WindowSurface,
         framebuffer_size: (u32, u32),
     ) -> Result<Arc<Self>> {
-        let image_format =
-            choose_surface_format(window_surface, &device.physical_device);
-        let present_mode =
-            choose_present_mode(window_surface, &device.physical_device);
-        let extent = choose_swap_extent(
+        let image_format = selection::choose_surface_format(
+            window_surface,
+            &device.physical_device,
+        );
+        let present_mode = selection::choose_present_mode(
+            window_surface,
+            &device.physical_device,
+        );
+        let extent = selection::choose_swap_extent(
             window_surface,
             &device.physical_device,
             framebuffer_size,
         )?;
-        let image_count =
-            choose_image_count(window_surface, &device.physical_device)?;
+        let image_count = selection::choose_image_count(
+            window_surface,
+            &device.physical_device,
+        )?;
 
-        let create_info = SwapchainCreateInfoKHR::builder()
+        let create_info = vk::SwapchainCreateInfoKHR::builder()
             // set the surface
             .surface(window_surface.surface)
             // image settings
@@ -89,14 +100,29 @@ impl Swapchain {
                 .context("unable to get swapchain images")?
         };
 
-        let swapchain_image_views =
-            create_image_views(device, image_format.format, &swapchain_images)?;
+        let render_pass =
+            render_pass::create_render_pass(device, image_format.format)?;
+
+        let swapchain_image_views = images::create_image_views(
+            device,
+            image_format.format,
+            &swapchain_images,
+        )?;
+
+        let framebuffers = images::create_framebuffers(
+            device,
+            &swapchain_image_views,
+            render_pass,
+            extent,
+        )?;
 
         Ok(Arc::new(Self {
             swapchain_loader,
             swapchain,
+            render_pass,
             swapchain_images,
             swapchain_image_views,
+            framebuffers,
             extent,
             format: image_format.format,
             color_space: image_format.color_space,
@@ -109,169 +135,17 @@ impl Drop for Swapchain {
     fn drop(&mut self) {
         unsafe {
             let logical_device = &self.device.logical_device;
+            self.framebuffers.drain(..).for_each(|framebuffer| {
+                logical_device.destroy_framebuffer(framebuffer, None);
+            });
             self.swapchain_image_views.drain(..).for_each(|view| {
                 logical_device.destroy_image_view(view, None);
             });
+            self.device
+                .logical_device
+                .destroy_render_pass(self.render_pass, None);
             self.swapchain_loader
                 .destroy_swapchain(self.swapchain, None);
         }
     }
-}
-
-/// Create image views for each of the swapchain images
-fn create_image_views(
-    device: &Device,
-    format: vk::Format,
-    swapchain_images: &Vec<vk::Image>,
-) -> Result<Vec<vk::ImageView>> {
-    let mut image_views = vec![];
-    for (i, image) in swapchain_images.iter().enumerate() {
-        let create_info = vk::ImageViewCreateInfo::builder()
-            .image(*image)
-            .format(format)
-            .view_type(vk::ImageViewType::TYPE_2D)
-            .subresource_range(
-                vk::ImageSubresourceRange::builder()
-                    .aspect_mask(vk::ImageAspectFlags::COLOR)
-                    .base_mip_level(0)
-                    .level_count(1)
-                    .base_array_layer(0)
-                    .layer_count(1)
-                    .build(),
-            )
-            .components(
-                ComponentMapping::builder()
-                    .r(vk::ComponentSwizzle::IDENTITY)
-                    .g(vk::ComponentSwizzle::IDENTITY)
-                    .b(vk::ComponentSwizzle::IDENTITY)
-                    .a(vk::ComponentSwizzle::IDENTITY)
-                    .build(),
-            );
-        let view = unsafe {
-            device
-                .logical_device
-                .create_image_view(&create_info, None)
-                .context("unable to create image view for swapchain image")?
-        };
-        device.name_vulkan_object(
-            format!("Swapchain Image View {}", i),
-            vk::ObjectType::IMAGE_VIEW,
-            &view,
-        )?;
-        image_views.push(view);
-    }
-
-    Ok(image_views)
-}
-
-/// Choose the number of images to use in the swapchain based on the min and
-/// max numbers of images supported by the device.
-fn choose_image_count(
-    window_surface: &WindowSurface,
-    physical_device: &vk::PhysicalDevice,
-) -> Result<u32> {
-    //! querying surface capabilities is safe in this context because the
-    //! physical device will not be selected unless it supports the swapchain
-    //! extension
-    let capabilities =
-        unsafe { window_surface.surface_capabilities(physical_device)? };
-    let proposed_image_count = capabilities.min_image_count + 1;
-    if capabilities.max_image_count > 0 {
-        Ok(std::cmp::min(
-            proposed_image_count,
-            capabilities.max_image_count,
-        ))
-    } else {
-        Ok(proposed_image_count)
-    }
-}
-
-/// Choose a surface format for the swapchain based on the window and chosen
-/// physical device.
-///
-fn choose_surface_format(
-    window_surface: &WindowSurface,
-    physical_device: &vk::PhysicalDevice,
-) -> vk::SurfaceFormatKHR {
-    //! checking formats is safe because support for the swapchain extension is
-    //! verified when picking a physical device
-    let formats = unsafe { window_surface.supported_formats(physical_device) };
-
-    log::info!("available formats {:?}", formats);
-
-    let format = formats
-        .iter()
-        .cloned()
-        .find(|format| {
-            format.color_space == vk::ColorSpaceKHR::SRGB_NONLINEAR
-                && format.format == vk::Format::B8G8R8A8_SRGB
-        })
-        .unwrap_or_else(|| formats[0]);
-
-    log::info!("chosen format {:?}", format);
-
-    format
-}
-
-/// Choose a presentation mode for the swapchain based on the window and chosen
-/// physical device.
-///
-pub fn choose_present_mode(
-    window_surface: &WindowSurface,
-    physical_device: &vk::PhysicalDevice,
-) -> vk::PresentModeKHR {
-    //! checking presentation modes is safe because support for the swapchain
-    //! extension is verified when picking a physical device
-    let modes =
-        unsafe { window_surface.supported_presentation_modes(physical_device) };
-
-    log::info!("available presentation modes {:?}", modes);
-
-    let mode = if modes.contains(&vk::PresentModeKHR::MAILBOX) {
-        vk::PresentModeKHR::MAILBOX
-    } else {
-        vk::PresentModeKHR::IMMEDIATE
-    };
-
-    log::info!("chosen presentation mode {:?}", mode);
-
-    mode
-}
-
-/// Choose the swap extent for the swapchain based on the window's framebuffer
-/// size.
-fn choose_swap_extent(
-    window_surface: &WindowSurface,
-    physical_device: &vk::PhysicalDevice,
-    framebuffer_size: (u32, u32),
-) -> Result<vk::Extent2D> {
-    //! Getting surface capabilities is safe because suppport for the swapchain
-    //! extenstion is verified when picking a physical device
-    let capabilities =
-        unsafe { window_surface.surface_capabilities(physical_device)? };
-
-    if capabilities.current_extent.width != u32::MAX {
-        log::debug!("use current extent {:?}", capabilities.current_extent);
-        Ok(capabilities.current_extent)
-    } else {
-        let extent = vk::Extent2D {
-            width: clamp(
-                framebuffer_size.0,
-                capabilities.min_image_extent.width,
-                capabilities.max_image_extent.width,
-            ),
-            height: clamp(
-                framebuffer_size.1,
-                capabilities.min_image_extent.height,
-                capabilities.max_image_extent.height,
-            ),
-        };
-        log::debug!("use computed extent {:?}", extent);
-        Ok(extent)
-    }
-}
-
-/// Clamp a value between a minimum and maximum bound.
-fn clamp(x: u32, min: u32, max: u32) -> u32 {
-    std::cmp::max(min, std::cmp::min(x, max))
 }

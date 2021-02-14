@@ -1,4 +1,3 @@
-mod render_pass;
 mod shader_module;
 
 use self::shader_module::ShaderModule;
@@ -11,7 +10,6 @@ use std::{ffi::CString, sync::Arc};
 /// All vulkan resources related to the graphics pipeline.
 pub struct GraphicsPipeline {
     pipeline_layout: vk::PipelineLayout,
-    render_pass: vk::RenderPass,
     pipeline: vk::Pipeline,
 
     device: Arc<Device>,
@@ -142,8 +140,6 @@ impl GraphicsPipeline {
             &pipeline_layout,
         )?;
 
-        let render_pass = render_pass::create_render_pass(&device, &swapchain)?;
-
         let pipeline_create_info = vk::GraphicsPipelineCreateInfo::builder()
             .stages(&[vertex_create_info.build(), fragment_create_info.build()])
             .vertex_input_state(&vertex_input_state)
@@ -155,7 +151,7 @@ impl GraphicsPipeline {
             .color_blend_state(&blend_state)
             //.dynamic_state(&dynamic_state)
             .layout(pipeline_layout)
-            .render_pass(render_pass)
+            .render_pass(swapchain.render_pass)
             .subpass(0)
             .base_pipeline_index(-1)
             .base_pipeline_handle(vk::Pipeline::null())
@@ -184,7 +180,6 @@ impl GraphicsPipeline {
         Ok(Arc::new(Self {
             pipeline_layout,
             pipeline,
-            render_pass,
             device: device.clone(),
             swapchain: swapchain.clone(),
         }))
@@ -197,9 +192,6 @@ impl Drop for GraphicsPipeline {
             self.device
                 .logical_device
                 .destroy_pipeline(self.pipeline, None);
-            self.device
-                .logical_device
-                .destroy_render_pass(self.render_pass, None);
             self.device
                 .logical_device
                 .destroy_pipeline_layout(self.pipeline_layout, None);

@@ -1,7 +1,7 @@
 //! Functions to create a proper render pass for this application's graphics
 //! pipeline.
 
-use crate::application::{Device, Swapchain};
+use crate::application::Device;
 
 use anyhow::Result;
 use ash::{version::DeviceV1_0, vk};
@@ -9,10 +9,10 @@ use ash::{version::DeviceV1_0, vk};
 /// Create a render pass for the graphics pipeline.
 pub fn create_render_pass(
     device: &Device,
-    swapchain: &Swapchain,
+    format: vk::Format,
 ) -> Result<vk::RenderPass> {
     let attachments = vec![vk::AttachmentDescription::builder()
-        .format(swapchain.format)
+        .format(format)
         .samples(vk::SampleCountFlags::TYPE_1)
         .load_op(vk::AttachmentLoadOp::CLEAR)
         .store_op(vk::AttachmentStoreOp::STORE)
