@@ -9,6 +9,7 @@ use std::{iter::Cycle, slice::Iter, sync::Arc};
 struct FrameSync {
     pub image_available_semaphore: vk::Semaphore,
     pub render_finished_semaphore: vk::Semaphore,
+    pub graphics_finished_fence: vk::Fence,
 }
 
 impl FrameSync {
@@ -54,9 +55,23 @@ impl FrameSync {
             &render_finished_semaphore,
         )?;
 
+        let graphics_finished_fence = unsafe {
+            device.logical_device.create_fence(
+                &vk::FenceCreateInfo::builder()
+                    .flags(vk::FenceCreateFlags::SIGNALED),
+                None,
+            )?
+        };
+        device.name_vulkan_object(
+            format!("{} Graphics Finished", &owned_name),
+            vk::ObjectType::FENCE,
+            &graphics_finished_fence,
+        )?;
+
         Ok(Self {
             image_available_semaphore,
             render_finished_semaphore,
+            graphics_finished_fence,
         })
     }
 
@@ -70,6 +85,9 @@ impl FrameSync {
         device
             .logical_device
             .destroy_semaphore(self.render_finished_semaphore, None);
+        device
+            .logical_device
+            .destroy_fence(self.graphics_finished_fence, None);
     }
 }
 
@@ -79,6 +97,7 @@ pub struct Frame {
 
     frames_in_flight: Vec<FrameSync>,
     current_frame: usize,
+    images_in_flight: Vec<vk::Fence>,
 
     graphics_pipeline: Arc<GraphicsPipeline>,
     swapchain: Arc<Swapchain>,
@@ -95,14 +114,19 @@ impl Frame {
         let command_buffers =
             create_command_buffers(device, swapchain, &command_pool)?;
 
-        let frames_in_flight = FrameSync::for_n_frames(device, 3)?;
+        let frames_in_flight = FrameSync::for_n_frames(device, 300)?;
         let current_frame = 0;
+
+        let images_in_flight =
+            vec![vk::Fence::null(); swapchain.framebuffers.len()];
 
         let frame = Self {
             command_pool,
             command_buffers,
+
             frames_in_flight,
             current_frame,
+            images_in_flight,
 
             graphics_pipeline: graphics_pipeline.clone(),
             swapchain: swapchain.clone(),
@@ -129,6 +153,24 @@ impl Frame {
             )?
         };
 
+        if self.images_in_flight[index as usize] != vk::Fence::null() {
+            unsafe {
+                self.device.logical_device.wait_for_fences(
+                    &[self.images_in_flight[index as usize]],
+                    true,
+                    u64::MAX,
+                )?;
+            }
+        }
+        self.images_in_flight[index as usize] =
+            frame_sync.graphics_finished_fence;
+
+        unsafe {
+            self.device
+                .logical_device
+                .reset_fences(&[frame_sync.graphics_finished_fence])?;
+        }
+
         let wait_semaphores = [frame_sync.image_available_semaphore];
         let wait_stages = [vk::PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT];
         let command_buffers = [self.command_buffers[index as usize]];
@@ -147,7 +189,7 @@ impl Frame {
             self.device.logical_device.queue_submit(
                 *graphics_queue,
                 &submit_info,
-                vk::Fence::null(),
+                frame_sync.graphics_finished_fence,
             )?;
         }
 
