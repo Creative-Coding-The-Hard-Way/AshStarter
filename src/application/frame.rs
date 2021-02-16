@@ -1,14 +1,13 @@
 mod frame_sync;
 
 use self::frame_sync::FrameSync;
-use crate::application::{
-    Device, GraphicsPipeline, Instance, Swapchain, WindowSurface,
-};
+use crate::application::{Device, GraphicsPipeline, Instance, Swapchain};
 
 use anyhow::{Context, Result};
 use ash::{version::DeviceV1_0, vk};
 use std::sync::Arc;
 
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum SwapchainState {
     Ok,
     NeedsRebuild,
@@ -21,6 +20,8 @@ pub struct Frame {
     frames_in_flight: Vec<FrameSync>,
     current_frame: usize,
     images_in_flight: Vec<vk::Fence>,
+
+    swapchain_state: SwapchainState,
 
     graphics_pipeline: Arc<GraphicsPipeline>,
     swapchain: Arc<Swapchain>,
@@ -54,6 +55,7 @@ impl Frame {
             frames_in_flight,
             current_frame,
             images_in_flight,
+            swapchain_state: SwapchainState::Ok,
 
             graphics_pipeline: graphics_pipeline.clone(),
             swapchain: swapchain.clone(),
@@ -98,11 +100,23 @@ impl Frame {
 
         self.record_buffer_commands()?;
 
+        self.swapchain_state = SwapchainState::Ok;
+
         Ok(())
+    }
+
+    /// Signal that the swapchain needs to be rebuilt before the next frame
+    /// is rendered.
+    pub fn needs_rebuild(&mut self) {
+        self.swapchain_state = SwapchainState::NeedsRebuild;
     }
 
     /// Render a single application frame.
     pub fn draw_frame(&mut self) -> Result<SwapchainState> {
+        if self.swapchain_state == SwapchainState::NeedsRebuild {
+            return Ok(SwapchainState::NeedsRebuild);
+        }
+
         self.current_frame =
             (self.current_frame + 1) % self.frames_in_flight.len();
         let frame_sync = &self.frames_in_flight[self.current_frame];

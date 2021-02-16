@@ -148,6 +148,7 @@ impl Application {
     /// Main window event loop. Events are dispatched via handle_event.
     fn main_loop(&mut self) -> Result<()> {
         self.window.set_key_polling(true);
+        self.window.set_size_polling(true);
 
         let events =
             self.events.take().context("event reciever is missing?!")?;
@@ -177,6 +178,11 @@ impl Application {
                 _,
             ) => {
                 self.window.set_should_close(true);
+            }
+
+            glfw::WindowEvent::FramebufferSize(_, _) => {
+                log::info!("resized");
+                self.frame.needs_rebuild();
             }
 
             _ => {}
