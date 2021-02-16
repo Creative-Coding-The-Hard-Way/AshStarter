@@ -1,11 +1,18 @@
 mod frame_sync;
 
 use self::frame_sync::FrameSync;
-use crate::application::{Device, GraphicsPipeline, Swapchain};
+use crate::application::{
+    Device, GraphicsPipeline, Instance, Swapchain, WindowSurface,
+};
 
 use anyhow::{Context, Result};
 use ash::{version::DeviceV1_0, vk};
 use std::sync::Arc;
+
+pub enum SwapchainState {
+    Ok,
+    NeedsRebuild,
+}
 
 pub struct Frame {
     command_pool: vk::CommandPool,
@@ -18,6 +25,9 @@ pub struct Frame {
     graphics_pipeline: Arc<GraphicsPipeline>,
     swapchain: Arc<Swapchain>,
     device: Arc<Device>,
+
+    #[allow(dead_code)]
+    instance: Arc<Instance>,
 }
 
 impl Frame {
@@ -25,6 +35,7 @@ impl Frame {
         device: &Arc<Device>,
         swapchain: &Arc<Swapchain>,
         graphics_pipeline: &Arc<GraphicsPipeline>,
+        instance: &Arc<Instance>,
     ) -> Result<Self> {
         let command_pool = create_command_pool(device)?;
         let command_buffers =
@@ -47,6 +58,7 @@ impl Frame {
             graphics_pipeline: graphics_pipeline.clone(),
             swapchain: swapchain.clone(),
             device: device.clone(),
+            instance: instance.clone(),
         };
 
         frame.record_buffer_commands()?;
@@ -54,20 +66,60 @@ impl Frame {
         Ok(frame)
     }
 
+    pub fn rebuild_swapchain(
+        &mut self,
+        framebuffer_size: (u32, u32),
+    ) -> Result<()> {
+        unsafe {
+            let device = &self.device;
+            self.device.logical_device.device_wait_idle()?;
+            self.device
+                .logical_device
+                .free_command_buffers(self.command_pool, &self.command_buffers);
+            self.command_buffers.clear();
+            self.frames_in_flight
+                .drain(..)
+                .for_each(|frame_sync| frame_sync.destroy(device));
+        }
+
+        self.swapchain = self.swapchain.rebuild(framebuffer_size)?;
+        self.images_in_flight =
+            vec![vk::Fence::null(); self.swapchain.framebuffers.len()];
+        self.command_buffers = create_command_buffers(
+            &self.device,
+            &self.swapchain,
+            &self.command_pool,
+        )?;
+        self.frames_in_flight = FrameSync::for_n_frames(&self.device, 5)?;
+        self.current_frame = 0;
+
+        self.graphics_pipeline =
+            GraphicsPipeline::new(&self.device, &self.swapchain)?;
+
+        self.record_buffer_commands()?;
+
+        Ok(())
+    }
+
     /// Render a single application frame.
-    pub fn draw_frame(&mut self) -> Result<()> {
+    pub fn draw_frame(&mut self) -> Result<SwapchainState> {
         self.current_frame =
             (self.current_frame + 1) % self.frames_in_flight.len();
         let frame_sync = &self.frames_in_flight[self.current_frame];
 
-        let (index, _needs_rebuild) = unsafe {
+        let result = unsafe {
             self.swapchain.swapchain_loader.acquire_next_image(
                 self.swapchain.swapchain,
                 u64::MAX,
                 frame_sync.image_available_semaphore,
                 vk::Fence::null(),
-            )?
+            )
         };
+        if let Err(vk::Result::ERROR_OUT_OF_DATE_KHR) = result {
+            return Ok(SwapchainState::NeedsRebuild);
+        }
+
+        let (index, needs_rebuild) = result?;
 
         if self.images_in_flight[index as usize] != vk::Fence::null() {
             unsafe {
@@ -118,20 +170,20 @@ impl Frame {
 
         let present_queue = self.device.present_queue.acquire();
 
-        let _ = unsafe {
+        let result = unsafe {
             self.swapchain
                 .swapchain_loader
-                .queue_present(*present_queue, &present_info)?
+                .queue_present(*present_queue, &present_info)
         };
+        if Err(vk::Result::ERROR_OUT_OF_DATE_KHR) == result {
+            return Ok(SwapchainState::NeedsRebuild);
+        }
 
-        // unsafe {
-        //     self.device
-        //         .logical_device
-        //         .queue_wait_idle(*graphics_queue)?;
-        //     self.device.logical_device.queue_wait_idle(*present_queue)?;
-        // }
-
-        Ok(())
+        Ok(if needs_rebuild {
+            SwapchainState::NeedsRebuild
+        } else {
+            SwapchainState::Ok
+        })
     }
 
     fn record_buffer_commands(&self) -> Result<()> {

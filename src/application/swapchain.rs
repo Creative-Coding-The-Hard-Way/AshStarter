@@ -29,6 +29,9 @@ pub struct Swapchain {
     pub color_space: vk::ColorSpaceKHR,
 
     #[allow(dead_code)]
+    pub window_surface: Arc<WindowSurface>,
+
+    #[allow(dead_code)]
     device: Arc<Device>,
 }
 
@@ -37,8 +40,9 @@ impl Swapchain {
     /// current size of the framebuffer.
     pub fn new(
         device: &Arc<Device>,
-        window_surface: &WindowSurface,
+        window_surface: &Arc<WindowSurface>,
         framebuffer_size: (u32, u32),
+        previous: Option<&Swapchain>,
     ) -> Result<Arc<Self>> {
         let image_format = selection::choose_surface_format(
             window_surface,
@@ -72,6 +76,11 @@ impl Swapchain {
             .present_mode(present_mode)
             .composite_alpha(vk::CompositeAlphaFlagsKHR::OPAQUE)
             .pre_transform(vk::SurfaceTransformFlagsKHR::IDENTITY)
+            .old_swapchain(if let Some(old_swapchain) = previous {
+                old_swapchain.swapchain
+            } else {
+                vk::SwapchainKHR::null()
+            })
             .clipped(true);
 
         let indices = vec![
@@ -126,8 +135,19 @@ impl Swapchain {
             extent,
             format: image_format.format,
             color_space: image_format.color_space,
+            window_surface: window_surface.clone(),
             device: device.clone(),
         }))
+    }
+
+    /// Rebuild a new swapchain using this swapchain as a reference.
+    pub fn rebuild(&self, framebuffer_size: (u32, u32)) -> Result<Arc<Self>> {
+        Self::new(
+            &self.device,
+            &self.window_surface,
+            framebuffer_size,
+            Some(&self),
+        )
     }
 }
 

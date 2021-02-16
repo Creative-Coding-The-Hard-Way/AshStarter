@@ -15,8 +15,9 @@ mod swapchain;
 mod window_surface;
 
 pub use self::{
-    device::Device, frame::Frame, graphics_pipeline::GraphicsPipeline,
-    instance::Instance, swapchain::Swapchain, window_surface::WindowSurface,
+    device::Device, frame::Frame, frame::SwapchainState,
+    graphics_pipeline::GraphicsPipeline, instance::Instance,
+    swapchain::Swapchain, window_surface::WindowSurface,
 };
 
 use anyhow::{bail, Context, Result};
@@ -75,21 +76,7 @@ pub struct Application {
     window: glfw::Window,
     events: Option<Receiver<(f64, glfw::WindowEvent)>>,
 
-    pipeline: Arc<GraphicsPipeline>,
-
     frame: Frame,
-
-    #[allow(dead_code)]
-    swapchain: Arc<Swapchain>,
-
-    #[allow(dead_code)]
-    device: Arc<Device>,
-
-    #[allow(dead_code)]
-    window_surface: Arc<WindowSurface>,
-
-    #[allow(dead_code)]
-    instance: Arc<Instance>,
 }
 
 impl Application {
@@ -118,22 +105,17 @@ impl Application {
             &device,
             &window_surface,
             (fbwidth as u32, fbheight as u32),
+            None,
         )?;
-
         let pipeline = GraphicsPipeline::new(&device, &swapchain)?;
 
-        let frame = Frame::new(&device, &swapchain, &pipeline)?;
+        let frame = Frame::new(&device, &swapchain, &pipeline, &instance)?;
 
         Ok(Self {
             glfw,
             window,
             events: Some(events),
             frame,
-            pipeline,
-            instance,
-            device,
-            window_surface,
-            swapchain,
         })
     }
 
@@ -147,9 +129,14 @@ impl Application {
         glfw.window_hint(glfw::WindowHint::ClientApi(
             glfw::ClientApiHint::NoApi,
         ));
-        glfw.window_hint(glfw::WindowHint::Resizable(false));
-        glfw.create_window(1366, 768, "Ash Starter", glfw::WindowMode::Windowed)
-            .context("unable to create the glfw window")
+
+        let (mut window, event_receiver) = glfw
+            .create_window(1366, 768, "Ash Starter", glfw::WindowMode::Windowed)
+            .context("unable to create the glfw window")?;
+
+        window.set_resizable(true);
+
+        Ok((window, event_receiver))
     }
 
     /// Run the application, blocks until the main event loop exits.
@@ -171,7 +158,11 @@ impl Application {
                 log::debug!("{:?}", event);
                 self.handle_event(event)?;
             }
-            self.frame.draw_frame()?;
+            if let SwapchainState::NeedsRebuild = self.frame.draw_frame()? {
+                let (iwidth, iheight) = self.window.get_framebuffer_size();
+                self.frame
+                    .rebuild_swapchain((iwidth as u32, iheight as u32))?;
+            }
         }
         Ok(())
     }
