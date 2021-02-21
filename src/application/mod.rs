@@ -10,18 +10,22 @@
 mod graphics_pipeline;
 mod render_context;
 
+pub use self::{
+    graphics_pipeline::GraphicsPipeline,
+    render_context::{RenderContext, SwapchainState},
+};
 use crate::rendering::{glfw_window::GlfwWindow, Device, Swapchain};
 
-pub use self::{
-    graphics_pipeline::GraphicsPipeline, render_context::RenderContext,
-};
-
 use anyhow::{Context, Result};
+use ash::{version::DeviceV1_0, vk};
 use std::sync::Arc;
 
 pub struct Application {
     window_surface: Arc<GlfwWindow>,
     render_context: RenderContext,
+    device: Arc<Device>,
+    swapchain: Arc<Swapchain>,
+    graphics_pipeline: Arc<GraphicsPipeline>,
 }
 
 impl Application {
@@ -45,19 +49,18 @@ impl Application {
 
             Ok((window, event_receiver))
         })?;
-
         let device = Device::new(window_surface.clone())?;
         let swapchain =
             Swapchain::new(device.clone(), window_surface.clone(), None)?;
-
+        let render_context = RenderContext::new(&device, &swapchain)?;
         let pipeline = GraphicsPipeline::new(&device, &swapchain)?;
-
-        let render_context =
-            RenderContext::new(&device, &swapchain, &pipeline)?;
 
         Ok(Self {
             window_surface,
             render_context,
+            device: device.clone(),
+            swapchain: swapchain.clone(),
+            graphics_pipeline: pipeline,
         })
     }
 
@@ -76,8 +79,40 @@ impl Application {
                 log::debug!("{:?}", event);
                 self.handle_event(event)?;
             }
-            self.render_context.draw_frame()?;
+
+            let device = &self.device;
+            let swapchain = &self.swapchain;
+            let graphics_pipeline = &self.graphics_pipeline;
+            let status =
+                self.render_context.draw_frame(|image_available, frame| {
+                    let command_buffer = frame.request_command_buffer()?;
+                    Self::record_buffer_commands(
+                        device,
+                        swapchain,
+                        graphics_pipeline,
+                        &frame.framebuffer,
+                        &command_buffer,
+                    )?;
+                    frame.submit_command_buffers(
+                        image_available,
+                        &[command_buffer],
+                    )
+                })?;
+            match status {
+                SwapchainState::Ok => {}
+                SwapchainState::NeedsRebuild => {
+                    self.replace_swapchain()?;
+                }
+            }
         }
+        Ok(())
+    }
+
+    /// Update all systems which depend on the swapchain
+    fn replace_swapchain(&mut self) -> Result<()> {
+        self.swapchain = self.render_context.rebuild_swapchain()?;
+        self.graphics_pipeline =
+            GraphicsPipeline::new(&self.device, &self.swapchain)?;
         Ok(())
     }
 
@@ -102,6 +137,71 @@ impl Application {
             }
 
             _ => {}
+        }
+
+        Ok(())
+    }
+
+    fn record_buffer_commands(
+        device: &Device,
+        swapchain: &Swapchain,
+        graphics_pipeline: &GraphicsPipeline,
+        framebuffer: &vk::Framebuffer,
+        command_buffer: &vk::CommandBuffer,
+    ) -> Result<()> {
+        // begin the command buffer
+        let begin_info = vk::CommandBufferBeginInfo::builder()
+            .flags(vk::CommandBufferUsageFlags::empty());
+
+        // begin the render pass
+        let clear_values = [vk::ClearValue {
+            color: vk::ClearColorValue {
+                float32: [0.0, 0.0, 0.0, 1.0],
+            },
+        }];
+        let render_pass_begin_info = vk::RenderPassBeginInfo::builder()
+            .render_pass(swapchain.render_pass)
+            .framebuffer(*framebuffer)
+            .render_area(vk::Rect2D {
+                offset: vk::Offset2D { x: 0, y: 0 },
+                extent: swapchain.extent,
+            })
+            .clear_values(&clear_values);
+
+        unsafe {
+            // begin the command buffer
+            device
+                .logical_device
+                .begin_command_buffer(*command_buffer, &begin_info)?;
+
+            // begin the render pass
+            device.logical_device.cmd_begin_render_pass(
+                *command_buffer,
+                &render_pass_begin_info,
+                vk::SubpassContents::INLINE,
+            );
+
+            // bind the graphics pipeline
+            device.logical_device.cmd_bind_pipeline(
+                *command_buffer,
+                vk::PipelineBindPoint::GRAPHICS,
+                graphics_pipeline.pipeline,
+            );
+
+            // draw
+            device.logical_device.cmd_draw(
+                *command_buffer,
+                3, // vertex count
+                1, // instance count
+                0, // first vertex
+                0, // first instance
+            );
+
+            // end the render pass
+            device.logical_device.cmd_end_render_pass(*command_buffer);
+
+            // end the buffer
+            device.logical_device.end_command_buffer(*command_buffer)?;
         }
 
         Ok(())
