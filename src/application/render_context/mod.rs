@@ -3,7 +3,7 @@ mod frame_sync;
 use self::frame_sync::FrameSync;
 use crate::{
     application::GraphicsPipeline,
-    rendering::{Device, Instance, Swapchain},
+    rendering::{Device, Swapchain},
 };
 
 use anyhow::{Context, Result};
@@ -16,8 +16,8 @@ pub enum SwapchainState {
     NeedsRebuild,
 }
 
-pub struct Frame {
-    command_pool: vk::CommandPool,
+pub struct RenderContext {
+    command_pools: Vec<vk::CommandPool>,
     command_buffers: Vec<vk::CommandBuffer>,
 
     images_in_flight: Vec<FrameSync>,
@@ -28,27 +28,22 @@ pub struct Frame {
     graphics_pipeline: Arc<GraphicsPipeline>,
     swapchain: Arc<Swapchain>,
     device: Arc<Device>,
-
-    #[allow(dead_code)]
-    instance: Arc<Instance>,
 }
 
-impl Frame {
+impl RenderContext {
     pub fn new(
         device: &Arc<Device>,
         swapchain: &Arc<Swapchain>,
         graphics_pipeline: &Arc<GraphicsPipeline>,
-        instance: &Arc<Instance>,
     ) -> Result<Self> {
-        let command_pool = create_command_pool(device)?;
-        let command_buffers =
-            create_command_buffers(device, swapchain, &command_pool)?;
+        let command_pools = create_command_pools(device, swapchain)?;
+        let command_buffers = create_command_buffers(device, &command_pools)?;
 
         let images_in_flight =
             FrameSync::for_n_frames(device, swapchain.framebuffers.len())?;
 
         let frame = Self {
-            command_pool,
+            command_pools,
             command_buffers,
 
             images_in_flight,
@@ -59,47 +54,11 @@ impl Frame {
             graphics_pipeline: graphics_pipeline.clone(),
             swapchain: swapchain.clone(),
             device: device.clone(),
-            instance: instance.clone(),
         };
 
         frame.record_buffer_commands()?;
 
         Ok(frame)
-    }
-
-    fn rebuild_swapchain(&mut self) -> Result<()> {
-        unsafe {
-            let device = &self.device;
-            self.device.logical_device.device_wait_idle()?;
-            self.device
-                .logical_device
-                .free_command_buffers(self.command_pool, &self.command_buffers);
-            self.command_buffers.clear();
-            self.images_in_flight
-                .drain(..)
-                .for_each(|frame_sync| frame_sync.destroy(device));
-        }
-
-        self.swapchain = self.swapchain.rebuild()?;
-        self.images_in_flight = FrameSync::for_n_frames(
-            &self.device,
-            self.swapchain.framebuffers.len(),
-        )?;
-
-        self.command_buffers = create_command_buffers(
-            &self.device,
-            &self.swapchain,
-            &self.command_pool,
-        )?;
-
-        self.graphics_pipeline =
-            GraphicsPipeline::new(&self.device, &self.swapchain)?;
-
-        self.record_buffer_commands()?;
-
-        self.swapchain_state = SwapchainState::Ok;
-
-        Ok(())
     }
 
     /// Signal that the swapchain needs to be rebuilt before the next frame
@@ -128,8 +87,11 @@ impl Frame {
         if let Err(vk::Result::ERROR_OUT_OF_DATE_KHR) = result {
             return self.rebuild_swapchain();
         }
+        if let Ok((_, true)) = result {
+            return self.rebuild_swapchain();
+        }
 
-        let (index, needs_rebuild) = result?;
+        let (index, _) = result?;
         let current_frame_sync = &self.images_in_flight[index as usize];
 
         unsafe {
@@ -182,6 +144,42 @@ impl Frame {
         }
 
         self.previous_frame = index as usize;
+        Ok(())
+    }
+
+    fn rebuild_swapchain(&mut self) -> Result<()> {
+        unsafe {
+            let device = &self.device;
+            self.device.logical_device.device_wait_idle()?;
+            for (pool, buffer) in
+                self.command_pools.iter().zip(self.command_buffers.iter())
+            {
+                device
+                    .logical_device
+                    .free_command_buffers(*pool, &[*buffer]);
+                device.logical_device.destroy_command_pool(*pool, None);
+            }
+            self.command_pools.clear();
+            self.command_buffers.clear();
+            self.images_in_flight
+                .drain(..)
+                .for_each(|frame_sync| frame_sync.destroy(device));
+        }
+
+        self.swapchain = self.swapchain.rebuild()?;
+        self.images_in_flight = FrameSync::for_n_frames(
+            &self.device,
+            self.swapchain.framebuffers.len(),
+        )?;
+        self.command_pools =
+            create_command_pools(&self.device, &self.swapchain)?;
+        self.command_buffers =
+            create_command_buffers(&self.device, &self.command_pools)?;
+        self.graphics_pipeline =
+            GraphicsPipeline::new(&self.device, &self.swapchain)?;
+        self.record_buffer_commands()?;
+        self.swapchain_state = SwapchainState::Ok;
+
         Ok(())
     }
 
@@ -256,7 +254,7 @@ impl Frame {
     }
 }
 
-impl Drop for Frame {
+impl Drop for RenderContext {
     fn drop(&mut self) {
         unsafe {
             // don't delete anything until the GPU has stoped using our
@@ -272,12 +270,14 @@ impl Drop for Frame {
                 .for_each(|frame| frame.destroy(device));
 
             // safe to delete now
-            self.device
-                .logical_device
-                .free_command_buffers(self.command_pool, &self.command_buffers);
-            self.device
-                .logical_device
-                .destroy_command_pool(self.command_pool, None);
+            for (pool, buffer) in
+                self.command_pools.iter().zip(self.command_buffers.iter())
+            {
+                device
+                    .logical_device
+                    .free_command_buffers(*pool, &[*buffer]);
+                device.logical_device.destroy_command_pool(*pool, None);
+            }
         }
     }
 }
@@ -285,22 +285,29 @@ impl Drop for Frame {
 /// Create the command buffer pool.
 ///
 /// The caller is responsible for destroying the pool before the device.
-fn create_command_pool(device: &Device) -> Result<vk::CommandPool> {
-    let create_info = vk::CommandPoolCreateInfo::builder()
-        .queue_family_index(device.graphics_queue.family_id)
-        .flags(vk::CommandPoolCreateFlags::empty());
-    let command_pool = unsafe {
-        device
-            .logical_device
-            .create_command_pool(&create_info, None)
-            .context("unable to create the command pool")?
-    };
-    device.name_vulkan_object(
-        "Graphics Command Pool",
-        vk::ObjectType::COMMAND_POOL,
-        &command_pool,
-    )?;
-    Ok(command_pool)
+fn create_command_pools(
+    device: &Device,
+    swapchain: &Swapchain,
+) -> Result<Vec<vk::CommandPool>> {
+    let mut pools = vec![];
+    for i in 0..swapchain.framebuffers.len() {
+        let create_info = vk::CommandPoolCreateInfo::builder()
+            .queue_family_index(device.graphics_queue.family_id)
+            .flags(vk::CommandPoolCreateFlags::empty());
+        let command_pool = unsafe {
+            device
+                .logical_device
+                .create_command_pool(&create_info, None)
+                .context("unable to create the command pool")?
+        };
+        device.name_vulkan_object(
+            format!("Graphics Command Pool {}", i),
+            vk::ObjectType::COMMAND_POOL,
+            &command_pool,
+        )?;
+        pools.push(command_pool);
+    }
+    Ok(pools)
 }
 
 /// Create one command buffer for each frame.
@@ -309,18 +316,20 @@ fn create_command_pool(device: &Device) -> Result<vk::CommandPool> {
 /// using them.
 fn create_command_buffers(
     device: &Device,
-    swapchain: &Swapchain,
-    command_pool: &vk::CommandPool,
+    command_pools: &[vk::CommandPool],
 ) -> Result<Vec<vk::CommandBuffer>> {
-    let create_info = vk::CommandBufferAllocateInfo::builder()
-        .command_pool(*command_pool)
-        .level(vk::CommandBufferLevel::PRIMARY)
-        .command_buffer_count(swapchain.framebuffers.len() as u32);
-    let command_buffers = unsafe {
-        device
-            .logical_device
-            .allocate_command_buffers(&create_info)?
-    };
-
-    Ok(command_buffers)
+    let mut buffers = vec![];
+    for pool in command_pools {
+        let create_info = vk::CommandBufferAllocateInfo::builder()
+            .command_pool(*pool)
+            .level(vk::CommandBufferLevel::PRIMARY)
+            .command_buffer_count(1);
+        let command_buffers = unsafe {
+            device
+                .logical_device
+                .allocate_command_buffers(&create_info)?
+        };
+        buffers.push(command_buffers[0]);
+    }
+    Ok(buffers)
 }

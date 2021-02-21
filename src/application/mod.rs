@@ -7,19 +7,21 @@
 //! app.run()?;
 //! ```
 
-mod frame;
 mod graphics_pipeline;
+mod render_context;
 
 use crate::rendering::{glfw_window::GlfwWindow, Device, Swapchain};
 
-pub use self::{frame::Frame, graphics_pipeline::GraphicsPipeline};
+pub use self::{
+    graphics_pipeline::GraphicsPipeline, render_context::RenderContext,
+};
 
 use anyhow::{Context, Result};
 use std::sync::Arc;
 
 pub struct Application {
     window_surface: Arc<GlfwWindow>,
-    frame: Frame,
+    render_context: RenderContext,
 }
 
 impl Application {
@@ -50,27 +52,17 @@ impl Application {
 
         let pipeline = GraphicsPipeline::new(&device, &swapchain)?;
 
-        let frame = Frame::new(
-            &device,
-            &swapchain,
-            &pipeline,
-            &window_surface.instance,
-        )?;
+        let render_context =
+            RenderContext::new(&device, &swapchain, &pipeline)?;
 
         Ok(Self {
             window_surface,
-            frame,
+            render_context,
         })
     }
 
     /// Run the application, blocks until the main event loop exits.
     pub fn run(mut self) -> Result<()> {
-        self.main_loop()?;
-        Ok(())
-    }
-
-    /// Main window event loop. Events are dispatched via handle_event.
-    fn main_loop(&mut self) -> Result<()> {
         let events = self
             .window_surface
             .event_receiver
@@ -84,7 +76,7 @@ impl Application {
                 log::debug!("{:?}", event);
                 self.handle_event(event)?;
             }
-            self.frame.draw_frame()?;
+            self.render_context.draw_frame()?;
         }
         Ok(())
     }
@@ -106,7 +98,7 @@ impl Application {
 
             glfw::WindowEvent::FramebufferSize(_, _) => {
                 log::info!("resized");
-                self.frame.needs_rebuild();
+                self.render_context.needs_rebuild();
             }
 
             _ => {}

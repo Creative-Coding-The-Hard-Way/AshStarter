@@ -14,7 +14,6 @@ pub struct Swapchain {
     pub swapchain: vk::SwapchainKHR,
 
     pub framebuffers: Vec<vk::Framebuffer>,
-    swapchain_images: Vec<vk::Image>,
     swapchain_image_views: Vec<vk::ImageView>,
 
     pub render_pass: vk::RenderPass,
@@ -121,7 +120,6 @@ impl Swapchain {
             swapchain_loader,
             swapchain,
             render_pass,
-            swapchain_images,
             swapchain_image_views,
             framebuffers,
             extent,
