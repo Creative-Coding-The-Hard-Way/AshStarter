@@ -1,7 +1,10 @@
 mod frame_sync;
 
 use self::frame_sync::FrameSync;
-use crate::application::{Device, GraphicsPipeline, Instance, Swapchain};
+use crate::{
+    application::GraphicsPipeline,
+    rendering::{Device, Instance, Swapchain},
+};
 
 use anyhow::{Context, Result};
 use ash::{version::DeviceV1_0, vk};
@@ -64,10 +67,7 @@ impl Frame {
         Ok(frame)
     }
 
-    pub fn rebuild_swapchain(
-        &mut self,
-        framebuffer_size: (u32, u32),
-    ) -> Result<()> {
+    fn rebuild_swapchain(&mut self) -> Result<()> {
         unsafe {
             let device = &self.device;
             self.device.logical_device.device_wait_idle()?;
@@ -80,7 +80,7 @@ impl Frame {
                 .for_each(|frame_sync| frame_sync.destroy(device));
         }
 
-        self.swapchain = self.swapchain.rebuild(framebuffer_size)?;
+        self.swapchain = self.swapchain.rebuild()?;
         self.images_in_flight = FrameSync::for_n_frames(
             &self.device,
             self.swapchain.framebuffers.len(),
@@ -109,9 +109,9 @@ impl Frame {
     }
 
     /// Render a single application frame.
-    pub fn draw_frame(&mut self) -> Result<SwapchainState> {
+    pub fn draw_frame(&mut self) -> Result<()> {
         if self.swapchain_state == SwapchainState::NeedsRebuild {
-            return Ok(SwapchainState::NeedsRebuild);
+            return self.rebuild_swapchain();
         }
 
         let acquired_semaphore = self.images_in_flight[self.previous_frame]
@@ -126,7 +126,7 @@ impl Frame {
             )
         };
         if let Err(vk::Result::ERROR_OUT_OF_DATE_KHR) = result {
-            return Ok(SwapchainState::NeedsRebuild);
+            return self.rebuild_swapchain();
         }
 
         let (index, needs_rebuild) = result?;
@@ -152,9 +152,8 @@ impl Frame {
             .signal_semaphores(&render_finished_signal_semaphores)
             .build()];
 
-        let graphics_queue = self.device.graphics_queue.acquire();
-
         unsafe {
+            let graphics_queue = self.device.graphics_queue.acquire();
             self.device
                 .logical_device
                 .reset_fences(&[current_frame_sync.graphics_finished_fence])?;
@@ -172,24 +171,18 @@ impl Frame {
             .swapchains(&swapchains)
             .image_indices(&indices);
 
-        let present_queue = self.device.present_queue.acquire();
-
         let result = unsafe {
+            let present_queue = self.device.present_queue.acquire();
             self.swapchain
                 .swapchain_loader
                 .queue_present(*present_queue, &present_info)
         };
         if Err(vk::Result::ERROR_OUT_OF_DATE_KHR) == result {
-            return Ok(SwapchainState::NeedsRebuild);
+            return self.rebuild_swapchain();
         }
 
         self.previous_frame = index as usize;
-
-        Ok(if needs_rebuild {
-            SwapchainState::NeedsRebuild
-        } else {
-            SwapchainState::Ok
-        })
+        Ok(())
     }
 
     fn record_buffer_commands(&self) -> Result<()> {

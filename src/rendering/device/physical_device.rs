@@ -1,7 +1,8 @@
 //! Functions for picking a physical device with the features required by this
 //! application.
 
-use crate::application::{device::QueueFamilyIndices, Instance, WindowSurface};
+use super::QueueFamilyIndices;
+use crate::rendering::{Instance, WindowSurface};
 
 use anyhow::{Context, Result};
 use ash::{version::InstanceV1_0, vk};
@@ -9,7 +10,7 @@ use ash::{version::InstanceV1_0, vk};
 /// Pick a physical device based on suitability criteria.
 pub fn pick_physical_device(
     instance: &Instance,
-    window_surface: &WindowSurface,
+    window_surface: &dyn WindowSurface,
 ) -> Result<vk::PhysicalDevice> {
     let physical_devices =
         unsafe { instance.ash.enumerate_physical_devices()? };
@@ -24,12 +25,12 @@ pub fn pick_physical_device(
 fn is_device_suitable(
     instance: &Instance,
     physical_device: &vk::PhysicalDevice,
-    window_surface: &WindowSurface,
+    window_surface: &dyn WindowSurface,
 ) -> bool {
     let queues_supported = QueueFamilyIndices::find(
         physical_device,
         &instance.ash,
-        &window_surface,
+        window_surface,
     )
     .is_ok();
 

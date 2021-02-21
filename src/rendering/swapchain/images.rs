@@ -1,4 +1,4 @@
-use crate::application::Device;
+use crate::rendering::Device;
 
 use anyhow::{Context, Result};
 use ash::{version::DeviceV1_0, vk};

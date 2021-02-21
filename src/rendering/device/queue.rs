@@ -1,4 +1,4 @@
-use crate::application::Device;
+use super::Device;
 
 use anyhow::Result;
 use ash::vk;

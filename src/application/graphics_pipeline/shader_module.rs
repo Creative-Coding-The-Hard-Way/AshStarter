@@ -6,7 +6,6 @@ use std::sync::Arc;
 
 /// A wrapper for the vulkan shader module handle which destroys the module
 /// when dropped.
-///
 pub struct ShaderModule {
     pub shader_module: vk::ShaderModule,
 
@@ -17,7 +16,6 @@ impl ShaderModule {
     /// Create a new shader module using the provided source.
     ///
     /// Panics if the source array is not divisible evenly into u32 words.
-    ///
     pub fn new<Name>(
         device: &Arc<Device>,
         name: Name,
