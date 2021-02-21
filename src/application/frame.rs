@@ -17,9 +17,8 @@ pub struct Frame {
     command_pool: vk::CommandPool,
     command_buffers: Vec<vk::CommandBuffer>,
 
-    frames_in_flight: Vec<FrameSync>,
-    current_frame: usize,
-    images_in_flight: Vec<vk::Fence>,
+    images_in_flight: Vec<FrameSync>,
+    previous_frame: usize,
 
     swapchain_state: SwapchainState,
 
@@ -42,20 +41,17 @@ impl Frame {
         let command_buffers =
             create_command_buffers(device, swapchain, &command_pool)?;
 
-        let frames_in_flight = FrameSync::for_n_frames(device, 300)?;
-        let current_frame = 0;
-
         let images_in_flight =
-            vec![vk::Fence::null(); swapchain.framebuffers.len()];
+            FrameSync::for_n_frames(device, swapchain.framebuffers.len())?;
 
         let frame = Self {
             command_pool,
             command_buffers,
 
-            frames_in_flight,
-            current_frame,
             images_in_flight,
             swapchain_state: SwapchainState::Ok,
+
+            previous_frame: 0, // always 'start' on frame 0
 
             graphics_pipeline: graphics_pipeline.clone(),
             swapchain: swapchain.clone(),
@@ -79,21 +75,22 @@ impl Frame {
                 .logical_device
                 .free_command_buffers(self.command_pool, &self.command_buffers);
             self.command_buffers.clear();
-            self.frames_in_flight
+            self.images_in_flight
                 .drain(..)
                 .for_each(|frame_sync| frame_sync.destroy(device));
         }
 
         self.swapchain = self.swapchain.rebuild(framebuffer_size)?;
-        self.images_in_flight =
-            vec![vk::Fence::null(); self.swapchain.framebuffers.len()];
+        self.images_in_flight = FrameSync::for_n_frames(
+            &self.device,
+            self.swapchain.framebuffers.len(),
+        )?;
+
         self.command_buffers = create_command_buffers(
             &self.device,
             &self.swapchain,
             &self.command_pool,
         )?;
-        self.frames_in_flight = FrameSync::for_n_frames(&self.device, 5)?;
-        self.current_frame = 0;
 
         self.graphics_pipeline =
             GraphicsPipeline::new(&self.device, &self.swapchain)?;
@@ -117,15 +114,14 @@ impl Frame {
             return Ok(SwapchainState::NeedsRebuild);
         }
 
-        self.current_frame =
-            (self.current_frame + 1) % self.frames_in_flight.len();
-        let frame_sync = &self.frames_in_flight[self.current_frame];
+        let acquired_semaphore = self.images_in_flight[self.previous_frame]
+            .image_available_semaphore;
 
         let result = unsafe {
             self.swapchain.swapchain_loader.acquire_next_image(
                 self.swapchain.swapchain,
                 u64::MAX,
-                frame_sync.image_available_semaphore,
+                acquired_semaphore,
                 vk::Fence::null(),
             )
         };
@@ -134,30 +130,21 @@ impl Frame {
         }
 
         let (index, needs_rebuild) = result?;
-
-        if self.images_in_flight[index as usize] != vk::Fence::null() {
-            unsafe {
-                self.device.logical_device.wait_for_fences(
-                    &[self.images_in_flight[index as usize]],
-                    true,
-                    u64::MAX,
-                )?;
-            }
-        }
-        self.images_in_flight[index as usize] =
-            frame_sync.graphics_finished_fence;
+        let current_frame_sync = &self.images_in_flight[index as usize];
 
         unsafe {
-            self.device
-                .logical_device
-                .reset_fences(&[frame_sync.graphics_finished_fence])?;
+            self.device.logical_device.wait_for_fences(
+                &[current_frame_sync.graphics_finished_fence],
+                true,
+                u64::MAX,
+            )?;
         }
 
-        let wait_semaphores = [frame_sync.image_available_semaphore];
+        let wait_semaphores = [acquired_semaphore];
         let wait_stages = [vk::PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT];
         let command_buffers = [self.command_buffers[index as usize]];
         let render_finished_signal_semaphores =
-            [frame_sync.render_finished_semaphore];
+            [current_frame_sync.render_finished_semaphore];
         let submit_info = [vk::SubmitInfo::builder()
             .wait_semaphores(&wait_semaphores)
             .wait_dst_stage_mask(&wait_stages)
@@ -168,10 +155,13 @@ impl Frame {
         let graphics_queue = self.device.graphics_queue.acquire();
 
         unsafe {
+            self.device
+                .logical_device
+                .reset_fences(&[current_frame_sync.graphics_finished_fence])?;
             self.device.logical_device.queue_submit(
                 *graphics_queue,
                 &submit_info,
-                frame_sync.graphics_finished_fence,
+                current_frame_sync.graphics_finished_fence,
             )?;
         }
 
@@ -192,6 +182,8 @@ impl Frame {
         if Err(vk::Result::ERROR_OUT_OF_DATE_KHR) == result {
             return Ok(SwapchainState::NeedsRebuild);
         }
+
+        self.previous_frame = index as usize;
 
         Ok(if needs_rebuild {
             SwapchainState::NeedsRebuild
@@ -282,7 +274,7 @@ impl Drop for Frame {
                 .expect("wait for device to idle");
 
             let device = &self.device;
-            self.frames_in_flight
+            self.images_in_flight
                 .drain(..)
                 .for_each(|frame| frame.destroy(device));
 

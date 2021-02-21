@@ -23,7 +23,7 @@ pub use self::{
 use anyhow::{bail, Context, Result};
 use ash::vk;
 use glfw::Glfw;
-use std::sync::{mpsc::Receiver, Arc};
+use std::sync::mpsc::Receiver;
 
 #[cfg_attr(doc, aquamarine::aquamarine)]
 /// The application's state.
