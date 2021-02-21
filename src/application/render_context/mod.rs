@@ -1,6 +1,6 @@
-mod frame_sync;
+mod frame;
 
-use self::frame_sync::FrameSync;
+use self::frame::Frame;
 use crate::{
     application::GraphicsPipeline,
     rendering::{Device, Swapchain},
@@ -20,7 +20,7 @@ pub struct RenderContext {
     command_pools: Vec<vk::CommandPool>,
     command_buffers: Vec<vk::CommandBuffer>,
 
-    images_in_flight: Vec<FrameSync>,
+    frames_in_flight: Vec<Frame>,
     previous_frame: usize,
 
     swapchain_state: SwapchainState,
@@ -39,14 +39,14 @@ impl RenderContext {
         let command_pools = create_command_pools(device, swapchain)?;
         let command_buffers = create_command_buffers(device, &command_pools)?;
 
-        let images_in_flight =
-            FrameSync::for_n_frames(device, swapchain.framebuffers.len())?;
+        let frames_in_flight =
+            Frame::create_n_frames(device, swapchain.framebuffers.len())?;
 
-        let frame = Self {
+        let context = Self {
             command_pools,
             command_buffers,
 
-            images_in_flight,
+            frames_in_flight,
             swapchain_state: SwapchainState::Ok,
 
             previous_frame: 0, // always 'start' on frame 0
@@ -56,9 +56,9 @@ impl RenderContext {
             device: device.clone(),
         };
 
-        frame.record_buffer_commands()?;
+        context.record_buffer_commands()?;
 
-        Ok(frame)
+        Ok(context)
     }
 
     /// Signal that the swapchain needs to be rebuilt before the next frame
@@ -73,7 +73,8 @@ impl RenderContext {
             return self.rebuild_swapchain();
         }
 
-        let acquired_semaphore = self.images_in_flight[self.previous_frame]
+        let acquired_semaphore = self.frames_in_flight[self.previous_frame]
+            .sync
             .image_available_semaphore;
 
         let result = unsafe {
@@ -92,11 +93,11 @@ impl RenderContext {
         }
 
         let (index, _) = result?;
-        let current_frame_sync = &self.images_in_flight[index as usize];
+        let current_frame = &self.frames_in_flight[index as usize];
 
         unsafe {
             self.device.logical_device.wait_for_fences(
-                &[current_frame_sync.graphics_finished_fence],
+                &[current_frame.sync.graphics_finished_fence],
                 true,
                 u64::MAX,
             )?;
@@ -106,7 +107,7 @@ impl RenderContext {
         let wait_stages = [vk::PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT];
         let command_buffers = [self.command_buffers[index as usize]];
         let render_finished_signal_semaphores =
-            [current_frame_sync.render_finished_semaphore];
+            [current_frame.sync.render_finished_semaphore];
         let submit_info = [vk::SubmitInfo::builder()
             .wait_semaphores(&wait_semaphores)
             .wait_dst_stage_mask(&wait_stages)
@@ -118,11 +119,11 @@ impl RenderContext {
             let graphics_queue = self.device.graphics_queue.acquire();
             self.device
                 .logical_device
-                .reset_fences(&[current_frame_sync.graphics_finished_fence])?;
+                .reset_fences(&[current_frame.sync.graphics_finished_fence])?;
             self.device.logical_device.queue_submit(
                 *graphics_queue,
                 &submit_info,
-                current_frame_sync.graphics_finished_fence,
+                current_frame.sync.graphics_finished_fence,
             )?;
         }
 
@@ -161,13 +162,11 @@ impl RenderContext {
             }
             self.command_pools.clear();
             self.command_buffers.clear();
-            self.images_in_flight
-                .drain(..)
-                .for_each(|frame_sync| frame_sync.destroy(device));
+            self.frames_in_flight.clear();
         }
 
         self.swapchain = self.swapchain.rebuild()?;
-        self.images_in_flight = FrameSync::for_n_frames(
+        self.frames_in_flight = Frame::create_n_frames(
             &self.device,
             self.swapchain.framebuffers.len(),
         )?;
@@ -265,9 +264,7 @@ impl Drop for RenderContext {
                 .expect("wait for device to idle");
 
             let device = &self.device;
-            self.images_in_flight
-                .drain(..)
-                .for_each(|frame| frame.destroy(device));
+            self.frames_in_flight.clear();
 
             // safe to delete now
             for (pool, buffer) in

@@ -12,19 +12,6 @@ pub struct FrameSync {
 }
 
 impl FrameSync {
-    /// Create a vector of named frame sync objects.
-    pub fn for_n_frames(
-        device: &Device,
-        max_frames_in_flight: usize,
-    ) -> Result<Vec<Self>> {
-        let mut frames_in_flight = vec![];
-        for i in 0..max_frames_in_flight {
-            frames_in_flight
-                .push(FrameSync::new(device, format!("FrameSync {}", i))?);
-        }
-        Ok(frames_in_flight)
-    }
-
     /// Create the synchronization primitives used for each frame.
     ///
     pub fn new<Name>(device: &Device, name: Name) -> Result<Self>
@@ -75,7 +62,7 @@ impl FrameSync {
     }
 
     /// Called by the owner when all sync resources should be destroyed.
-    pub unsafe fn destroy(self, device: &Device) {
+    pub unsafe fn destroy(&mut self, device: &Device) {
         //! This function does no checking that the semaphores are done being used,
         //! that is up to the owner. (for example, wait for the device to idle)
         device
