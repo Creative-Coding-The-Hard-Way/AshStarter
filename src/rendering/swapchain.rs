@@ -1,3 +1,9 @@
+//! This module defines the Swapchain abstraction and related Vulkan resources.
+//!
+//! The Swapchain is inherently tied to the display surface and the Window
+//! which provides it. As such, only the main application thread should ever
+//! directly interact with the swapchain.
+
 mod images;
 mod render_pass;
 mod selection;

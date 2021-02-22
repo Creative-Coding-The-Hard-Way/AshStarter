@@ -1,3 +1,6 @@
+//! This module contains functions and structures for handling vulkan
+//! resources.
+
 pub mod command_pool;
 pub mod device;
 pub mod instance;

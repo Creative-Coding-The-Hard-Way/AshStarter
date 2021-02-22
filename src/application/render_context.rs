@@ -14,6 +14,46 @@ pub enum SwapchainState {
     NeedsRebuild,
 }
 
+#[cfg_attr(doc, aquamarine::aquamarine)]
+/// The RenderContext is responsible for requesting an image from the
+/// swapchain, picking the corresponding Frame instance, and dispatching to the
+/// RenderTarget.
+///
+/// # Sequence Diagram
+/// ```mermaid
+/// sequenceDiagram
+///     participant app as Application
+///     participant rc as Render Context
+///     participant rt as Render Target
+///     participant frame as Frame <br> (Index)
+///     participant swap as Swapchain
+///
+///     app ->>+ rc: Draw Frame(RenderTarget)
+///
+///     rc ->> swap: Acquire Frame
+///     activate swap
+///     swap -->> rc: (Index, Acquired)
+///
+///     rc ->>+frame: Begin Frame (Index)
+///     frame ->> frame: wait for fences from last submit
+///     frame ->> frame: reset resources
+///
+///
+///     rc ->>+ rt: draw_to_frame(Acquired, Current Frame)
+///
+///     rt ->> frame: request <br> command buffer
+///     rt ->> rt: fill command buffer
+///     rt ->> frame: submit <br> command buffer
+///     rt -->>- rc: finish frame
+///
+///
+///     deactivate frame
+///
+///     rc ->> swap: Present
+///     deactivate swap
+///
+///     rc -->>- app: Ok()
+/// ```
 pub struct RenderContext {
     frames_in_flight: Vec<Frame>,
     previous_frame: usize,

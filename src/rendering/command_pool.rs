@@ -1,3 +1,6 @@
+//! This module provides structures for managing a collection of command
+//! buffers for a given command pool.
+
 use crate::rendering::Device;
 
 use anyhow::{Context, Result};

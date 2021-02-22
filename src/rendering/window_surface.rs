@@ -1,3 +1,27 @@
+//! This module defines the WindowSurface trait and common implementations.
+//!
+//! # Example
+//!
+//! ```
+//! let window_surface = GlfwWindow::new(|glfw| {
+//!     let (mut window, event_receiver) = glfw
+//!         .create_window(
+//!             1366,
+//!             768,
+//!             "Ash Starter",
+//!             glfw::WindowMode::Windowed,
+//!         )
+//!         .context("unable to create the glfw window")?;
+//!
+//!     window.set_resizable(true);
+//!     window.set_key_polling(true);
+//!     window.set_size_polling(true);
+//!
+//!     Ok((window, event_receiver))
+//! })?;
+//! ```
+//!
+
 pub mod glfw_window;
 
 use crate::rendering::Instance;
@@ -30,14 +54,6 @@ pub trait WindowSurface {
     ///
     /// Unsafe because the device's supported extensions must be checked prior
     /// to querying for queue presentation support.
-    ///
-    ///            window_surface
-    ///                .surface_loader
-    ///                .get_physical_device_surface_support(
-    ///                    *physical_device,
-    ///                    i as u32,
-    ///                    window_surface.surface,
-    ///                )
     unsafe fn get_physical_device_surface_support(
         &self,
         physical_device: &vk::PhysicalDevice,

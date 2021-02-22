@@ -1,3 +1,6 @@
+//! This module defines the ShadeModule abstraction which makes it easy to
+//! create vulkan shader modules directly with the rust `include_bytes` macro.
+
 use crate::{ffi, rendering::Device};
 
 use anyhow::{Context, Result};
