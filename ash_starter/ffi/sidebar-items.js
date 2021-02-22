@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["copy_to_u32","Copy a byte slice into a properly-aligned u32 array."],["to_os_ptrs","Build a vector of pointers to c-style strings from a vector of rust strings."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["graphics_pipeline",""]],"struct":[["Triangle","Resources used to render a single triangle to a frame."]]});

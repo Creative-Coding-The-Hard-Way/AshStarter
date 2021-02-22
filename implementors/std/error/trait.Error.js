@@ -1,0 +1,16 @@
+(function() {var implementors = {};
+implementors["aho_corasick"] = [{"text":"impl Error for Error","synthetic":false,"types":[]}];
+implementors["ash"] = [{"text":"impl Error for InstanceError","synthetic":false,"types":[]},{"text":"impl Error for LoadingError","synthetic":false,"types":[]},{"text":"impl Error for Result","synthetic":false,"types":[]}];
+implementors["chrono"] = [{"text":"impl Error for ParseError","synthetic":false,"types":[]},{"text":"impl Error for RoundingError","synthetic":false,"types":[]}];
+implementors["flexi_logger"] = [{"text":"impl Error for FlexiLoggerError","synthetic":false,"types":[]}];
+implementors["glfw"] = [{"text":"impl Error for Error","synthetic":false,"types":[]},{"text":"impl Error for InitError","synthetic":false,"types":[]}];
+implementors["glob"] = [{"text":"impl Error for GlobError","synthetic":false,"types":[]},{"text":"impl Error for PatternError","synthetic":false,"types":[]}];
+implementors["libloading"] = [{"text":"impl Error for Error","synthetic":false,"types":[]}];
+implementors["log"] = [{"text":"impl Error for SetLoggerError","synthetic":false,"types":[]},{"text":"impl Error for ParseLevelError","synthetic":false,"types":[]}];
+implementors["proc_macro2"] = [{"text":"impl Error for LexError","synthetic":false,"types":[]}];
+implementors["regex"] = [{"text":"impl Error for Error","synthetic":false,"types":[]}];
+implementors["regex_syntax"] = [{"text":"impl Error for Error","synthetic":false,"types":[]},{"text":"impl Error for Error","synthetic":false,"types":[]},{"text":"impl Error for Error","synthetic":false,"types":[]},{"text":"impl Error for CaseFoldError","synthetic":false,"types":[]},{"text":"impl Error for UnicodeWordError","synthetic":false,"types":[]}];
+implementors["semver"] = [{"text":"impl Error for SemVerError","synthetic":false,"types":[]},{"text":"impl Error for ReqParseError","synthetic":false,"types":[]}];
+implementors["syn"] = [{"text":"impl Error for Error","synthetic":false,"types":[]}];
+implementors["time"] = [{"text":"impl Error for OutOfRangeError","synthetic":false,"types":[]},{"text":"impl Error for ParseError","synthetic":false,"types":[]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

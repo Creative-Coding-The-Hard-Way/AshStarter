@@ -1,0 +1,10 @@
+(function() {var implementors = {};
+implementors["anyhow"] = [{"text":"impl Drop for Error","synthetic":false,"types":[]}];
+implementors["ash_starter"] = [{"text":"impl Drop for Frame","synthetic":false,"types":[]},{"text":"impl Drop for RenderContext","synthetic":false,"types":[]},{"text":"impl Drop for GraphicsPipeline","synthetic":false,"types":[]},{"text":"impl Drop for TransientCommandPool","synthetic":false,"types":[]},{"text":"impl Drop for Device","synthetic":false,"types":[]},{"text":"impl Drop for Instance","synthetic":false,"types":[]},{"text":"impl Drop for ShaderModule","synthetic":false,"types":[]},{"text":"impl Drop for Swapchain","synthetic":false,"types":[]},{"text":"impl Drop for GlfwWindow","synthetic":false,"types":[]}];
+implementors["glfw"] = [{"text":"impl Drop for Cursor","synthetic":false,"types":[]},{"text":"impl Drop for Glfw","synthetic":false,"types":[]},{"text":"impl Drop for Window","synthetic":false,"types":[]}];
+implementors["itertools"] = [{"text":"impl&lt;'a, K, I, F&gt; Drop for Group&lt;'a, K, I, F&gt; <span class=\"where fmt-newline\">where<br>&nbsp;&nbsp;&nbsp;&nbsp;I: Iterator,<br>&nbsp;&nbsp;&nbsp;&nbsp;I::Item: 'a,&nbsp;</span>","synthetic":false,"types":[]},{"text":"impl&lt;'a, I&gt; Drop for Chunk&lt;'a, I&gt; <span class=\"where fmt-newline\">where<br>&nbsp;&nbsp;&nbsp;&nbsp;I: Iterator,<br>&nbsp;&nbsp;&nbsp;&nbsp;I::Item: 'a,&nbsp;</span>","synthetic":false,"types":[]}];
+implementors["libloading"] = [{"text":"impl Drop for Library","synthetic":false,"types":[]}];
+implementors["regex_syntax"] = [{"text":"impl Drop for Ast","synthetic":false,"types":[]},{"text":"impl Drop for ClassSet","synthetic":false,"types":[]},{"text":"impl Drop for Hir","synthetic":false,"types":[]}];
+implementors["syn"] = [{"text":"impl&lt;'a&gt; Drop for ParseBuffer&lt;'a&gt;","synthetic":false,"types":[]}];
+implementors["thread_local"] = [{"text":"impl&lt;T:&nbsp;Send&gt; Drop for ThreadLocal&lt;T&gt;","synthetic":false,"types":[]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
