@@ -8,6 +8,7 @@ use ash::{version::DeviceV1_0, vk};
 
 use std::sync::Arc;
 
+/// All per-frame resources and synchronization for this application.
 pub struct Frame {
     pub sync: FrameSync,
     pub framebuffer: vk::Framebuffer,

@@ -1,6 +1,7 @@
 mod frame;
+mod render_target;
 
-use self::frame::Frame;
+pub use self::{frame::Frame, render_target::RenderTarget};
 use crate::rendering::{Device, Swapchain};
 
 use anyhow::Result;
@@ -45,9 +46,12 @@ impl RenderContext {
     }
 
     /// Render a single application frame.
-    pub fn draw_frame<F>(&mut self, mut render: F) -> Result<SwapchainState>
+    pub fn draw_frame<Target>(
+        &mut self,
+        render_target: &mut Target,
+    ) -> Result<SwapchainState>
     where
-        F: FnMut(vk::Semaphore, &mut Frame) -> Result<vk::Semaphore>,
+        Target: RenderTarget,
     {
         if self.swapchain_state == SwapchainState::NeedsRebuild {
             return Ok(SwapchainState::NeedsRebuild);
@@ -80,7 +84,8 @@ impl RenderContext {
         let render_finished_semaphore = {
             let mut current_frame = &mut self.frames_in_flight[index as usize];
             current_frame.begin_frame()?;
-            render(acquired_semaphore, &mut current_frame)?
+            render_target
+                .render_to_frame(acquired_semaphore, &mut current_frame)?
         };
 
         let render_finished_semaphores = &[render_finished_semaphore];

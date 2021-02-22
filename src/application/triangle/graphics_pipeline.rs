@@ -1,7 +1,4 @@
-mod shader_module;
-
-use self::shader_module::ShaderModule;
-use crate::rendering::{Device, Swapchain};
+use crate::rendering::{Device, ShaderModule, Swapchain};
 
 use anyhow::{Context, Result};
 use ash::{version::DeviceV1_0, vk};

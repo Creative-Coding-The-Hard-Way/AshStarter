@@ -1,4 +1,4 @@
-use crate::{application::Device, ffi};
+use crate::{ffi, rendering::Device};
 
 use anyhow::{Context, Result};
 use ash::{version::DeviceV1_0, vk};
@@ -8,7 +8,6 @@ use std::sync::Arc;
 /// when dropped.
 pub struct ShaderModule {
     pub shader_module: vk::ShaderModule,
-
     device: Arc<Device>,
 }
 
