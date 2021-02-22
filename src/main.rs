@@ -9,6 +9,7 @@
 
 mod application;
 mod ffi;
+mod rendering;
 
 use anyhow::{Context, Result};
 use application::Application;

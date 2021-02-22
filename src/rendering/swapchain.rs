@@ -1,37 +1,34 @@
+//! This module defines the Swapchain abstraction and related Vulkan resources.
+//!
+//! The Swapchain is inherently tied to the display surface and the Window
+//! which provides it. As such, only the main application thread should ever
+//! directly interact with the swapchain.
+
 mod images;
 mod render_pass;
 mod selection;
 
-use crate::application::{Device, WindowSurface};
+use crate::rendering::{Device, WindowSurface};
 
 use anyhow::{Context, Result};
 use ash::{extensions::khr, version::DeviceV1_0, vk};
 use std::sync::Arc;
 
-/// Bundle up the raw swapchain and the extension functions which are used
-/// to operate it.
+/// Manage the swapchain and all dependent resources.
 pub struct Swapchain {
     pub swapchain_loader: khr::Swapchain,
     pub swapchain: vk::SwapchainKHR,
 
-    #[allow(dead_code)]
-    swapchain_images: Vec<vk::Image>,
-
-    #[allow(dead_code)]
-    swapchain_image_views: Vec<vk::ImageView>,
-
-    #[allow(dead_code)]
     pub framebuffers: Vec<vk::Framebuffer>,
+    swapchain_image_views: Vec<vk::ImageView>,
 
     pub render_pass: vk::RenderPass,
     pub extent: vk::Extent2D,
     pub format: vk::Format,
     pub color_space: vk::ColorSpaceKHR,
 
-    #[allow(dead_code)]
-    pub window_surface: Arc<WindowSurface>,
+    pub window_surface: Arc<dyn WindowSurface>,
 
-    #[allow(dead_code)]
     device: Arc<Device>,
 }
 
@@ -39,32 +36,30 @@ impl Swapchain {
     /// Create a new swapchain based on the surface, physical device, and the
     /// current size of the framebuffer.
     pub fn new(
-        device: &Arc<Device>,
-        window_surface: &Arc<WindowSurface>,
-        framebuffer_size: (u32, u32),
+        device: Arc<Device>,
+        window_surface: Arc<dyn WindowSurface>,
         previous: Option<&Swapchain>,
     ) -> Result<Arc<Self>> {
         let image_format = selection::choose_surface_format(
-            window_surface,
+            window_surface.as_ref(),
             &device.physical_device,
         );
         let present_mode = selection::choose_present_mode(
-            window_surface,
+            window_surface.as_ref(),
             &device.physical_device,
         );
         let extent = selection::choose_swap_extent(
-            window_surface,
+            window_surface.as_ref(),
             &device.physical_device,
-            framebuffer_size,
         )?;
         let image_count = selection::choose_image_count(
-            window_surface,
+            window_surface.as_ref(),
             &device.physical_device,
         )?;
 
         let create_info = vk::SwapchainCreateInfoKHR::builder()
             // set the surface
-            .surface(window_surface.surface)
+            .surface(unsafe { window_surface.get_surface_handle() })
             // image settings
             .image_format(image_format.format)
             .image_color_space(image_format.color_space)
@@ -83,7 +78,7 @@ impl Swapchain {
             })
             .clipped(true);
 
-        let indices = vec![
+        let indices = &[
             device.graphics_queue.family_id,
             device.present_queue.family_id,
         ];
@@ -94,7 +89,7 @@ impl Swapchain {
             } else {
                 create_info
                     .image_sharing_mode(vk::SharingMode::CONCURRENT)
-                    .queue_family_indices(&indices)
+                    .queue_family_indices(indices)
             };
 
         let swapchain_loader =
@@ -109,17 +104,19 @@ impl Swapchain {
                 .context("unable to get swapchain images")?
         };
 
-        let render_pass =
-            render_pass::create_render_pass(device, image_format.format)?;
+        let render_pass = render_pass::create_render_pass(
+            device.as_ref(),
+            image_format.format,
+        )?;
 
         let swapchain_image_views = images::create_image_views(
-            device,
+            device.as_ref(),
             image_format.format,
             &swapchain_images,
         )?;
 
         let framebuffers = images::create_framebuffers(
-            device,
+            device.as_ref(),
             &swapchain_image_views,
             render_pass,
             extent,
@@ -129,23 +126,21 @@ impl Swapchain {
             swapchain_loader,
             swapchain,
             render_pass,
-            swapchain_images,
             swapchain_image_views,
             framebuffers,
             extent,
             format: image_format.format,
             color_space: image_format.color_space,
-            window_surface: window_surface.clone(),
-            device: device.clone(),
+            window_surface,
+            device,
         }))
     }
 
     /// Rebuild a new swapchain using this swapchain as a reference.
-    pub fn rebuild(&self, framebuffer_size: (u32, u32)) -> Result<Arc<Self>> {
+    pub fn rebuild(&self) -> Result<Arc<Self>> {
         Self::new(
-            &self.device,
-            &self.window_surface,
-            framebuffer_size,
+            self.device.clone(),
+            self.window_surface.clone(),
             Some(&self),
         )
     }

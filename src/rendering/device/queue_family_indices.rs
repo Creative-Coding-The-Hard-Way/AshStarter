@@ -1,7 +1,9 @@
 //! This module provides a structure for finding queue families which support
 //! this application.
 
-use crate::application::{device::Queue, window_surface::WindowSurface};
+use crate::rendering::WindowSurface;
+
+use super::Queue;
 
 use anyhow::{Context, Result};
 use ash::{
@@ -29,7 +31,7 @@ impl QueueFamilyIndices {
     pub fn find(
         physical_device: &vk::PhysicalDevice,
         ash: &ash::Instance,
-        window_surface: &WindowSurface,
+        window_surface: &dyn WindowSurface,
     ) -> Result<Self> {
         let queue_families = unsafe {
             ash.get_physical_device_queue_family_properties(*physical_device)
@@ -44,13 +46,10 @@ impl QueueFamilyIndices {
             }
 
             let present_support = unsafe {
-                window_surface
-                    .surface_loader
-                    .get_physical_device_surface_support(
-                        *physical_device,
-                        i as u32,
-                        window_surface.surface,
-                    )
+                window_surface.get_physical_device_surface_support(
+                    physical_device,
+                    i as u32,
+                )
             };
             match present_support {
                 Ok(true) => {

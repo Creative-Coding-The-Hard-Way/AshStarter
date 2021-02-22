@@ -1,7 +1,4 @@
-mod shader_module;
-
-use self::shader_module::ShaderModule;
-use crate::application::{Device, Swapchain};
+use crate::rendering::{Device, ShaderModule, Swapchain};
 
 use anyhow::{Context, Result};
 use ash::{version::DeviceV1_0, vk};
@@ -26,12 +23,14 @@ impl GraphicsPipeline {
         let vertex_module = ShaderModule::new(
             device,
             "Vertex Shader",
-            std::include_bytes!("../../shaders/sprv/inline_positions.vert.spv"),
+            std::include_bytes!(
+                "../../../shaders/sprv/inline_positions.vert.spv"
+            ),
         )?;
         let fragment_module = ShaderModule::new(
             device,
             "Fragment Shader",
-            std::include_bytes!("../../shaders/sprv/passthrough.frag.spv"),
+            std::include_bytes!("../../../shaders/sprv/passthrough.frag.spv"),
         )?;
 
         // Dynamic parts of the pipeline

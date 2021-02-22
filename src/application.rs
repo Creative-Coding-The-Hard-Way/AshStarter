@@ -7,76 +7,27 @@
 //! app.run()?;
 //! ```
 
-mod device;
-mod frame;
-mod graphics_pipeline;
-mod instance;
-mod swapchain;
-mod window_surface;
+pub mod render_context;
+mod triangle;
 
 pub use self::{
-    device::Device, frame::Frame, frame::SwapchainState,
-    graphics_pipeline::GraphicsPipeline, instance::Instance,
-    swapchain::Swapchain, window_surface::WindowSurface,
+    render_context::{RenderContext, SwapchainState},
+    triangle::Triangle,
 };
+use crate::rendering::{glfw_window::GlfwWindow, Device, Swapchain};
 
-use anyhow::{bail, Context, Result};
-use ash::vk;
-use glfw::Glfw;
-use std::sync::{mpsc::Receiver, Arc};
+use anyhow::{Context, Result};
+use std::sync::Arc;
 
-#[cfg_attr(doc, aquamarine::aquamarine)]
-/// The application's state.
+/// The main application.
 ///
-/// # Ownership Diagram
-///
-///```mermaid
-///  classDiagram
-///      class Instance {
-///        vulkan ptrs
-///        ash instance
-///      }
-///      class Device {
-///        logical_device
-///        physical_device
-///        queues
-///      }
-///      class Swapchain {
-///        swapchain handle
-///      }
-///      class WindowSurface {
-///        surface handle
-///      }
-///      class GraphicsPipeline {
-///      }
-///
-///      class Application {
-///      }
-///
-///      Application --|> Instance: has a
-///      Application --|> GraphicsPipeline: has a
-///
-///      Device --|> WindowSurface: has a
-///      Swapchain --|> WindowSurface: has a
-///
-///      Application --|> Device: has a
-///      Application --|> WindowSurface: has a
-///
-///      GraphicsPipeline --|> Device: has a
-///      GraphicsPipeline --|> Swapchain: has a
-///
-///      Application --|> Swapchain: has a
-///
-///      Device --|> Instance: has a
-///      Swapchain --|> Device: has a
-///      WindowSurface --|> Instance: has a
-///```
+/// The Application has a window, a render context, and one or more systems
+/// which can render to a frame when presented by the render context.
 pub struct Application {
-    glfw: Glfw,
-    window: glfw::Window,
-    events: Option<Receiver<(f64, glfw::WindowEvent)>>,
-
-    frame: Frame,
+    window_surface: Arc<GlfwWindow>,
+    render_context: RenderContext,
+    swapchain: Arc<Swapchain>,
+    triangle: Triangle,
 }
 
 impl Application {
@@ -84,87 +35,66 @@ impl Application {
     ///
     /// Returns `Err()` if anything goes wrong while building the app.
     pub fn new() -> Result<Self> {
-        let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS)
-            .context("unable to setup glfw for this application")?;
-        let (window, events) = Self::create_window(&mut glfw)?;
-        let instance =
-            Instance::new(&glfw.get_required_instance_extensions().context(
-                "unable to get required vulkan extensions for this platform",
-            )?)?;
-        let window_surface = WindowSurface::new(&window, instance.clone())?;
-        let device = Device::new(&instance, &window_surface)?;
+        let window_surface = GlfwWindow::new(|glfw| {
+            let (mut window, event_receiver) = glfw
+                .create_window(
+                    1366,
+                    768,
+                    "Ash Starter",
+                    glfw::WindowMode::Windowed,
+                )
+                .context("unable to create the glfw window")?;
 
-        device.name_vulkan_object(
-            "main application surface",
-            vk::ObjectType::SURFACE_KHR,
-            &window_surface.surface,
-        )?;
+            window.set_resizable(true);
+            window.set_key_polling(true);
+            window.set_size_polling(true);
 
-        let (fbwidth, fbheight) = window.get_framebuffer_size();
-        let swapchain = Swapchain::new(
-            &device,
-            &window_surface,
-            (fbwidth as u32, fbheight as u32),
-            None,
-        )?;
-        let pipeline = GraphicsPipeline::new(&device, &swapchain)?;
-
-        let frame = Frame::new(&device, &swapchain, &pipeline, &instance)?;
+            Ok((window, event_receiver))
+        })?;
+        let device = Device::new(window_surface.clone())?;
+        let swapchain =
+            Swapchain::new(device.clone(), window_surface.clone(), None)?;
+        let render_context = RenderContext::new(&device, &swapchain)?;
+        let triangle = Triangle::new(device.clone(), swapchain.clone())?;
 
         Ok(Self {
-            glfw,
-            window,
-            events: Some(events),
-            frame,
+            window_surface,
+            render_context,
+            swapchain: swapchain.clone(),
+            triangle,
         })
-    }
-
-    /// Create this application's glfw window
-    fn create_window(
-        glfw: &mut Glfw,
-    ) -> Result<(glfw::Window, Receiver<(f64, glfw::WindowEvent)>)> {
-        if !glfw.vulkan_supported() {
-            bail!("vulkan is not supported on this device!");
-        }
-        glfw.window_hint(glfw::WindowHint::ClientApi(
-            glfw::ClientApiHint::NoApi,
-        ));
-
-        let (mut window, event_receiver) = glfw
-            .create_window(1366, 768, "Ash Starter", glfw::WindowMode::Windowed)
-            .context("unable to create the glfw window")?;
-
-        window.set_resizable(true);
-
-        Ok((window, event_receiver))
     }
 
     /// Run the application, blocks until the main event loop exits.
     pub fn run(mut self) -> Result<()> {
-        self.main_loop()?;
-        Ok(())
-    }
+        let events = self
+            .window_surface
+            .event_receiver
+            .borrow_mut()
+            .take()
+            .unwrap();
 
-    /// Main window event loop. Events are dispatched via handle_event.
-    fn main_loop(&mut self) -> Result<()> {
-        self.window.set_key_polling(true);
-        self.window.set_size_polling(true);
-
-        let events =
-            self.events.take().context("event reciever is missing?!")?;
-
-        while !self.window.should_close() {
-            self.glfw.poll_events();
+        while !self.window_surface.window.borrow().should_close() {
+            self.window_surface.glfw.borrow_mut().poll_events();
             for (_, event) in glfw::flush_messages(&events) {
                 log::debug!("{:?}", event);
                 self.handle_event(event)?;
             }
-            if let SwapchainState::NeedsRebuild = self.frame.draw_frame()? {
-                let (iwidth, iheight) = self.window.get_framebuffer_size();
-                self.frame
-                    .rebuild_swapchain((iwidth as u32, iheight as u32))?;
+            let status = self.render_context.draw_frame(&mut self.triangle)?;
+            match status {
+                SwapchainState::Ok => {}
+                SwapchainState::NeedsRebuild => {
+                    self.replace_swapchain()?;
+                }
             }
         }
+        Ok(())
+    }
+
+    /// Update all systems which depend on the swapchain
+    fn replace_swapchain(&mut self) -> Result<()> {
+        self.swapchain = self.render_context.rebuild_swapchain()?;
+        self.triangle.replace_swapchain(self.swapchain.clone())?;
         Ok(())
     }
 
@@ -177,23 +107,20 @@ impl Application {
                 glfw::Action::Press,
                 _,
             ) => {
-                self.window.set_should_close(true);
+                self.window_surface
+                    .window
+                    .borrow_mut()
+                    .set_should_close(true);
             }
 
             glfw::WindowEvent::FramebufferSize(_, _) => {
                 log::info!("resized");
-                self.frame.needs_rebuild();
+                self.render_context.needs_rebuild();
             }
 
             _ => {}
         }
 
         Ok(())
-    }
-}
-
-impl Drop for Application {
-    fn drop(&mut self) {
-        log::debug!("cleanup application");
     }
 }

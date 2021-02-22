@@ -1,7 +1,7 @@
 //! Functions to create a proper render pass for this application's graphics
 //! pipeline.
 
-use crate::application::Device;
+use crate::rendering::Device;
 
 use anyhow::Result;
 use ash::{version::DeviceV1_0, vk};

@@ -1,6 +1,6 @@
 //! Functions for selecting correct swapchain properties for this application.
 
-use crate::application::WindowSurface;
+use crate::rendering::WindowSurface;
 
 use anyhow::Result;
 use ash::vk;
@@ -8,7 +8,7 @@ use ash::vk;
 /// Choose the number of images to use in the swapchain based on the min and
 /// max numbers of images supported by the device.
 pub fn choose_image_count(
-    window_surface: &WindowSurface,
+    window_surface: &dyn WindowSurface,
     physical_device: &vk::PhysicalDevice,
 ) -> Result<u32> {
     //! querying surface capabilities is safe in this context because the
@@ -31,7 +31,7 @@ pub fn choose_image_count(
 /// physical device.
 ///
 pub fn choose_surface_format(
-    window_surface: &WindowSurface,
+    window_surface: &dyn WindowSurface,
     physical_device: &vk::PhysicalDevice,
 ) -> vk::SurfaceFormatKHR {
     //! checking formats is safe because support for the swapchain extension is
@@ -58,7 +58,7 @@ pub fn choose_surface_format(
 /// physical device.
 ///
 pub fn choose_present_mode(
-    window_surface: &WindowSurface,
+    window_surface: &dyn WindowSurface,
     physical_device: &vk::PhysicalDevice,
 ) -> vk::PresentModeKHR {
     //! checking presentation modes is safe because support for the swapchain
@@ -82,9 +82,8 @@ pub fn choose_present_mode(
 /// Choose the swap extent for the swapchain based on the window's framebuffer
 /// size.
 pub fn choose_swap_extent(
-    window_surface: &WindowSurface,
+    window_surface: &dyn WindowSurface,
     physical_device: &vk::PhysicalDevice,
-    framebuffer_size: (u32, u32),
 ) -> Result<vk::Extent2D> {
     //! Getting surface capabilities is safe because suppport for the swapchain
     //! extenstion is verified when picking a physical device
@@ -95,14 +94,15 @@ pub fn choose_swap_extent(
         log::debug!("use current extent {:?}", capabilities.current_extent);
         Ok(capabilities.current_extent)
     } else {
+        let (width, height) = window_surface.framebuffer_size();
         let extent = vk::Extent2D {
             width: clamp(
-                framebuffer_size.0,
+                width,
                 capabilities.min_image_extent.width,
                 capabilities.max_image_extent.width,
             ),
             height: clamp(
-                framebuffer_size.1,
+                height,
                 capabilities.min_image_extent.height,
                 capabilities.max_image_extent.height,
             ),
