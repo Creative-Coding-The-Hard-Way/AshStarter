@@ -1,6 +1,8 @@
 mod graphics_pipeline;
+mod vertex;
 
 use self::graphics_pipeline::GraphicsPipeline;
+pub use self::vertex::Vertex;
 use crate::{
     application::render_context::{Frame, RenderTarget},
     rendering::{Device, Swapchain},

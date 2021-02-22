@@ -1,3 +1,4 @@
+use super::Vertex;
 use crate::rendering::{Device, ShaderModule, Swapchain};
 
 use anyhow::{Context, Result};
@@ -45,10 +46,12 @@ impl GraphicsPipeline {
 
         // Fixed Function Configuration
 
+        let (binding_descriptions, attribute_descriptions) =
+            Vertex::binding_description();
         let vertex_input_state =
             vk::PipelineVertexInputStateCreateInfo::builder()
-                .vertex_binding_descriptions(&[])
-                .vertex_attribute_descriptions(&[]);
+                .vertex_binding_descriptions(&binding_descriptions)
+                .vertex_attribute_descriptions(&attribute_descriptions);
 
         let input_assembly =
             vk::PipelineInputAssemblyStateCreateInfo::builder()
