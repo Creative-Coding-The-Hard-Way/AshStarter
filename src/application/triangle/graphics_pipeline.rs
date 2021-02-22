@@ -23,9 +23,7 @@ impl GraphicsPipeline {
         let vertex_module = ShaderModule::new(
             device,
             "Vertex Shader",
-            std::include_bytes!(
-                "../../../shaders/sprv/inline_positions.vert.spv"
-            ),
+            std::include_bytes!("../../../shaders/sprv/passthrough.vert.spv"),
         )?;
         let fragment_module = ShaderModule::new(
             device,
