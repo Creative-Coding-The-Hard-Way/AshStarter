@@ -32,7 +32,7 @@ impl Vertex {
             .build();
         let color = vk::VertexInputAttributeDescription::builder()
             .binding(0)
-            .location(12)
+            .location(1)
             .format(vk::Format::R32G32B32A32_SFLOAT)
             .offset(offset_of!(Vertex, color) as u32)
             .build();
