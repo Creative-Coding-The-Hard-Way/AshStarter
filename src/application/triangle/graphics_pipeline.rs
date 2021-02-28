@@ -1,3 +1,4 @@
+use super::Vertex;
 use crate::rendering::{Device, ShaderModule, Swapchain};
 
 use anyhow::{Context, Result};
@@ -23,9 +24,7 @@ impl GraphicsPipeline {
         let vertex_module = ShaderModule::new(
             device,
             "Vertex Shader",
-            std::include_bytes!(
-                "../../../shaders/sprv/inline_positions.vert.spv"
-            ),
+            std::include_bytes!("../../../shaders/sprv/passthrough.vert.spv"),
         )?;
         let fragment_module = ShaderModule::new(
             device,
@@ -47,10 +46,12 @@ impl GraphicsPipeline {
 
         // Fixed Function Configuration
 
+        let (binding_descriptions, attribute_descriptions) =
+            Vertex::binding_description();
         let vertex_input_state =
             vk::PipelineVertexInputStateCreateInfo::builder()
-                .vertex_binding_descriptions(&[])
-                .vertex_attribute_descriptions(&[]);
+                .vertex_binding_descriptions(&binding_descriptions)
+                .vertex_attribute_descriptions(&attribute_descriptions);
 
         let input_assembly =
             vk::PipelineInputAssemblyStateCreateInfo::builder()
@@ -82,7 +83,7 @@ impl GraphicsPipeline {
             .rasterizer_discard_enable(false)
             .polygon_mode(vk::PolygonMode::FILL)
             .line_width(1.0)
-            .cull_mode(vk::CullModeFlags::BACK)
+            .cull_mode(vk::CullModeFlags::NONE)
             .front_face(vk::FrontFace::CLOCKWISE)
             .depth_bias_enable(false)
             .depth_bias_constant_factor(0.0)
