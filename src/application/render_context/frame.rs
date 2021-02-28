@@ -1,7 +1,9 @@
 mod sync;
 
 use self::sync::FrameSync;
-use crate::rendering::{command_pool::TransientCommandPool, CpuBuffer, Device};
+use crate::rendering::{
+    command_pool::TransientCommandPool, CpuBuffer, Device, GpuBuffer,
+};
 
 use anyhow::{Context, Result};
 use ash::{version::DeviceV1_0, vk};
@@ -14,7 +16,8 @@ pub struct Frame {
     pub framebuffer: vk::Framebuffer,
     command_pool: TransientCommandPool,
     device: Arc<Device>,
-    buffer: CpuBuffer,
+    pub staging_buffer: CpuBuffer,
+    pub vertex_buffer: GpuBuffer,
 }
 
 impl Frame {
@@ -55,9 +58,15 @@ impl Frame {
                 device.clone(),
                 name.clone(),
             )?,
-            buffer: CpuBuffer::new(
+            staging_buffer: CpuBuffer::new(
                 device.clone(),
-                vk::BufferUsageFlags::VERTEX_BUFFER,
+                vk::BufferUsageFlags::TRANSFER_SRC,
+            )?,
+            vertex_buffer: GpuBuffer::create(
+                device.clone(),
+                vk::BufferUsageFlags::VERTEX_BUFFER
+                    | vk::BufferUsageFlags::TRANSFER_DST,
+                vk::MemoryPropertyFlags::DEVICE_LOCAL,
             )?,
             device,
         })
@@ -70,11 +79,6 @@ impl Frame {
             self.command_pool.reset()?;
         }
         Ok(())
-    }
-
-    /// Request access to the cpu buffer
-    pub fn request_buffer(&mut self) -> &mut CpuBuffer {
-        &mut self.buffer
     }
 
     /// Request a command buffer which can be used to submit graphics commands.

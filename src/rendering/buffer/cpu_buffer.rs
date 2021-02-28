@@ -32,6 +32,10 @@ impl CpuBuffer {
         })
     }
 
+    pub fn size_in_bytes(&self) -> u64 {
+        self.buffer.bytes_allocated
+    }
+
     /// The raw vertex buffer handle
     ///
     /// Unsafe because the buffer handle can become invalid when `write_data`

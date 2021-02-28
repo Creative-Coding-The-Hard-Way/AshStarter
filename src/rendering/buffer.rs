@@ -1,4 +1,5 @@
 mod cpu_buffer;
+mod transfer;
 
 pub use self::cpu_buffer::CpuBuffer;
 use crate::rendering::Device;
@@ -13,13 +14,13 @@ use std::sync::Arc;
 /// A gpu buffer which can be destroyed and reallocated on demand.
 pub struct GpuBuffer {
     /// the raw vulkan buffer handle
-    raw: vk::Buffer,
+    pub raw: vk::Buffer,
 
     /// the gpu memory owned by this buffer instance
     memory: vk::DeviceMemory,
 
     /// the number of bytes allocated on the gpu for vertex_buffer_memory
-    bytes_allocated: u64,
+    pub bytes_allocated: u64,
 
     usage: vk::BufferUsageFlags,
     properties: vk::MemoryPropertyFlags,

@@ -27,24 +27,62 @@ impl RenderTarget for Triangle {
         image_available: vk::Semaphore,
         frame: &mut Frame,
     ) -> Result<vk::Semaphore> {
+        let bytes_size =
+            (self.vertices.len() * std::mem::size_of::<Vertex>()) as u64;
+
         // It's safe to write to the buffer because this method will not be
         // called until the previous rendering commands for this frame have
         // finished
-        let vertex_buffer_handle = unsafe {
-            let buffer = frame.request_buffer();
-            buffer.write_data(&self.vertices)?;
-            buffer.raw_buffer()
-        };
+        unsafe {
+            frame.staging_buffer.write_data(&self.vertices)?;
+            if frame.vertex_buffer.bytes_allocated
+                < frame.staging_buffer.size_in_bytes()
+            {
+                frame
+                    .vertex_buffer
+                    .allocate_memory(frame.staging_buffer.size_in_bytes())?;
+            }
+        }
+
+        let transfer_buffer = frame.request_command_buffer()?;
+
+        unsafe {
+            let begin_info = vk::CommandBufferBeginInfo::builder()
+                .flags(vk::CommandBufferUsageFlags::ONE_TIME_SUBMIT)
+                .build();
+            self.device
+                .logical_device
+                .begin_command_buffer(transfer_buffer, &begin_info)?;
+
+            let regions = [vk::BufferCopy::builder()
+                .src_offset(0)
+                .dst_offset(0)
+                .size(bytes_size)
+                .build()];
+            self.device.logical_device.cmd_copy_buffer(
+                transfer_buffer,
+                frame.staging_buffer.raw_buffer(),
+                frame.vertex_buffer.raw,
+                &regions,
+            );
+
+            self.device
+                .logical_device
+                .end_command_buffer(transfer_buffer)?;
+        }
 
         let command_buffer = frame.request_command_buffer()?;
 
         self.record_buffer_commands(
             &frame.framebuffer,
             &command_buffer,
-            vertex_buffer_handle,
+            frame.vertex_buffer.raw,
         )?;
 
-        frame.submit_command_buffers(image_available, &[command_buffer])
+        frame.submit_command_buffers(
+            image_available,
+            &[transfer_buffer, command_buffer],
+        )
     }
 }
 
@@ -104,6 +142,26 @@ impl Triangle {
             self.device
                 .logical_device
                 .begin_command_buffer(*command_buffer, &begin_info)?;
+
+            let buffer_memory_barriers = [vk::BufferMemoryBarrier::builder()
+                .src_access_mask(vk::AccessFlags::TRANSFER_WRITE)
+                .dst_access_mask(vk::AccessFlags::VERTEX_ATTRIBUTE_READ)
+                .offset(0)
+                .size(
+                    (self.vertices.len() * std::mem::size_of::<Vertex>())
+                        as u64,
+                )
+                .buffer(vertex_buffer)
+                .build()];
+            self.device.logical_device.cmd_pipeline_barrier(
+                *command_buffer,
+                vk::PipelineStageFlags::TRANSFER,
+                vk::PipelineStageFlags::VERTEX_INPUT,
+                vk::DependencyFlags::VIEW_LOCAL,
+                &[],
+                &buffer_memory_barriers,
+                &[],
+            );
 
             // begin the render pass
             self.device.logical_device.cmd_begin_render_pass(
