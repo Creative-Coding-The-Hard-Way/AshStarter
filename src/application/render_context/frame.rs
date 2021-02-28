@@ -55,7 +55,10 @@ impl Frame {
                 device.clone(),
                 name.clone(),
             )?,
-            buffer: CpuBuffer::new(device.clone())?,
+            buffer: CpuBuffer::new(
+                device.clone(),
+                vk::BufferUsageFlags::VERTEX_BUFFER,
+            )?,
             device,
         })
     }
