@@ -10,7 +10,7 @@ pub mod swapchain;
 pub mod window_surface;
 
 pub use self::{
-    buffer::{CpuBuffer, GpuBuffer},
+    buffer::{CpuBuffer, StaticBuffer},
     device::{Device, Queue},
     instance::Instance,
     shader_module::ShaderModule,

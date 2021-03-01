@@ -1,4 +1,4 @@
-use super::GpuBuffer;
+use super::{Buffer, StaticBuffer};
 use crate::rendering::Device;
 
 use anyhow::Result;
@@ -11,8 +11,8 @@ use std::sync::Arc;
 /// to the driver-specified limit on the number of allocations supported by
 /// the device.
 pub struct CpuBuffer {
-    buffer: GpuBuffer,
-    device: Arc<Device>,
+    buffer: StaticBuffer,
+    written_size: u64,
 }
 
 impl CpuBuffer {
@@ -22,27 +22,14 @@ impl CpuBuffer {
         usage: vk::BufferUsageFlags,
     ) -> Result<Self> {
         Ok(Self {
-            buffer: GpuBuffer::create(
+            buffer: StaticBuffer::empty(
                 device.clone(),
                 usage,
                 vk::MemoryPropertyFlags::HOST_VISIBLE
                     | vk::MemoryPropertyFlags::HOST_COHERENT,
             )?,
-            device,
+            written_size: 0,
         })
-    }
-
-    pub fn size_in_bytes(&self) -> u64 {
-        self.buffer.bytes_allocated
-    }
-
-    /// The raw vertex buffer handle
-    ///
-    /// Unsafe because the buffer handle can become invalid when `write_data`
-    /// is called. The application should not keep any long lived references to
-    /// this handle.
-    pub unsafe fn raw_buffer(&self) -> vk::Buffer {
-        self.buffer.raw
     }
 
     /// Write the provided data into the vertex buffer.
@@ -50,26 +37,61 @@ impl CpuBuffer {
     /// Unsafe because this method can replace both the buffer and the backing
     /// memory. It is the responsibility of the application to ensure that
     /// neither resource is being used when this method is called.
+    ///
+    /// No explicit flush is required because the memory is allocated as
+    /// HOST_COHERENT.
     pub unsafe fn write_data<T>(&mut self, data: &[T]) -> Result<()>
     where
         T: Sized,
     {
-        let byte_size = (std::mem::size_of::<T>() * data.len()) as u64;
-        if byte_size > self.buffer.bytes_allocated {
-            self.buffer.allocate_memory(byte_size)?;
-        }
+        self.resize((std::mem::size_of::<T>() * data.len()) as u64)?;
 
-        let ptr = self.device.logical_device.map_memory(
-            self.buffer.memory,
+        let ptr = self.buffer.device.logical_device.map_memory(
+            self.buffer.memory(),
             0,
-            byte_size,
+            self.written_size,
             vk::MemoryMapFlags::empty(),
         )?;
 
         std::ptr::copy_nonoverlapping(data.as_ptr(), ptr as *mut T, data.len());
 
-        self.device.logical_device.unmap_memory(self.buffer.memory);
+        self.buffer
+            .device
+            .logical_device
+            .unmap_memory(self.buffer.memory());
 
         Ok(())
+    }
+
+    /// Update the written-size of the buffer.
+    ///
+    /// Reallocate the underlying GPU memory when needed.
+    fn resize(&mut self, byte_size: u64) -> Result<()> {
+        if byte_size > self.buffer.size_in_bytes() {
+            self.buffer = self.buffer.allocate(byte_size)?;
+        }
+        self.written_size = byte_size;
+        Ok(())
+    }
+}
+
+impl Buffer for CpuBuffer {
+    /// The raw buffer handle.
+    ///
+    /// Can be invalidated on calls to `write_data`.
+    unsafe fn raw(&self) -> ash::vk::Buffer {
+        self.buffer.raw()
+    }
+
+    /// The raw device memory handle.
+    ///
+    /// Can be invalidate on calls to `write_data`.
+    unsafe fn memory(&self) -> vk::DeviceMemory {
+        self.buffer.memory()
+    }
+
+    /// The size of the data written on the last call to `write_data`.
+    fn size_in_bytes(&self) -> u64 {
+        self.written_size
     }
 }
