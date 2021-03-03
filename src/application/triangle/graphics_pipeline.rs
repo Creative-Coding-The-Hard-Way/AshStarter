@@ -1,4 +1,4 @@
-use super::Vertex;
+use super::{UniformBufferObject, Vertex};
 use crate::rendering::{Device, ShaderModule, Swapchain};
 
 use anyhow::{Context, Result};
@@ -7,6 +7,7 @@ use std::{ffi::CString, sync::Arc};
 
 /// All vulkan resources related to the graphics pipeline.
 pub struct GraphicsPipeline {
+    descriptor_set_layout: vk::DescriptorSetLayout,
     pipeline_layout: vk::PipelineLayout,
     pub pipeline: vk::Pipeline,
 
@@ -122,7 +123,20 @@ impl GraphicsPipeline {
             .blend_constants([0.0, 0.0, 0.0, 0.0])
             .attachments(blend_attachments);
 
-        let layouts = vec![];
+        let descriptor_set_layout_bindings =
+            [UniformBufferObject::descriptor_set_layout_binding()];
+        let descriptor_set_layout_create_info =
+            vk::DescriptorSetLayoutCreateInfo::builder()
+                .bindings(&descriptor_set_layout_bindings);
+
+        let descriptor_set_layout = unsafe {
+            device.logical_device.create_descriptor_set_layout(
+                &descriptor_set_layout_create_info,
+                None,
+            )?
+        };
+
+        let layouts = [descriptor_set_layout];
         let push_constant_ranges = vec![];
         let pipeline_layout_create_info =
             vk::PipelineLayoutCreateInfo::builder()
@@ -178,6 +192,7 @@ impl GraphicsPipeline {
         // build pipeline object
 
         Ok(Arc::new(Self {
+            descriptor_set_layout,
             pipeline_layout,
             pipeline,
             device: device.clone(),
@@ -195,6 +210,10 @@ impl Drop for GraphicsPipeline {
             self.device
                 .logical_device
                 .destroy_pipeline_layout(self.pipeline_layout, None);
+            self.device.logical_device.destroy_descriptor_set_layout(
+                self.descriptor_set_layout,
+                None,
+            );
         }
     }
 }

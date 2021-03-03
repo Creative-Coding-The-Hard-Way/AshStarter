@@ -1,8 +1,12 @@
 mod graphics_pipeline;
+mod uniforms;
 mod vertex;
 
+pub use self::{uniforms::UniformBufferObject, vertex::Vertex};
+
+type Mat4 = nalgebra::Matrix4<f32>;
+
 use self::graphics_pipeline::GraphicsPipeline;
-pub use self::vertex::Vertex;
 use crate::{
     application::render_context::{Frame, RenderTarget},
     rendering::{
@@ -30,6 +34,12 @@ impl RenderTarget for Triangle {
         image_available: vk::Semaphore,
         frame: &mut Frame,
     ) -> Result<vk::Semaphore> {
+        // update the projection transform with the identity every frame
+        let ubo = UniformBufferObject::new(Mat4::identity());
+        unsafe {
+            frame.uniform_buffer.write_data(&[ubo])?;
+        }
+
         // Transfer data to the gpu by first writing it into a staging buffer.
         //
         // This is wasteful because the data changes every frame - so it's

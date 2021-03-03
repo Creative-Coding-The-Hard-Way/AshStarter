@@ -20,6 +20,7 @@ pub struct Frame {
     device: Arc<Device>,
     pub staging_buffer: CpuBuffer,
     pub vertex_buffer: StaticBuffer,
+    pub uniform_buffer: CpuBuffer,
 }
 
 impl Frame {
@@ -69,6 +70,10 @@ impl Frame {
                 vk::BufferUsageFlags::VERTEX_BUFFER
                     | vk::BufferUsageFlags::TRANSFER_DST,
                 vk::MemoryPropertyFlags::DEVICE_LOCAL,
+            )?,
+            uniform_buffer: CpuBuffer::new(
+                device.clone(),
+                vk::BufferUsageFlags::UNIFORM_BUFFER,
             )?,
             device,
         })
