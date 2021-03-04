@@ -1,16 +1,18 @@
 mod sync;
 
 use self::sync::FrameSync;
+use crate::application::triangle::UniformBufferObject;
 use crate::rendering::{
-    buffer::{CpuBuffer, StaticBuffer},
+    buffer::{Buffer, CpuBuffer, StaticBuffer},
     command_pool::TransientCommandPool,
     Device,
 };
 
 use anyhow::{Context, Result};
 use ash::{version::DeviceV1_0, vk};
-
 use std::sync::Arc;
+
+type Mat4 = nalgebra::Matrix4<f32>;
 
 /// All per-frame resources and synchronization for this application.
 pub struct Frame {
@@ -20,6 +22,11 @@ pub struct Frame {
     device: Arc<Device>,
     pub staging_buffer: CpuBuffer,
     pub vertex_buffer: StaticBuffer,
+    pub uniform_buffer: CpuBuffer,
+
+    descriptor_pool: vk::DescriptorPool,
+    descriptor_set_layout: vk::DescriptorSetLayout,
+    pub descriptor_set: vk::DescriptorSet,
 }
 
 impl Frame {
@@ -53,6 +60,68 @@ impl Frame {
     where
         Name: Into<String> + Clone,
     {
+        let pool_sizes = [vk::DescriptorPoolSize::builder()
+            .descriptor_count(1)
+            .build()];
+        let pool_create_info = vk::DescriptorPoolCreateInfo::builder()
+            .pool_sizes(&pool_sizes)
+            .max_sets(1)
+            .flags(vk::DescriptorPoolCreateFlags::empty());
+        let descriptor_pool = unsafe {
+            device
+                .logical_device
+                .create_descriptor_pool(&pool_create_info, None)?
+        };
+
+        let descriptor_set_layout_bindings =
+            [UniformBufferObject::descriptor_set_layout_binding()];
+        let descriptor_set_layout_create_info =
+            vk::DescriptorSetLayoutCreateInfo::builder()
+                .bindings(&descriptor_set_layout_bindings);
+        let descriptor_set_layout = unsafe {
+            device.logical_device.create_descriptor_set_layout(
+                &descriptor_set_layout_create_info,
+                None,
+            )?
+        };
+        let descriptor_set_layouts = [descriptor_set_layout];
+        let descriptor_set_allocate_info =
+            vk::DescriptorSetAllocateInfo::builder()
+                .descriptor_pool(descriptor_pool)
+                .set_layouts(&descriptor_set_layouts);
+
+        let descriptor_set = unsafe {
+            device
+                .logical_device
+                .allocate_descriptor_sets(&descriptor_set_allocate_info)?[0]
+        };
+
+        let mut uniform_buffer = CpuBuffer::new(
+            device.clone(),
+            vk::BufferUsageFlags::UNIFORM_BUFFER,
+        )?;
+        let ubo = UniformBufferObject::new(Mat4::identity());
+        unsafe { uniform_buffer.write_data(&[ubo])? };
+
+        let buffer_info = [vk::DescriptorBufferInfo::builder()
+            .buffer(unsafe { uniform_buffer.raw() })
+            .offset(0)
+            .range(std::mem::size_of::<UniformBufferObject>() as u64)
+            .build()];
+        let write_descriptor_set = [vk::WriteDescriptorSet::builder()
+            .dst_set(descriptor_set)
+            .dst_binding(0)
+            .dst_array_element(0)
+            .descriptor_type(vk::DescriptorType::UNIFORM_BUFFER)
+            .buffer_info(&buffer_info)
+            .build()];
+
+        unsafe {
+            device
+                .logical_device
+                .update_descriptor_sets(&write_descriptor_set, &[]);
+        }
+
         Ok(Self {
             sync: FrameSync::new(&device, name.clone())?,
             framebuffer,
@@ -70,6 +139,10 @@ impl Frame {
                     | vk::BufferUsageFlags::TRANSFER_DST,
                 vk::MemoryPropertyFlags::DEVICE_LOCAL,
             )?,
+            uniform_buffer,
+            descriptor_pool,
+            descriptor_set_layout,
+            descriptor_set,
             device,
         })
     }
@@ -158,6 +231,13 @@ impl Drop for Frame {
             self.wait_for_graphics_to_complete()
                 .expect("error while waiting for resources to clear");
             self.sync.destroy(&self.device);
+            self.device
+                .logical_device
+                .destroy_descriptor_pool(self.descriptor_pool, None);
+            self.device.logical_device.destroy_descriptor_set_layout(
+                self.descriptor_set_layout,
+                None,
+            );
         }
     }
 }

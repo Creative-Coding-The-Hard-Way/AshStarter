@@ -39,24 +39,24 @@ impl Application {
         let window_surface = GlfwWindow::new(|glfw| {
             let (mut window, event_receiver) = glfw
                 .with_primary_monitor(|glfw, main_monitor| {
-                    if let Some(monitor) = main_monitor {
-                        let (width, height) = monitor.get_physical_size();
-                        let (sw, sh) = monitor.get_content_scale();
-                        let (w, h) = (width as f32 * sw, height as f32 * sh);
-                        glfw.create_window(
-                            w as u32,
-                            h as u32,
-                            "Ash Starter",
-                            glfw::WindowMode::FullScreen(monitor),
-                        )
-                    } else {
-                        glfw.create_window(
-                            1366,
-                            768,
-                            "Ash Starter",
-                            glfw::WindowMode::Windowed,
-                        )
-                    }
+                    //if let Some(monitor) = main_monitor {
+                    //    let (width, height) = monitor.get_physical_size();
+                    //    let (sw, sh) = monitor.get_content_scale();
+                    //    let (w, h) = (width as f32 * sw, height as f32 * sh);
+                    //    glfw.create_window(
+                    //        w as u32,
+                    //        h as u32,
+                    //        "Ash Starter",
+                    //        glfw::WindowMode::FullScreen(monitor),
+                    //    )
+                    //} else {
+                    glfw.create_window(
+                        1366,
+                        768,
+                        "Ash Starter",
+                        glfw::WindowMode::Windowed,
+                    )
+                    //}
                 })
                 .context("unable to create the glfw window")?;
             window.set_resizable(true);
