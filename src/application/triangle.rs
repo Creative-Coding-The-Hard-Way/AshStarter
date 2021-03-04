@@ -25,6 +25,7 @@ pub struct Triangle {
     graphics_pipeline: Arc<GraphicsPipeline>,
     swapchain: Arc<Swapchain>,
     device: Arc<Device>,
+    projection: Mat4,
 }
 
 impl RenderTarget for Triangle {
@@ -34,10 +35,11 @@ impl RenderTarget for Triangle {
         image_available: vk::Semaphore,
         frame: &mut Frame,
     ) -> Result<vk::Semaphore> {
-        // update the projection transform with the identity every frame
-        let ubo = UniformBufferObject::new(Mat4::identity());
+        // update the projection transform based on the frame size
         unsafe {
-            frame.uniform_buffer.write_data(&[ubo])?;
+            frame
+                .uniform_buffer
+                .write_data(&[UniformBufferObject::new(self.projection)])?;
         }
 
         // Transfer data to the gpu by first writing it into a staging buffer.
@@ -89,10 +91,23 @@ impl Triangle {
     pub fn new(device: Arc<Device>, swapchain: Arc<Swapchain>) -> Result<Self> {
         let graphics_pipeline = GraphicsPipeline::new(&device, &swapchain)?;
 
+        let aspect =
+            swapchain.extent.width as f32 / swapchain.extent.height as f32;
+        let height = 2.0;
+        let width = aspect * height;
+
         Ok(Self {
             vertices: vec![],
             graphics_pipeline,
             swapchain,
+            projection: Mat4::new_orthographic(
+                -width / 2.0,
+                width / 2.0,
+                -height / 2.0,
+                height / 2.0,
+                1.0,
+                -1.0,
+            ),
             device,
         })
     }
