@@ -8,7 +8,7 @@ use std::{ffi::CString, sync::Arc};
 /// All vulkan resources related to the graphics pipeline.
 pub struct GraphicsPipeline {
     descriptor_set_layout: vk::DescriptorSetLayout,
-    pipeline_layout: vk::PipelineLayout,
+    pub pipeline_layout: vk::PipelineLayout,
     pub pipeline: vk::Pipeline,
 
     device: Arc<Device>,

@@ -24,7 +24,6 @@ impl UniformBufferObject {
             .descriptor_type(vk::DescriptorType::UNIFORM_BUFFER)
             .descriptor_count(1)
             .stage_flags(vk::ShaderStageFlags::VERTEX)
-            .immutable_samplers(&[])
             .build()
     }
 }

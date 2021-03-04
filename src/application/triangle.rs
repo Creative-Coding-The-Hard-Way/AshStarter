@@ -71,6 +71,7 @@ impl RenderTarget for Triangle {
             frame.request_command_buffer()?,
             &frame.framebuffer,
             unsafe { frame.vertex_buffer.raw() },
+            frame.descriptor_set,
         )?;
 
         // submission order is irrelevant, the render command includes a
@@ -113,6 +114,7 @@ impl Triangle {
         command_buffer: vk::CommandBuffer,
         framebuffer: &vk::Framebuffer,
         vertex_buffer: vk::Buffer,
+        descriptor_set: vk::DescriptorSet,
     ) -> Result<vk::CommandBuffer> {
         // begin the command buffer
         let begin_info = vk::CommandBufferBeginInfo::builder()
@@ -180,6 +182,16 @@ impl Triangle {
                 0,
                 &buffers,
                 &offsets,
+            );
+
+            let descriptor_sets = [descriptor_set];
+            self.device.logical_device.cmd_bind_descriptor_sets(
+                command_buffer,
+                vk::PipelineBindPoint::GRAPHICS,
+                self.graphics_pipeline.pipeline_layout,
+                0,
+                &descriptor_sets,
+                &[],
             );
 
             // draw
