@@ -1,17 +1,18 @@
 [package]
-name = "ash_starter"
+name = "ccthw"
 version = "0.1.0"
 authors = ["Bradley Lyman <lyman.brad3211@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-anyhow = "1.0.38"
+anyhow = "1.0.44"
 flexi_logger = "0.17.1"
 log = "0.4.13"
 ash = "0.31.0"
 aquamarine = "*"
 nalgebra = "*"
 memoffset = "*"
+thiserror = "1.0.29"
 
 [dependencies.glfw]
 version = "0.41.0"

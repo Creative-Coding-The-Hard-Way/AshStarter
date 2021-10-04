@@ -1,12 +1,3 @@
-//! A rust application.
-//!
-//! # How To Run
-//!
-//! ```
-//! cargo run --example hello_world
-//! ```
-//!
-
 mod application;
 
 use anyhow::{Context, Result};
