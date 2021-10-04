@@ -9,6 +9,10 @@ GLFW has great cross-platform support for windowing and Vulkan.
 cargo run --example e1
 ```
 
+## Keybinds
+
+* `Esc` - quit the application
+
 ## Screenshot
 
 ![screenshot](./screenshot.jpg)
