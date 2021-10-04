@@ -49,6 +49,7 @@ pub struct GlfwWindow {
 }
 
 impl GlfwWindow {
+    /// Initialize the GLFW library and create a new window.
     pub fn new(window_title: &str) -> Result<Self, WindowError> {
         // Initialize the GLFW library
         let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS)?;
@@ -62,10 +63,8 @@ impl GlfwWindow {
             glfw::ClientApiHint::NoApi,
         ));
 
-        // Attempt to create a fullscreen application using the primary
-        // monitor's physical size.
-        // If this fails for any reason, fall back to creating a windowed
-        // application.
+        // Create a windowed application. Fullscreen can always be toggled
+        // later.
         let (window, event_receiver) = glfw
             .create_window(1366, 768, window_title, glfw::WindowMode::Windowed)
             .ok_or(WindowError::WindowCreateFailed)?;
