@@ -11,7 +11,8 @@ cargo run --example e2
 
 ## Keybinds
 
-- `Space + Ctrl`: toggle fullscreen
+* `Space + Ctrl` - toggle fullscreen
+* `Esc` - quit the application
 
 ## Screenshot
 
