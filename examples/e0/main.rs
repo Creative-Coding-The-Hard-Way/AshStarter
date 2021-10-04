@@ -1,15 +1,13 @@
-//! A Vulkan demo written in Rust.
+//! A rust application.
 //!
 //! # How To Run
 //!
 //! ```
-//! cargo run --release
+//! cargo run --example hello_world
 //! ```
 //!
 
 mod application;
-mod ffi;
-mod rendering;
 
 use anyhow::{Context, Result};
 use application::Application;
