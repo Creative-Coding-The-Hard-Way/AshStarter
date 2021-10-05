@@ -1,3 +1,4 @@
-pub mod glfw_window;
 mod markdown;
+
+pub mod glfw_window;
 pub mod vulkan;

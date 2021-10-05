@@ -3,7 +3,7 @@ mod queue;
 mod queue_family_indices;
 mod render_device;
 
-use crate::vulkan::{Instance, WindowSurface};
+use crate::vulkan::{errors::InstanceError, Instance, WindowSurface};
 
 use ash::vk;
 use thiserror::Error;
@@ -36,6 +36,24 @@ pub enum QueueSelectionError {
 pub enum RenderDeviceError {
     #[error("Unexpected physical device error")]
     UnexpectedPhysicalDeviceError(#[from] PhysicalDeviceError),
+
+    #[error("Unexpected queue selection error")]
+    UnexpectedQueueSelectionError(#[from] QueueSelectionError),
+
+    #[error("Unexpected Vulkan instance error")]
+    UnexpectedInstanceError(#[from] InstanceError),
+
+    #[error("Unable to set debug name, {}, for {:?}", .0, .1)]
+    UnableToSetDebugName(String, vk::ObjectType, #[source] vk::Result),
+}
+
+/// Types which implement this trait can be assigned a debug name in the Vulkan
+/// debug callback logs.
+pub trait VulkanDebugName<T>
+where
+    T: vk::Handle + Copy,
+{
+    fn type_and_handle(&self) -> (vk::ObjectType, T);
 }
 
 /// This struct bundles a Vulkan queue with related data for easy tracking.
@@ -50,6 +68,7 @@ pub struct GpuQueue {
 /// by all parts of the application.
 pub struct RenderDevice {
     /// The physical device used by this application.
+    #[allow(unused)]
     physical_device: vk::PhysicalDevice,
 
     /// The Vulkan logical device used to issue commands to the physical device.
@@ -60,7 +79,9 @@ pub struct RenderDevice {
     graphics_queue: GpuQueue,
     present_queue: GpuQueue,
 
-    surface: WindowSurface,
+    /// The Vulkan presentation surface for the current window.
+    #[allow(unused)]
+    window_surface: WindowSurface,
 
     /// The Vulkan library instance.
     instance: Instance,

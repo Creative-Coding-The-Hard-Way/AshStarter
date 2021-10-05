@@ -1,12 +1,13 @@
 //! This module defines the main application initialization, event loop, and
 //! rendering.
-use anyhow::{Context, Result};
+
+use anyhow::Result;
 use ccthw::{glfw_window::GlfwWindow, vulkan};
 
 // The main application state.
 pub struct Application {
     #[allow(unused)]
-    instance: vulkan::Instance,
+    vk_dev: vulkan::RenderDevice,
 
     glfw_window: GlfwWindow,
 }
@@ -17,16 +18,9 @@ impl Application {
         let mut glfw_window = GlfwWindow::new("GLFW Lib")?;
         glfw_window.window.set_key_polling(true);
 
-        let extensions = glfw_window
-            .glfw
-            .get_required_instance_extensions()
-            .context("unable to get required Vulkan extensions")?;
-
-        let instance = vulkan::Instance::new(&extensions)?;
-
         Ok(Self {
+            vk_dev: glfw_window.create_vulkan_device()?,
             glfw_window,
-            instance,
         })
     }
 

@@ -1,3 +1,9 @@
+use crate::vulkan::{
+    errors::{InstanceError, RenderDeviceError},
+    Instance, RenderDevice, WindowSurface,
+};
+
+use ash::{extensions::khr::Surface, version::InstanceV1_0, vk, vk::Handle};
 use std::sync::mpsc::Receiver;
 use thiserror::Error;
 
@@ -22,6 +28,18 @@ pub enum WindowError {
 
     #[error("There is no video mode associated with the primary monitor")]
     PrimaryVideoModeMissing,
+
+    #[error("GLFW is unable to determine the required vulkan extensions for this platform")]
+    RequiredExtensionsUnavailable,
+
+    #[error("Unexpected instance error")]
+    UnexpectedInstanceError(#[from] InstanceError),
+
+    #[error("Unable to create the Vulkan surface")]
+    UnableToCreateSurface(#[source] vk::Result),
+
+    #[error("Unable to create the Vulkan render device")]
+    UnexpectedRenderDeviceError(#[from] RenderDeviceError),
 }
 
 /// GLFW uses a Receiver for accepting window events. This type alias is more
@@ -147,5 +165,32 @@ impl GlfwWindow {
             )?;
         }
         Ok(())
+    }
+
+    /// Create the Vulkan instance and surface for the current window.
+    pub fn create_vulkan_device(&self) -> Result<RenderDevice, WindowError> {
+        let required_extensions = self
+            .glfw
+            .get_required_instance_extensions()
+            .ok_or(WindowError::RequiredExtensionsUnavailable)?;
+        let instance = Instance::new(&required_extensions)?;
+
+        let mut surface_handle: u64 = 0;
+        let result = vk::Result::from_raw(self.window.create_window_surface(
+            instance.ash.handle().as_raw() as usize,
+            std::ptr::null(),
+            &mut surface_handle,
+        ) as i32);
+        if result != vk::Result::SUCCESS {
+            return Err(WindowError::UnableToCreateSurface(result));
+        }
+
+        let window_surface = WindowSurface::new(
+            vk::SurfaceKHR::from_raw(surface_handle),
+            Surface::new(&instance.entry, &instance.ash),
+        );
+
+        RenderDevice::new(instance, window_surface)
+            .map_err(WindowError::UnexpectedRenderDeviceError)
     }
 }

@@ -81,3 +81,14 @@ impl WindowSurface {
             .unwrap_or_else(|_| vec![])
     }
 }
+
+impl Drop for WindowSurface {
+    /// UNSAFE: There is no internal synchronization with GPU resources. The
+    /// application must ensure this object isn't dropped until all other
+    /// resources are done using it.
+    fn drop(&mut self) {
+        unsafe {
+            self.loader.destroy_surface(self.khr, None);
+        }
+    }
+}
