@@ -56,7 +56,7 @@ pub enum InstanceError {
 ///
 pub struct Instance {
     /// The Ash Vulkan library entrypoint.
-    ash: ash::Instance,
+    pub ash: ash::Instance,
 
     /// The Debug entrypoint, used to set debug names for vulkan objects.
     debug: DebugUtils,
