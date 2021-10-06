@@ -2,18 +2,21 @@
 //! rendering.
 
 mod per_frame;
-mod semaphore_pool;
 
 use per_frame::PerFrame;
-use semaphore_pool::SemaphorePool;
+
+use ccthw::{
+    glfw_window::GlfwWindow,
+    vulkan,
+    vulkan::{errors::SwapchainError, SemaphorePool},
+};
 
 use anyhow::{Context, Result};
 use ash::{version::DeviceV1_0, vk};
-use ccthw::{glfw_window::GlfwWindow, vulkan, vulkan::errors::SwapchainError};
 use thiserror::Error;
 
 #[derive(Debug, Error)]
-pub enum RenderError {
+pub enum FrameError {
     #[error("The swapchain needs to be rebuilt")]
     SwapchainNeedsRebuild,
 
@@ -34,24 +37,28 @@ pub struct Application {
 impl Application {
     /// Build a new instance of the application.
     pub fn new() -> Result<Self> {
-        let mut glfw_window = GlfwWindow::new("GLFW Lib")?;
+        let mut glfw_window = GlfwWindow::new("Swapchain")?;
         glfw_window.window.set_key_polling(true);
         glfw_window.window.set_framebuffer_size_polling(true);
 
+        // Create the vulkan render device
         let vk_dev = glfw_window.create_vulkan_device()?;
         let semaphore_pool = SemaphorePool::new();
 
+        // build per-frame resources
         let mut per_frame = vec![];
         for i in 0..vk_dev.swapchain.as_ref().unwrap().image_views.len() {
             per_frame.push(PerFrame::new(&vk_dev, i)?);
         }
 
+        // create a render pass
         let render_pass = vk_dev.create_render_pass()?;
         vk_dev.name_vulkan_object(
             "Application Render Pass",
             (vk::ObjectType::RENDER_PASS, render_pass),
         )?;
 
+        // create framebuffers for the render pass
         let framebuffers = vk_dev
             .create_framebuffers(&render_pass, "Application Framebuffer")?;
 
@@ -76,25 +83,40 @@ impl Application {
             }
             let result = self.render();
             match result {
-                Err(RenderError::SwapchainNeedsRebuild) => {
+                Err(FrameError::SwapchainNeedsRebuild) => {
                     self.rebuild_swapchain_resources()?;
                 }
                 _ => result?,
             }
-            std::thread::sleep(std::time::Duration::from_millis(100));
+
+            // This is a really silly way to prevent the process from spinning
+            // insanely fast. A real application is going to do more work
+            // between frames anyways and should have some other mechanism for
+            // limiting frame updates (if desired).
+            std::thread::sleep(std::time::Duration::from_millis(1));
         }
         Ok(())
     }
 
-    fn render(&mut self) -> Result<(), RenderError> {
+    /// Render the applications state in in a three-step process.
+    fn render(&mut self) -> Result<(), FrameError> {
+        // 1. Acquire the next image from the swapchain and update any related
+        //    per-frame resources.
         let index = self.acquire_next_image()?;
+
+        // 2. Draw a single frame. This means build and submit a command-buffer
+        //    to the graphics queue.
         self.draw_frame(index)?;
+
+        // 3. Present the swapchain image to the screen. This blocks on the
+        //    frame's semaphore which indicates that the graphics operations
+        //    have been completed.
         self.present_image(index)?;
         Ok(())
     }
 
     /// Draw a single frame.
-    fn acquire_next_image(&mut self) -> Result<usize, RenderError> {
+    fn acquire_next_image(&mut self) -> Result<usize, FrameError> {
         let acquire_semaphore =
             self.semaphore_pool.get_semaphore(&self.vk_dev).context(
                 "unable to get a semaphore for the next swapchain image",
@@ -108,7 +130,7 @@ impl Application {
                 self.semaphore_pool.return_semaphore(acquire_semaphore);
             }
             if let Err(SwapchainError::NeedsRebuild) = result {
-                return Err(RenderError::SwapchainNeedsRebuild);
+                return Err(FrameError::SwapchainNeedsRebuild);
             }
             result.context("unable to acquire the next swapchain image")?
         };
@@ -165,12 +187,33 @@ impl Application {
                 &begin_info,
             )?;
 
-            //let render_pass_begin_info = vk::RenderPassBeginInfo{
-            //
-            //};
-            //self.vk_dev.logical_device.cmd_begin_render_pass(current_frame.command_buffer,
+            let clear_values = [vk::ClearValue {
+                color: vk::ClearColorValue {
+                    float32: [1.0, 1.0, 1.0, 1.0],
+                },
+            }];
+            let render_pass_begin_info = vk::RenderPassBeginInfo {
+                render_pass: self.render_pass,
+                framebuffer: self.framebuffers[index],
+                render_area: vk::Rect2D {
+                    offset: vk::Offset2D { x: 0, y: 0 },
+                    extent: self.vk_dev.swapchain().extent,
+                },
+                clear_value_count: 1,
+                p_clear_values: clear_values.as_ptr(),
+                ..Default::default()
+            };
+            self.vk_dev.logical_device.cmd_begin_render_pass(
+                current_frame.command_buffer,
+                &render_pass_begin_info,
+                vk::SubpassContents::INLINE,
+            );
 
             // do something here
+
+            self.vk_dev
+                .logical_device
+                .cmd_end_render_pass(current_frame.command_buffer);
 
             self.vk_dev
                 .logical_device
@@ -224,11 +267,29 @@ impl Application {
     fn rebuild_swapchain_resources(&mut self) -> Result<()> {
         unsafe {
             self.vk_dev.logical_device.device_wait_idle()?;
+            self.destroy_swapchain_resources();
         }
         let (width, height) = self.glfw_window.window.get_framebuffer_size();
         self.vk_dev
             .rebuild_swapchain((width as u32, height as u32))?;
+
+        self.render_pass = self.vk_dev.create_render_pass()?;
+        self.framebuffers = self.vk_dev.create_framebuffers(
+            &self.render_pass,
+            "Application Framebuffer",
+        )?;
         Ok(())
+    }
+
+    unsafe fn destroy_swapchain_resources(&mut self) {
+        for framebuffer in self.framebuffers.drain(..) {
+            self.vk_dev
+                .logical_device
+                .destroy_framebuffer(framebuffer, None);
+        }
+        self.vk_dev
+            .logical_device
+            .destroy_render_pass(self.render_pass, None);
     }
 
     /// Handle a GLFW window event.
@@ -265,14 +326,7 @@ impl Drop for Application {
                 .logical_device
                 .device_wait_idle()
                 .expect("error while waiting for graphics device idle");
-            for framebuffer in self.framebuffers.drain(..) {
-                self.vk_dev
-                    .logical_device
-                    .destroy_framebuffer(framebuffer, None);
-            }
-            self.vk_dev
-                .logical_device
-                .destroy_render_pass(self.render_pass, None);
+            self.destroy_swapchain_resources();
         }
         for per_frame in self.per_frame.drain(..) {
             per_frame.destroy(&self.vk_dev);

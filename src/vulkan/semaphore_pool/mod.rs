@@ -1,4 +1,4 @@
-use ccthw::vulkan::RenderDevice;
+use crate::vulkan::RenderDevice;
 
 use ash::{version::DeviceV1_0, vk};
 use thiserror::Error;
@@ -9,6 +9,9 @@ pub enum SemaphorePoolError {
     UnableToCreateNewSemaphore(#[source] vk::Result),
 }
 
+/// A semaphore pool maintains a collection of binary semaphores which are
+/// available for re-use. The application is responsible for destroying the
+/// pool prior to exit.
 pub struct SemaphorePool {
     recycled_semaphores: Vec<vk::Semaphore>,
 }

@@ -1,6 +1,10 @@
-# Vulkan Device
+# Swapchain
 
-This example shows a GLFW application which creates a Vulkan device.
+This example shows a GLFW application which creates a Swapchain to clear the
+screen every frame.
+
+The swapchain is automatically rebuilt when the window is resized or when it
+becomes invalid for any reason.
 
 ## Usage
 
@@ -10,7 +14,8 @@ cargo run --example e3
 
 ## Keybinds
 
-- `Space + Ctrl`: toggle fullscreen
+* `Esc` - exit
+* `Space + Ctrl` - toggle fullscreen
 
 ## Screenshot
 
