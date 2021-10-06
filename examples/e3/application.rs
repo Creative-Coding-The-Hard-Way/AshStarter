@@ -23,6 +23,8 @@ pub enum RenderError {
 
 // The main application state.
 pub struct Application {
+    framebuffers: Vec<vk::Framebuffer>,
+    render_pass: vk::RenderPass,
     per_frame: Vec<PerFrame>,
     semaphore_pool: SemaphorePool,
     vk_dev: vulkan::RenderDevice,
@@ -44,11 +46,22 @@ impl Application {
             per_frame.push(PerFrame::new(&vk_dev, i)?);
         }
 
+        let render_pass = vk_dev.create_render_pass()?;
+        vk_dev.name_vulkan_object(
+            "Application Render Pass",
+            (vk::ObjectType::RENDER_PASS, render_pass),
+        )?;
+
+        let framebuffers = vk_dev
+            .create_framebuffers(&render_pass, "Application Framebuffer")?;
+
         Ok(Self {
             per_frame,
             semaphore_pool,
             vk_dev,
             glfw_window,
+            render_pass,
+            framebuffers,
         })
     }
 
@@ -152,6 +165,11 @@ impl Application {
                 &begin_info,
             )?;
 
+            //let render_pass_begin_info = vk::RenderPassBeginInfo{
+            //
+            //};
+            //self.vk_dev.logical_device.cmd_begin_render_pass(current_frame.command_buffer,
+
             // do something here
 
             self.vk_dev
@@ -247,6 +265,14 @@ impl Drop for Application {
                 .logical_device
                 .device_wait_idle()
                 .expect("error while waiting for graphics device idle");
+            for framebuffer in self.framebuffers.drain(..) {
+                self.vk_dev
+                    .logical_device
+                    .destroy_framebuffer(framebuffer, None);
+            }
+            self.vk_dev
+                .logical_device
+                .destroy_render_pass(self.render_pass, None);
         }
         for per_frame in self.per_frame.drain(..) {
             per_frame.destroy(&self.vk_dev);

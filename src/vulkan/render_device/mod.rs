@@ -1,7 +1,9 @@
+mod framebuffer;
 mod physical_device;
 mod queue;
 mod queue_family_indices;
 mod render_device;
+mod render_pass;
 mod swapchain;
 mod vulkan_debug_name;
 
@@ -50,6 +52,12 @@ pub enum RenderDeviceError {
 
     #[error("Unable to set debug name, {}, for {:?}", .0, .1)]
     UnableToSetDebugName(String, vk::ObjectType, #[source] vk::Result),
+
+    #[error("Unable to create render pass")]
+    UnableToCreateRenderPass(#[source] vk::Result),
+
+    #[error("Unable to create a framebuffer for swapchain image {}", .0)]
+    UnableToCreateFramebuffer(usize, #[source] vk::Result),
 }
 
 #[derive(Debug, Error)]
