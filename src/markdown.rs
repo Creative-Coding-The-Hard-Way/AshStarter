@@ -24,7 +24,11 @@ where
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("\n")?;
         for entry in self.0 {
-            f.write_fmt(format_args!("- {:?}\n", entry))?;
+            if f.alternate() {
+                f.write_fmt(format_args!("- {:#?}\n", entry))?;
+            } else {
+                f.write_fmt(format_args!("- {:?}\n", entry))?;
+            }
         }
         Ok(())
     }

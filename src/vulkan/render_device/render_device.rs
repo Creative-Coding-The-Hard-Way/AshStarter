@@ -8,6 +8,10 @@ use ash::{version::DeviceV1_0, vk};
 
 impl RenderDevice {
     /// Create the Vulkan Render Device.
+    ///
+    /// The device is initialized *without* a swapchain initially. An
+    /// additional call to `rebuild_swapchain` is needed prior to any rendering
+    /// operations.
     pub fn new(
         instance: Instance,
         window_surface: WindowSurface,
@@ -35,6 +39,7 @@ impl RenderDevice {
             graphics_queue,
             present_queue,
             window_surface,
+            swapchain: None,
         };
 
         vk_dev.name_vulkan_object("Graphics Queue", vk_dev.graphics_queue)?;
@@ -92,6 +97,10 @@ impl Drop for RenderDevice {
     /// resources which depend on it! There is no internal synchronization.
     fn drop(&mut self) {
         unsafe {
+            if let Some(swapchain) = self.swapchain.take() {
+                self.destroy_swapchain(swapchain)
+                    .expect("Error while destroying the swapchain");
+            }
             self.logical_device
                 .device_wait_idle()
                 .expect("Error while waiting for device work to finish");

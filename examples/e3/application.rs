@@ -6,9 +6,7 @@ use ccthw::{glfw_window::GlfwWindow, vulkan};
 
 // The main application state.
 pub struct Application {
-    #[allow(unused)]
     vk_dev: vulkan::RenderDevice,
-
     glfw_window: GlfwWindow,
 }
 
@@ -17,6 +15,7 @@ impl Application {
     pub fn new() -> Result<Self> {
         let mut glfw_window = GlfwWindow::new("GLFW Lib")?;
         glfw_window.window.set_key_polling(true);
+        glfw_window.window.set_framebuffer_size_polling(true);
 
         Ok(Self {
             vk_dev: glfw_window.create_vulkan_device()?,
@@ -53,6 +52,10 @@ impl Application {
                 Modifiers::Control,
             ) => {
                 self.glfw_window.toggle_fullscreen()?;
+            }
+            WindowEvent::FramebufferSize(width, height) => {
+                self.vk_dev
+                    .rebuild_swapchain((width as u32, height as u32))?;
             }
             _ => {}
         }

@@ -8,6 +8,9 @@ pub enum WindowSurfaceError {
         "Unable to determine if the device can present images with this queue"
     )]
     UnableToCheckPhysicalDeviceSurfaceSupport(#[source] vk::Result),
+
+    #[error("Unable to get the surface capabilities for a physical device")]
+    UnableToGetPhysicalDeviceSurfaceCapabilities(#[source] vk::Result),
 }
 
 /// A wrapper for the Surface and Loader used by this application. It's
@@ -16,8 +19,8 @@ pub enum WindowSurfaceError {
 pub struct WindowSurface {
     /// The surface and surface loader used to present framebuffers to the
     /// screen.
-    loader: khr::Surface,
-    khr: vk::SurfaceKHR,
+    pub loader: khr::Surface,
+    pub khr: vk::SurfaceKHR,
 }
 
 impl WindowSurface {
@@ -79,6 +82,21 @@ impl WindowSurface {
                 self.khr,
             )
             .unwrap_or_else(|_| vec![])
+    }
+
+    /// Returns the set of all supported surface capabilities.
+    ///
+    /// Unsafe because the device's supported extensions must be checked prior
+    /// to querying the surface capabilities.
+    pub unsafe fn surface_capabilities(
+        &self,
+        physical_device: &vk::PhysicalDevice,
+    ) -> Result<vk::SurfaceCapabilitiesKHR, WindowSurfaceError> {
+        self.loader
+            .get_physical_device_surface_capabilities(
+                *physical_device,
+                self.khr,
+            ).map_err(WindowSurfaceError::UnableToGetPhysicalDeviceSurfaceCapabilities)
     }
 }
 

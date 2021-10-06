@@ -1,5 +1,5 @@
 use crate::vulkan::{
-    errors::{InstanceError, RenderDeviceError},
+    errors::{InstanceError, RenderDeviceError, SwapchainError},
     Instance, RenderDevice, WindowSurface,
 };
 
@@ -40,6 +40,9 @@ pub enum WindowError {
 
     #[error("Unable to create the Vulkan render device")]
     UnexpectedRenderDeviceError(#[from] RenderDeviceError),
+
+    #[error("Unexpected swapchain error")]
+    UnexpectedSwapchainError(#[from] SwapchainError),
 }
 
 /// GLFW uses a Receiver for accepting window events. This type alias is more
@@ -190,7 +193,12 @@ impl GlfwWindow {
             Surface::new(&instance.entry, &instance.ash),
         );
 
-        RenderDevice::new(instance, window_surface)
-            .map_err(WindowError::UnexpectedRenderDeviceError)
+        let mut device = RenderDevice::new(instance, window_surface)
+            .map_err(WindowError::UnexpectedRenderDeviceError)?;
+
+        let (w, h) = self.window.get_framebuffer_size();
+        device.rebuild_swapchain((w as u32, h as u32))?;
+
+        Ok(device)
     }
 }

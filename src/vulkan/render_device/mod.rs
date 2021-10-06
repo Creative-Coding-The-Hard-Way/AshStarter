@@ -2,10 +2,15 @@ mod physical_device;
 mod queue;
 mod queue_family_indices;
 mod render_device;
+mod swapchain;
+mod vulkan_debug_name;
 
-use crate::vulkan::{errors::InstanceError, Instance, WindowSurface};
+use crate::vulkan::{
+    errors::{InstanceError, WindowSurfaceError},
+    Instance, WindowSurface,
+};
 
-use ash::vk;
+use ash::{extensions::khr, vk};
 use thiserror::Error;
 
 /// This enum represents the errors which can occur while attempting to find
@@ -47,6 +52,39 @@ pub enum RenderDeviceError {
     UnableToSetDebugName(String, vk::ObjectType, #[source] vk::Result),
 }
 
+#[derive(Debug, Error)]
+pub enum SwapchainError {
+    #[error("Unexpected window error in the swapchain")]
+    UnexpectedWindowError(#[from] WindowSurfaceError),
+
+    #[error("Unable to create the swapchain")]
+    UnableToCreateSwapchain(#[source] vk::Result),
+
+    #[error("Unable to get swapchain images")]
+    UnableToGetSwapchainImages(#[source] vk::Result),
+
+    #[error("Unable to create a view for swapchain image {}", .0)]
+    UnableToCreateSwapchainImageView(usize, #[source] vk::Result),
+
+    #[error("Unexpected render device error")]
+    UnexpectedRenderDeviceError(#[from] RenderDeviceError),
+
+    #[error(
+        "Unable to drain graphics queue when destroying the old swapchain"
+    )]
+    UnableToDrainGraphicsQueue(#[source] vk::Result),
+
+    #[error(
+        "Unable to drain presentation queue when destroying the old swapchain"
+    )]
+    UnableToDrainPresentQueue(#[source] vk::Result),
+
+    #[error(
+        "Unable to wait for device idle when destroying the old swapchain"
+    )]
+    UnableToWaitForDeviceIdle(#[source] vk::Result),
+}
+
 /// Types which implement this trait can be assigned a debug name in the Vulkan
 /// debug callback logs.
 pub trait VulkanDebugName<T>
@@ -64,27 +102,52 @@ pub struct GpuQueue {
     pub index: u32,
 }
 
+/// All swapchain-related resources - things which need replaced when the
+/// swapchain is rebuilt.
+pub struct Swapchain {
+    /// The swapchain extension function loader provided by the ash library.
+    pub loader: khr::Swapchain,
+
+    /// The Vulkan SwapchainKHR used for most swapchain operations.
+    pub khr: vk::SwapchainKHR,
+
+    /// The array of image views for this swapchain's images.
+    pub image_views: Vec<vk::ImageView>,
+
+    /// The image format for this swapchain's images.
+    pub format: vk::Format,
+
+    /// The color space used for this swapchain's images.
+    pub color_space: vk::ColorSpaceKHR,
+
+    /// The hardware pixel extent for this swapchain's images.
+    pub extent: vk::Extent2D,
+}
+
 /// The render device holds the core Vulkan state and devices which are used
 /// by all parts of the application.
 pub struct RenderDevice {
     /// The physical device used by this application.
     #[allow(unused)]
-    physical_device: vk::PhysicalDevice,
+    pub physical_device: vk::PhysicalDevice,
 
     /// The Vulkan logical device used to issue commands to the physical device.
-    logical_device: ash::Device,
+    pub logical_device: ash::Device,
 
-    /// The gpu command queues used by the application for rendering,
-    /// presentation, and compute, operations.
-    graphics_queue: GpuQueue,
-    present_queue: GpuQueue,
+    /// The GPU queue used to submit graphics commands.
+    pub graphics_queue: GpuQueue,
+
+    /// The GPU queue used to submit presentation commands.
+    pub present_queue: GpuQueue,
+
+    /// The window's swapchain and related resources.
+    pub swapchain: Option<Swapchain>,
 
     /// The Vulkan presentation surface for the current window.
-    #[allow(unused)]
-    window_surface: WindowSurface,
+    pub window_surface: WindowSurface,
 
     /// The Vulkan library instance.
-    instance: Instance,
+    pub instance: Instance,
 }
 
 /// This struct holds all of the queue indices required by this application.

@@ -11,6 +11,7 @@ pub mod errors {
     pub use super::instance::InstanceError;
     pub use super::render_device::{
         PhysicalDeviceError, QueueSelectionError, RenderDeviceError,
+        SwapchainError,
     };
     pub use super::window_surface::WindowSurfaceError;
 }
