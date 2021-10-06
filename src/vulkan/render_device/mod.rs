@@ -83,6 +83,9 @@ pub enum SwapchainError {
         "Unable to wait for device idle when destroying the old swapchain"
     )]
     UnableToWaitForDeviceIdle(#[source] vk::Result),
+
+    #[error("The swapchain is invalid and needs to be rebuilt")]
+    NeedsRebuild,
 }
 
 /// Types which implement this trait can be assigned a debug name in the Vulkan

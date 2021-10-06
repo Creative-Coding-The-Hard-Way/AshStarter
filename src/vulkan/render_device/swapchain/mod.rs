@@ -6,6 +6,45 @@ use super::{RenderDevice, Swapchain, SwapchainError};
 use ash::{version::DeviceV1_0, vk};
 
 impl RenderDevice {
+    /// Return a borrow of the underlying swapchain struct.
+    ///
+    /// PANICS if the swapchain does not exist.
+    pub fn swapchain(&self) -> &Swapchain {
+        self.swapchain.as_ref().unwrap()
+    }
+
+    /// Acquire the next swapchain image index.
+    ///
+    /// # Params
+    ///
+    /// * `semaphore` - the semaphore to signal when the swapchain image is
+    ///    available for rendering. Can be null if uneeded.
+    /// * `fence` - the fence to signal when the swapchain image is available
+    ///    for rendering. Can be null if uneeded.
+    pub fn acquire_next_swapchain_image(
+        &self,
+        semaphore: vk::Semaphore,
+        fence: vk::Fence,
+    ) -> Result<usize, SwapchainError> {
+        let swapchain = self.swapchain.as_ref().unwrap();
+        let result = unsafe {
+            swapchain.loader.acquire_next_image(
+                swapchain.khr,
+                u64::MAX,
+                semaphore,
+                fence,
+            )
+        };
+        if let Err(vk::Result::ERROR_OUT_OF_DATE_KHR) = result {
+            return Err(SwapchainError::NeedsRebuild);
+        }
+        if let Ok((_, true)) = result {
+            return Err(SwapchainError::NeedsRebuild);
+        }
+        let (index, _) = result.ok().unwrap();
+        Ok(index as usize)
+    }
+
     /// Rebuild the render device's swapchain with the provided framebuffer
     /// size. Automatically handles replacing an existing swapchain if one
     /// already exists.

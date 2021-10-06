@@ -38,7 +38,7 @@ impl RenderDevice {
             self.window_surface.supported_formats(&self.physical_device)
         };
 
-        log::info!("available formats: {:#?}", MdList(&formats));
+        log::debug!("available formats: {:#?}", MdList(&formats));
 
         let format = formats
             .iter()
@@ -49,7 +49,7 @@ impl RenderDevice {
             })
             .unwrap_or_else(|| formats[0]);
 
-        log::info!("chosen format {:#?}", format);
+        log::debug!("chosen format {:#?}", format);
 
         format
     }
@@ -64,7 +64,7 @@ impl RenderDevice {
                 .supported_presentation_modes(&self.physical_device)
         };
 
-        log::info!("available presentation modes: {:?}", MdList(&modes));
+        log::debug!("available presentation modes: {:?}", MdList(&modes));
 
         let mode = if modes.contains(&vk::PresentModeKHR::MAILBOX) {
             vk::PresentModeKHR::MAILBOX
@@ -72,7 +72,7 @@ impl RenderDevice {
             vk::PresentModeKHR::IMMEDIATE
         };
 
-        log::info!("chosen presentation mode {:?}", mode);
+        log::debug!("chosen presentation mode {:?}", mode);
 
         mode
     }
