@@ -5,7 +5,6 @@ mod queue_family_indices;
 mod render_device;
 mod render_pass;
 mod swapchain;
-mod vulkan_debug_name;
 
 use crate::vulkan::{
     errors::{InstanceError, WindowSurfaceError},
@@ -94,15 +93,6 @@ pub enum SwapchainError {
 
     #[error("The swapchain is invalid and needs to be rebuilt")]
     NeedsRebuild,
-}
-
-/// Types which implement this trait can be assigned a debug name in the Vulkan
-/// debug callback logs.
-pub trait VulkanDebugName<T>
-where
-    T: vk::Handle + Copy,
-{
-    fn type_and_handle(&self) -> (vk::ObjectType, T);
 }
 
 /// This struct bundles a Vulkan queue with related data for easy tracking.

@@ -1,3 +1,5 @@
+mod buffer;
+mod device_allocator;
 mod ffi;
 mod instance;
 mod render_device;
@@ -5,8 +7,10 @@ mod semaphore_pool;
 mod window_surface;
 
 pub use self::{
+    buffer::{Buffer, MappedBuffer},
+    device_allocator::{create_default_allocator, Allocation, DeviceAllocator},
     instance::Instance,
-    render_device::{GpuQueue, RenderDevice, VulkanDebugName},
+    render_device::{GpuQueue, RenderDevice},
     semaphore_pool::SemaphorePool,
     window_surface::WindowSurface,
 };
@@ -15,6 +19,8 @@ pub mod errors {
     use thiserror::Error;
 
     pub use super::{
+        buffer::BufferError,
+        device_allocator::DeviceAllocatorError,
         instance::InstanceError,
         render_device::{
             PhysicalDeviceError, QueueSelectionError, RenderDeviceError,
@@ -46,5 +52,11 @@ pub mod errors {
 
         #[error(transparent)]
         WindowSurfaceError(#[from] WindowSurfaceError),
+
+        #[error(transparent)]
+        DeviceAllocatorError(#[from] DeviceAllocatorError),
+
+        #[error(transparent)]
+        BufferError(#[from] BufferError),
     }
 }

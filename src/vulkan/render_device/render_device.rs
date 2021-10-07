@@ -1,6 +1,5 @@
 use super::{
     physical_device, QueueFamilyIndices, RenderDevice, RenderDeviceError,
-    VulkanDebugName,
 };
 use crate::vulkan::{Instance, WindowSurface};
 
@@ -42,9 +41,17 @@ impl RenderDevice {
             swapchain: None,
         };
 
-        vk_dev.name_vulkan_object("Graphics Queue", vk_dev.graphics_queue)?;
+        vk_dev.name_vulkan_object(
+            "Graphics Queue",
+            vk::ObjectType::QUEUE,
+            vk_dev.graphics_queue.queue,
+        )?;
         if !vk_dev.graphics_queue.is_same(&vk_dev.present_queue) {
-            vk_dev.name_vulkan_object("Present Queue", vk_dev.present_queue)?;
+            vk_dev.name_vulkan_object(
+                "Present Queue",
+                vk::ObjectType::QUEUE,
+                vk_dev.present_queue.queue,
+            )?;
         }
 
         Ok(vk_dev)
@@ -54,19 +61,18 @@ impl RenderDevice {
     ///
     /// Whatever name is provided here will show up in the debug logs if there
     /// are any issues detected by the validation layers.
-    pub fn name_vulkan_object<Name, Handle, DebuggableObject>(
+    pub fn name_vulkan_object<Name, Handle>(
         &self,
         name: Name,
-        object: DebuggableObject,
+        object_type: vk::ObjectType,
+        handle: Handle,
     ) -> Result<(), RenderDeviceError>
     where
-        Handle: vk::Handle + Copy,
-        DebuggableObject: VulkanDebugName<Handle>,
         Name: Into<String>,
+        Handle: vk::Handle + Copy,
     {
         let owned_name = name.into();
         let cname = std::ffi::CString::new(owned_name.clone()).unwrap();
-        let (object_type, handle) = object.type_and_handle();
         let name_info = vk::DebugUtilsObjectNameInfoEXT {
             object_type,
             p_object_name: cname.as_ptr(),

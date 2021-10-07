@@ -36,7 +36,8 @@ impl RenderDevice {
             };
             self.name_vulkan_object(
                 format!("{} - {}", name, i),
-                (vk::ObjectType::FRAMEBUFFER, framebuffer),
+                vk::ObjectType::FRAMEBUFFER,
+                framebuffer,
             )?;
             framebuffers.push(framebuffer);
         }

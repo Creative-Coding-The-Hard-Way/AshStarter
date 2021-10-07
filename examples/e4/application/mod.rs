@@ -8,7 +8,7 @@ use per_frame::PerFrame;
 use ccthw::{
     glfw_window::GlfwWindow,
     vulkan,
-    vulkan::{errors::SwapchainError, SemaphorePool},
+    vulkan::{errors::SwapchainError, Buffer, DeviceAllocator, SemaphorePool},
 };
 
 use anyhow::{Context, Result};
@@ -24,12 +24,22 @@ pub enum FrameError {
     UnexpectedRuntimeError(#[from] anyhow::Error),
 }
 
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub struct Vertex {
+    pub pos: [f32; 2],
+}
+
 // The main application state.
 pub struct Application {
+    // rendering resources
     framebuffers: Vec<vk::Framebuffer>,
     render_pass: vk::RenderPass,
     per_frame: Vec<PerFrame>,
+    vertex_data: Buffer,
+
+    // system resources
     semaphore_pool: SemaphorePool,
+    allocator: Box<dyn DeviceAllocator>,
     vk_dev: vulkan::RenderDevice,
     glfw_window: GlfwWindow,
 }
@@ -37,7 +47,7 @@ pub struct Application {
 impl Application {
     /// Build a new instance of the application.
     pub fn new() -> Result<Self> {
-        let mut glfw_window = GlfwWindow::new("Swapchain")?;
+        let mut glfw_window = GlfwWindow::new("First Triangle")?;
         glfw_window.window.set_key_polling(true);
         glfw_window.window.set_framebuffer_size_polling(true);
 
@@ -63,6 +73,31 @@ impl Application {
         let framebuffers = vk_dev
             .create_framebuffers(&render_pass, "Application Framebuffer")?;
 
+        let mut allocator = vulkan::create_default_allocator();
+
+        let vertex_data = {
+            let mapped = allocator
+                .create_buffer(
+                    &vk_dev,
+                    vk::BufferUsageFlags::VERTEX_BUFFER,
+                    vk::MemoryPropertyFlags::HOST_VISIBLE
+                        | vk::MemoryPropertyFlags::HOST_COHERENT,
+                    (std::mem::size_of::<Vertex>() * 3) as u64,
+                )?
+                .map::<Vertex>(&vk_dev)?;
+            mapped.data[0] = Vertex { pos: [0.5, 0.5] };
+            mapped.data[1] = Vertex { pos: [0.5, 2.0] };
+            mapped.data[2] = Vertex { pos: [0.5, -15.0] };
+            log::info!("MAPPED DATA: {:#?}", mapped.data);
+            mapped.unmap(&vk_dev)
+        };
+
+        vk_dev.name_vulkan_object(
+            "Vertex Data",
+            vk::ObjectType::BUFFER,
+            vertex_data.raw,
+        )?;
+
         Ok(Self {
             per_frame,
             semaphore_pool,
@@ -70,6 +105,8 @@ impl Application {
             glfw_window,
             render_pass,
             framebuffers,
+            allocator,
+            vertex_data,
         })
     }
 
@@ -210,6 +247,13 @@ impl Application {
                 vk::SubpassContents::INLINE,
             );
 
+            self.vk_dev.logical_device.cmd_bind_vertex_buffers(
+                current_frame.command_buffer,
+                0,
+                &[self.vertex_data.raw],
+                &[0],
+            );
+
             // do something here
 
             self.vk_dev
@@ -327,6 +371,11 @@ impl Drop for Application {
                 .logical_device
                 .device_wait_idle()
                 .expect("error while waiting for graphics device idle");
+
+            self.allocator
+                .destroy_buffer(&self.vk_dev, &mut self.vertex_data)
+                .expect("error while destroying vertex data buffer");
+
             self.destroy_swapchain_resources();
         }
         for per_frame in self.per_frame.drain(..) {

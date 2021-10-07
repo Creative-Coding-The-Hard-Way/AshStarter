@@ -1,4 +1,4 @@
-use super::{GpuQueue, VulkanDebugName};
+use super::GpuQueue;
 
 use ash::vk;
 
@@ -16,11 +16,5 @@ impl GpuQueue {
     /// queue
     pub fn is_same(&self, queue: &GpuQueue) -> bool {
         self.family_id == queue.family_id && self.index == queue.index
-    }
-}
-
-impl VulkanDebugName<vk::Queue> for GpuQueue {
-    fn type_and_handle(&self) -> (vk::ObjectType, vk::Queue) {
-        (vk::ObjectType::QUEUE, self.queue)
     }
 }

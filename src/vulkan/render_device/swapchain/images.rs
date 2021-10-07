@@ -38,7 +38,8 @@ impl RenderDevice {
             };
             self.name_vulkan_object(
                 format!("Swapchain Image View {}", i),
-                (vk::ObjectType::IMAGE_VIEW, view),
+                vk::ObjectType::IMAGE_VIEW,
+                view,
             )?;
             image_views.push(view);
         }
