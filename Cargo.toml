@@ -13,6 +13,7 @@ aquamarine = "*"
 nalgebra = "*"
 memoffset = "*"
 thiserror = "1.0.29"
+spin_sleep = "1.0.0"
 
 [dependencies.glfw]
 version = "0.41.0"

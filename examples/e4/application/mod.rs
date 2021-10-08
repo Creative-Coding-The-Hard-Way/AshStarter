@@ -8,6 +8,7 @@ use per_frame::PerFrame;
 
 use ccthw::{
     glfw_window::GlfwWindow,
+    timing::FrameRateLimit,
     vulkan,
     vulkan::{errors::SwapchainError, Buffer, DeviceAllocator, SemaphorePool},
 };
@@ -33,6 +34,8 @@ pub struct Vertex {
 
 // The main application state.
 pub struct Application {
+    fps_limit: FrameRateLimit,
+
     // rendering resources
     pipeline_layout: vk::PipelineLayout,
     pipeline: vk::Pipeline,
@@ -47,8 +50,9 @@ pub struct Application {
     vk_dev: vulkan::RenderDevice,
     glfw_window: GlfwWindow,
 
-    // paused
+    // app state
     paused: bool,
+    needs_swapchain_rebuild: bool,
 }
 
 impl Application {
@@ -118,6 +122,7 @@ impl Application {
             pipeline::create_pipeline(&vk_dev, render_pass)?;
 
         Ok(Self {
+            fps_limit: FrameRateLimit::new(120, 10),
             per_frame,
             semaphore_pool,
             vk_dev,
@@ -129,6 +134,7 @@ impl Application {
             pipeline,
             pipeline_layout,
             paused: false,
+            needs_swapchain_rebuild: false,
         })
     }
 
@@ -136,26 +142,28 @@ impl Application {
     pub fn run(mut self) -> Result<()> {
         let event_receiver = self.glfw_window.take_event_receiver()?;
         while !self.glfw_window.window.should_close() {
+            self.fps_limit.start_frame();
+
             for (_, event) in
                 self.glfw_window.flush_window_events(&event_receiver)
             {
                 self.handle_event(event)?;
             }
+            if self.needs_swapchain_rebuild {
+                self.rebuild_swapchain_resources()?;
+                self.needs_swapchain_rebuild = false;
+            }
             if !self.paused {
                 let result = self.render();
                 match result {
                     Err(FrameError::SwapchainNeedsRebuild) => {
-                        self.rebuild_swapchain_resources()?;
+                        self.needs_swapchain_rebuild = true;
                     }
                     _ => result?,
                 }
             }
-
-            // This is a really silly way to prevent the process from spinning
-            // insanely fast. A real application is going to do more work
-            // between frames anyways and should have some other mechanism for
-            // limiting frame updates (if desired).
-            std::thread::sleep(std::time::Duration::from_millis(1));
+            self.fps_limit.sleep_to_limit();
+            //log::debug!("Frame Time {:?}", self.fps_limit.avg_frame_time());
         }
         Ok(())
     }
@@ -407,7 +415,7 @@ impl Application {
             }
             WindowEvent::FramebufferSize(w, h) => {
                 self.paused = w == 0 || h == 0;
-                self.rebuild_swapchain_resources()?;
+                self.needs_swapchain_rebuild = true;
             }
             _ => {}
         }
