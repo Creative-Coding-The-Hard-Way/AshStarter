@@ -4,6 +4,7 @@ mod queue;
 mod queue_family_indices;
 mod render_device;
 mod render_pass;
+mod shader_module;
 mod swapchain;
 
 use crate::vulkan::{
@@ -93,6 +94,20 @@ pub enum SwapchainError {
 
     #[error("The swapchain is invalid and needs to be rebuilt")]
     NeedsRebuild,
+}
+
+#[derive(Debug, Error)]
+pub enum ShaderModuleError {
+    #[error(
+        "The shader's source bytes must be evenly divisible into u32 words"
+    )]
+    InvalidSourceLengthInShaderSPIRV,
+
+    #[error("Improper bytes found in compiled SPIRV shader module source")]
+    InvalidBytesInShaderSPIRV(#[source] core::array::TryFromSliceError),
+
+    #[error("Unable to create the shader module")]
+    UnableToCreateShaderModule(#[source] vk::Result),
 }
 
 /// This struct bundles a Vulkan queue with related data for easy tracking.

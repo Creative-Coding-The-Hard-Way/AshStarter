@@ -2,6 +2,7 @@
 //! rendering.
 
 mod per_frame;
+mod pipeline;
 
 use per_frame::PerFrame;
 
@@ -27,11 +28,14 @@ pub enum FrameError {
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Vertex {
     pub pos: [f32; 2],
+    pub rgba: [f32; 4],
 }
 
 // The main application state.
 pub struct Application {
     // rendering resources
+    pipeline_layout: vk::PipelineLayout,
+    pipeline: vk::Pipeline,
     framebuffers: Vec<vk::Framebuffer>,
     render_pass: vk::RenderPass,
     per_frame: Vec<PerFrame>,
@@ -85,10 +89,18 @@ impl Application {
                     (std::mem::size_of::<Vertex>() * 3) as u64,
                 )?
                 .map::<Vertex>(&vk_dev)?;
-            mapped.data[0] = Vertex { pos: [0.5, 0.5] };
-            mapped.data[1] = Vertex { pos: [0.5, 2.0] };
-            mapped.data[2] = Vertex { pos: [0.5, -15.0] };
-            log::info!("MAPPED DATA: {:#?}", mapped.data);
+            mapped.data[0] = Vertex {
+                pos: [0.0, 0.5],
+                rgba: [0.2, 0.2, 0.8, 1.0],
+            };
+            mapped.data[1] = Vertex {
+                pos: [0.5, -0.5],
+                rgba: [0.2, 0.2, 0.8, 1.0],
+            };
+            mapped.data[2] = Vertex {
+                pos: [-0.5, -0.5],
+                rgba: [0.2, 0.2, 0.8, 1.0],
+            };
             mapped.unmap(&vk_dev)
         };
 
@@ -97,6 +109,9 @@ impl Application {
             vk::ObjectType::BUFFER,
             vertex_data.raw,
         )?;
+
+        let (pipeline, pipeline_layout) =
+            pipeline::create_pipeline(&vk_dev, render_pass)?;
 
         Ok(Self {
             per_frame,
@@ -107,6 +122,8 @@ impl Application {
             framebuffers,
             allocator,
             vertex_data,
+            pipeline,
+            pipeline_layout,
         })
     }
 
@@ -246,12 +263,23 @@ impl Application {
                 &render_pass_begin_info,
                 vk::SubpassContents::INLINE,
             );
-
+            self.vk_dev.logical_device.cmd_bind_pipeline(
+                current_frame.command_buffer,
+                vk::PipelineBindPoint::GRAPHICS,
+                self.pipeline,
+            );
             self.vk_dev.logical_device.cmd_bind_vertex_buffers(
                 current_frame.command_buffer,
                 0,
                 &[self.vertex_data.raw],
                 &[0],
+            );
+            self.vk_dev.logical_device.cmd_draw(
+                current_frame.command_buffer,
+                3, // vertex count
+                1, // instance count
+                0, // first vertex index
+                0, // first instance
             );
 
             // do something here
@@ -323,10 +351,20 @@ impl Application {
             &self.render_pass,
             "Application Framebuffer",
         )?;
+        let (pipeline, pipeline_layout) =
+            pipeline::create_pipeline(&self.vk_dev, self.render_pass)?;
+        self.pipeline = pipeline;
+        self.pipeline_layout = pipeline_layout;
         Ok(())
     }
 
     unsafe fn destroy_swapchain_resources(&mut self) {
+        self.vk_dev
+            .logical_device
+            .destroy_pipeline_layout(self.pipeline_layout, None);
+        self.vk_dev
+            .logical_device
+            .destroy_pipeline(self.pipeline, None);
         for framebuffer in self.framebuffers.drain(..) {
             self.vk_dev
                 .logical_device

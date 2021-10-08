@@ -24,7 +24,7 @@ pub mod errors {
         instance::InstanceError,
         render_device::{
             PhysicalDeviceError, QueueSelectionError, RenderDeviceError,
-            SwapchainError,
+            ShaderModuleError, SwapchainError,
         },
         semaphore_pool::SemaphorePoolError,
         window_surface::WindowSurfaceError,
@@ -58,5 +58,8 @@ pub mod errors {
 
         #[error(transparent)]
         BufferError(#[from] BufferError),
+
+        #[error(transparent)]
+        ShaderModuleError(#[from] ShaderModuleError),
     }
 }
