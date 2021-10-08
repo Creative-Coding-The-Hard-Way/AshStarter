@@ -46,6 +46,9 @@ pub struct Application {
     allocator: Box<dyn DeviceAllocator>,
     vk_dev: vulkan::RenderDevice,
     glfw_window: GlfwWindow,
+
+    // paused
+    paused: bool,
 }
 
 impl Application {
@@ -54,6 +57,7 @@ impl Application {
         let mut glfw_window = GlfwWindow::new("First Triangle")?;
         glfw_window.window.set_key_polling(true);
         glfw_window.window.set_framebuffer_size_polling(true);
+        //glfw_window.window.set_iconify_polling(true);
 
         // Create the vulkan render device
         let vk_dev = glfw_window.create_vulkan_device()?;
@@ -124,6 +128,7 @@ impl Application {
             vertex_data,
             pipeline,
             pipeline_layout,
+            paused: false,
         })
     }
 
@@ -136,12 +141,14 @@ impl Application {
             {
                 self.handle_event(event)?;
             }
-            let result = self.render();
-            match result {
-                Err(FrameError::SwapchainNeedsRebuild) => {
-                    self.rebuild_swapchain_resources()?;
+            if !self.paused {
+                let result = self.render();
+                match result {
+                    Err(FrameError::SwapchainNeedsRebuild) => {
+                        self.rebuild_swapchain_resources()?;
+                    }
+                    _ => result?,
                 }
-                _ => result?,
             }
 
             // This is a really silly way to prevent the process from spinning
@@ -338,10 +345,15 @@ impl Application {
 
     /// Rebuild the swapchain and any dependent resources.
     fn rebuild_swapchain_resources(&mut self) -> Result<()> {
+        if self.paused {
+            self.glfw_window.glfw.wait_events();
+            return Ok(());
+        }
         unsafe {
             self.vk_dev.logical_device.device_wait_idle()?;
             self.destroy_swapchain_resources();
         }
+
         let (width, height) = self.glfw_window.window.get_framebuffer_size();
         self.vk_dev
             .rebuild_swapchain((width as u32, height as u32))?;
@@ -393,7 +405,8 @@ impl Application {
             ) => {
                 self.glfw_window.toggle_fullscreen()?;
             }
-            WindowEvent::FramebufferSize(..) => {
+            WindowEvent::FramebufferSize(w, h) => {
+                self.paused = w == 0 || h == 0;
                 self.rebuild_swapchain_resources()?;
             }
             _ => {}
