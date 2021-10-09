@@ -2,18 +2,15 @@
 //! rendering.
 
 mod per_frame;
-mod pipeline;
 
 use per_frame::PerFrame;
 
 use ccthw::{
     glfw_window::GlfwWindow,
+    renderer::{ClearFrame, FinishFrame, Renderer},
     timing::FrameRateLimit,
     vulkan,
-    vulkan::{
-        errors::SwapchainError, Buffer, DeviceAllocator, RenderPassArgs,
-        SemaphorePool,
-    },
+    vulkan::{errors::SwapchainError, SemaphorePool},
 };
 
 use anyhow::{Context, Result};
@@ -29,39 +26,26 @@ pub enum FrameError {
     UnexpectedRuntimeError(#[from] anyhow::Error),
 }
 
-#[derive(Debug, Copy, Clone, PartialEq)]
-pub struct Vertex {
-    pub pos: [f32; 2],
-    pub rgba: [f32; 4],
-}
-
 // The main application state.
 pub struct Application {
-    fps_limit: FrameRateLimit,
+    // renderers
+    clear_frame: ClearFrame,
+    finish_frame: FinishFrame,
 
-    // rendering resources
-    pipeline_layout: vk::PipelineLayout,
-    pipeline: vk::Pipeline,
-    framebuffers: Vec<vk::Framebuffer>,
-    render_pass: vk::RenderPass,
     per_frame: Vec<PerFrame>,
-    vertex_data: Buffer,
-
-    // system resources
     semaphore_pool: SemaphorePool,
-    allocator: Box<dyn DeviceAllocator>,
     vk_dev: vulkan::RenderDevice,
     glfw_window: GlfwWindow,
+    fps_limit: FrameRateLimit,
 
-    // app state
     paused: bool,
-    needs_swapchain_rebuild: bool,
+    swapchain_needs_rebuild: bool,
 }
 
 impl Application {
     /// Build a new instance of the application.
     pub fn new() -> Result<Self> {
-        let mut glfw_window = GlfwWindow::new("First Triangle")?;
+        let mut glfw_window = GlfwWindow::new("Swapchain")?;
         glfw_window.window.set_key_polling(true);
         glfw_window.window.set_framebuffer_size_polling(true);
 
@@ -75,72 +59,18 @@ impl Application {
             per_frame.push(PerFrame::new(&vk_dev, i)?);
         }
 
-        // create a render pass
-        let render_pass = vk_dev.create_render_pass(RenderPassArgs {
-            first: true,
-            last: true,
-            ..Default::default()
-        })?;
-        vk_dev.name_vulkan_object(
-            "Application Render Pass",
-            vk::ObjectType::RENDER_PASS,
-            render_pass,
-        )?;
-
-        // create framebuffers for the render pass
-        let framebuffers = vk_dev
-            .create_framebuffers(&render_pass, "Application Framebuffer")?;
-
-        let mut allocator = vulkan::create_default_allocator();
-
-        let vertex_data = {
-            let mapped = allocator
-                .create_buffer(
-                    &vk_dev,
-                    vk::BufferUsageFlags::VERTEX_BUFFER,
-                    vk::MemoryPropertyFlags::HOST_VISIBLE
-                        | vk::MemoryPropertyFlags::HOST_COHERENT,
-                    (std::mem::size_of::<Vertex>() * 3) as u64,
-                )?
-                .map::<Vertex>(&vk_dev)?;
-            mapped.data[0] = Vertex {
-                pos: [0.0, 0.5],
-                rgba: [0.2, 0.2, 0.8, 1.0],
-            };
-            mapped.data[1] = Vertex {
-                pos: [0.5, -0.5],
-                rgba: [0.2, 0.2, 0.8, 1.0],
-            };
-            mapped.data[2] = Vertex {
-                pos: [-0.5, -0.5],
-                rgba: [0.2, 0.2, 0.8, 1.0],
-            };
-            mapped.unmap(&vk_dev)
-        };
-
-        vk_dev.name_vulkan_object(
-            "Vertex Data",
-            vk::ObjectType::BUFFER,
-            vertex_data.raw,
-        )?;
-
-        let (pipeline, pipeline_layout) =
-            pipeline::create_pipeline(&vk_dev, render_pass)?;
-
         Ok(Self {
-            fps_limit: FrameRateLimit::new(120, 10),
+            clear_frame: ClearFrame::new(&vk_dev, [0.0, 0.0, 1.0, 1.0])?,
+            finish_frame: FinishFrame::new(&vk_dev)?,
+
             per_frame,
             semaphore_pool,
             vk_dev,
             glfw_window,
-            render_pass,
-            framebuffers,
-            allocator,
-            vertex_data,
-            pipeline,
-            pipeline_layout,
+
+            fps_limit: FrameRateLimit::new(120, 30),
             paused: false,
-            needs_swapchain_rebuild: false,
+            swapchain_needs_rebuild: false,
         })
     }
 
@@ -149,27 +79,27 @@ impl Application {
         let event_receiver = self.glfw_window.take_event_receiver()?;
         while !self.glfw_window.window.should_close() {
             self.fps_limit.start_frame();
-
             for (_, event) in
                 self.glfw_window.flush_window_events(&event_receiver)
             {
                 self.handle_event(event)?;
             }
-            if self.needs_swapchain_rebuild {
+            if self.swapchain_needs_rebuild {
                 self.rebuild_swapchain_resources()?;
-                self.needs_swapchain_rebuild = false;
+                self.swapchain_needs_rebuild = false;
             }
             if !self.paused {
                 let result = self.render();
                 match result {
                     Err(FrameError::SwapchainNeedsRebuild) => {
-                        self.needs_swapchain_rebuild = true;
+                        self.swapchain_needs_rebuild = true;
                     }
                     _ => result?,
                 }
             }
             self.fps_limit.sleep_to_limit();
-            //log::debug!("Frame Time {:?}", self.fps_limit.avg_frame_time());
+            //let fps = 1.0 / self.fps_limit.avg_frame_time().as_secs_f64();
+            //log::debug!("Avg FPS: {}", fps);
         }
         Ok(())
     }
@@ -263,51 +193,16 @@ impl Application {
                 &begin_info,
             )?;
 
-            let clear_values = [vk::ClearValue {
-                color: vk::ClearColorValue {
-                    float32: [1.0, 1.0, 1.0, 1.0],
-                },
-            }];
-            let render_pass_begin_info = vk::RenderPassBeginInfo {
-                render_pass: self.render_pass,
-                framebuffer: self.framebuffers[index],
-                render_area: vk::Rect2D {
-                    offset: vk::Offset2D { x: 0, y: 0 },
-                    extent: self.vk_dev.swapchain().extent,
-                },
-                clear_value_count: 1,
-                p_clear_values: clear_values.as_ptr(),
-                ..Default::default()
-            };
-            self.vk_dev.logical_device.cmd_begin_render_pass(
+            self.clear_frame.fill_command_buffer(
+                &self.vk_dev,
                 current_frame.command_buffer,
-                &render_pass_begin_info,
-                vk::SubpassContents::INLINE,
-            );
-            self.vk_dev.logical_device.cmd_bind_pipeline(
+                index as u32,
+            )?;
+            self.finish_frame.fill_command_buffer(
+                &self.vk_dev,
                 current_frame.command_buffer,
-                vk::PipelineBindPoint::GRAPHICS,
-                self.pipeline,
-            );
-            self.vk_dev.logical_device.cmd_bind_vertex_buffers(
-                current_frame.command_buffer,
-                0,
-                &[self.vertex_data.raw],
-                &[0],
-            );
-            self.vk_dev.logical_device.cmd_draw(
-                current_frame.command_buffer,
-                3, // vertex count
-                1, // instance count
-                0, // first vertex index
-                0, // first instance
-            );
-
-            // do something here
-
-            self.vk_dev
-                .logical_device
-                .cmd_end_render_pass(current_frame.command_buffer);
+                index as u32,
+            )?;
 
             self.vk_dev
                 .logical_device
@@ -365,44 +260,16 @@ impl Application {
         }
         unsafe {
             self.vk_dev.logical_device.device_wait_idle()?;
-            self.destroy_swapchain_resources();
         }
-
         let (width, height) = self.glfw_window.window.get_framebuffer_size();
         self.vk_dev
             .rebuild_swapchain((width as u32, height as u32))?;
-
-        self.render_pass = self.vk_dev.create_render_pass(RenderPassArgs {
-            first: true,
-            last: true,
-            ..Default::default()
-        })?;
-        self.framebuffers = self.vk_dev.create_framebuffers(
-            &self.render_pass,
-            "Application Framebuffer",
-        )?;
-        let (pipeline, pipeline_layout) =
-            pipeline::create_pipeline(&self.vk_dev, self.render_pass)?;
-        self.pipeline = pipeline;
-        self.pipeline_layout = pipeline_layout;
-        Ok(())
-    }
-
-    unsafe fn destroy_swapchain_resources(&mut self) {
-        self.vk_dev
-            .logical_device
-            .destroy_pipeline_layout(self.pipeline_layout, None);
-        self.vk_dev
-            .logical_device
-            .destroy_pipeline(self.pipeline, None);
-        for framebuffer in self.framebuffers.drain(..) {
-            self.vk_dev
-                .logical_device
-                .destroy_framebuffer(framebuffer, None);
+        unsafe {
+            self.clear_frame.rebuild_swapchain_resources(&self.vk_dev)?;
+            self.finish_frame
+                .rebuild_swapchain_resources(&self.vk_dev)?;
         }
-        self.vk_dev
-            .logical_device
-            .destroy_render_pass(self.render_pass, None);
+        Ok(())
     }
 
     /// Handle a GLFW window event.
@@ -425,7 +292,7 @@ impl Application {
             }
             WindowEvent::FramebufferSize(w, h) => {
                 self.paused = w == 0 || h == 0;
-                self.needs_swapchain_rebuild = true;
+                self.swapchain_needs_rebuild = true;
             }
             _ => {}
         }
@@ -440,12 +307,8 @@ impl Drop for Application {
                 .logical_device
                 .device_wait_idle()
                 .expect("error while waiting for graphics device idle");
-
-            self.allocator
-                .destroy_buffer(&self.vk_dev, &mut self.vertex_data)
-                .expect("error while destroying vertex data buffer");
-
-            self.destroy_swapchain_resources();
+            self.clear_frame.destroy(&self.vk_dev);
+            self.finish_frame.destroy(&self.vk_dev);
         }
         for per_frame in self.per_frame.drain(..) {
             per_frame.destroy(&self.vk_dev);

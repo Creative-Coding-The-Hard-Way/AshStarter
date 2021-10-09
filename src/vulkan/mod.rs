@@ -10,7 +10,7 @@ pub use self::{
     buffer::{Buffer, MappedBuffer},
     device_allocator::{create_default_allocator, Allocation, DeviceAllocator},
     instance::Instance,
-    render_device::{GpuQueue, RenderDevice},
+    render_device::{GpuQueue, RenderDevice, RenderPassArgs},
     semaphore_pool::SemaphorePool,
     window_surface::WindowSurface,
 };

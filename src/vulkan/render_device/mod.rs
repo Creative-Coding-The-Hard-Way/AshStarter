@@ -110,6 +110,18 @@ pub enum ShaderModuleError {
     UnableToCreateShaderModule(#[source] vk::Result),
 }
 
+/// Arguments for constructing a new RenderPass.
+#[derive(Debug, Copy, Clone)]
+pub struct RenderPassArgs {
+    /// Create the first render pass for the frame. This transitions the
+    /// color attachment from `UNDEFINED` to `OPTIMAL`.
+    pub first: bool,
+
+    /// Create the last render pass for the frame. This transitions the color
+    /// attachment to `PRESENT_SRC_KHR`.
+    pub last: bool,
+}
+
 /// This struct bundles a Vulkan queue with related data for easy tracking.
 #[derive(Debug, Clone, Copy)]
 pub struct GpuQueue {

@@ -1,4 +1,4 @@
-use super::{RenderDevice, RenderDeviceError};
+use super::{RenderDevice, RenderDeviceError, RenderPassArgs};
 
 use ash::{version::DeviceV1_0, vk};
 
@@ -6,6 +6,7 @@ impl RenderDevice {
     /// Create a new render pass.
     pub fn create_render_pass(
         &self,
+        args: RenderPassArgs,
     ) -> Result<vk::RenderPass, RenderDeviceError> {
         let color_attachment = vk::AttachmentDescription {
             flags: vk::AttachmentDescriptionFlags::empty(),
@@ -15,8 +16,8 @@ impl RenderDevice {
             store_op: vk::AttachmentStoreOp::STORE,
             stencil_load_op: vk::AttachmentLoadOp::DONT_CARE,
             stencil_store_op: vk::AttachmentStoreOp::DONT_CARE,
-            initial_layout: vk::ImageLayout::UNDEFINED,
-            final_layout: vk::ImageLayout::PRESENT_SRC_KHR,
+            initial_layout: args.initial_layout(),
+            final_layout: args.final_layout(),
         };
 
         let color_attachment_reference = vk::AttachmentReference {
@@ -65,6 +66,33 @@ impl RenderDevice {
             self.logical_device
                 .create_render_pass(&render_pass_info, None)
                 .map_err(RenderDeviceError::UnableToCreateRenderPass)
+        }
+    }
+}
+
+impl RenderPassArgs {
+    fn initial_layout(&self) -> vk::ImageLayout {
+        if self.first {
+            vk::ImageLayout::UNDEFINED
+        } else {
+            vk::ImageLayout::COLOR_ATTACHMENT_OPTIMAL
+        }
+    }
+
+    fn final_layout(&self) -> vk::ImageLayout {
+        if self.last {
+            vk::ImageLayout::PRESENT_SRC_KHR
+        } else {
+            vk::ImageLayout::COLOR_ATTACHMENT_OPTIMAL
+        }
+    }
+}
+
+impl Default for RenderPassArgs {
+    fn default() -> Self {
+        RenderPassArgs {
+            first: false,
+            last: false,
         }
     }
 }

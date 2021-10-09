@@ -8,7 +8,7 @@ use per_frame::PerFrame;
 use ccthw::{
     glfw_window::GlfwWindow,
     vulkan,
-    vulkan::{errors::SwapchainError, SemaphorePool},
+    vulkan::{errors::SwapchainError, RenderPassArgs, SemaphorePool},
 };
 
 use anyhow::{Context, Result};
@@ -52,7 +52,11 @@ impl Application {
         }
 
         // create a render pass
-        let render_pass = vk_dev.create_render_pass()?;
+        let render_pass = vk_dev.create_render_pass(RenderPassArgs {
+            first: true,
+            last: true,
+            ..Default::default()
+        })?;
         vk_dev.name_vulkan_object(
             "Application Render Pass",
             vk::ObjectType::RENDER_PASS,
@@ -274,7 +278,11 @@ impl Application {
         self.vk_dev
             .rebuild_swapchain((width as u32, height as u32))?;
 
-        self.render_pass = self.vk_dev.create_render_pass()?;
+        self.render_pass = self.vk_dev.create_render_pass(RenderPassArgs {
+            first: true,
+            last: true,
+            ..Default::default()
+        })?;
         self.framebuffers = self.vk_dev.create_framebuffers(
             &self.render_pass,
             "Application Framebuffer",
