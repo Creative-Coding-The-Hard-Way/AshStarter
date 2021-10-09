@@ -35,7 +35,7 @@ impl Renderer for FinishFrame {
         &self,
         vk_dev: &RenderDevice,
         cmd: vk::CommandBuffer,
-        current_image: u32,
+        current_image: usize,
     ) -> Result<()> {
         self.render_pass
             .begin_render_pass(vk_dev, cmd, current_image);

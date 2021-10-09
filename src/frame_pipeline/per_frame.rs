@@ -1,45 +1,35 @@
-use ccthw::vulkan::RenderDevice;
+use super::PerFrame;
 
-use anyhow::Result;
-use ash::{version::DeviceV1_0, vk};
+use crate::vulkan::{RenderDevice, SemaphorePool};
 
-pub struct PerFrame {
-    /// Signalled when the frame is ready to be used for rendering.
-    pub acquire_semaphore: vk::Semaphore,
-
-    /// Signalled when all graphics operations are complete and the frame is
-    /// ready for presentation.
-    pub release_semaphore: vk::Semaphore,
-
-    /// Signalled when all submitted graphics commands have completed.
-    pub queue_submit_fence: vk::Fence,
-
-    /// The command pool for operations in this frame.
-    pub command_pool: vk::CommandPool,
-
-    /// The command buffer for operations in this frame.
-    pub command_buffer: vk::CommandBuffer,
-}
+use ::{
+    anyhow::{Context, Result},
+    ash::{version::DeviceV1_0, vk},
+};
 
 impl PerFrame {
     /// Create new per-frame resources.
-    pub fn new(vk_dev: &RenderDevice, frame_index: usize) -> Result<Self> {
+    pub fn new(
+        vk_dev: &RenderDevice,
+        semaphore_pool: &mut SemaphorePool,
+        frame_index: usize,
+    ) -> Result<Self> {
         let acquire_semaphore = vk::Semaphore::null();
-        let release_semaphore = {
-            let create_info = vk::SemaphoreCreateInfo {
-                ..Default::default()
-            };
-            unsafe {
-                vk_dev.logical_device.create_semaphore(&create_info, None)?
-            }
-        };
-
+        let release_semaphore = semaphore_pool.get_semaphore(vk_dev)?;
         let queue_submit_fence = {
             let create_info = vk::FenceCreateInfo {
                 flags: vk::FenceCreateFlags::SIGNALED,
                 ..Default::default()
             };
-            unsafe { vk_dev.logical_device.create_fence(&create_info, None)? }
+            unsafe {
+                vk_dev
+                    .logical_device
+                    .create_fence(&create_info, None)
+                    .context(format!(
+                        "Unable to create fence for frame {}",
+                        frame_index
+                    ))?
+            }
         };
         vk_dev.name_vulkan_object(
             format!("Frame {} - Queue Submit Fence", frame_index),
@@ -56,7 +46,11 @@ impl PerFrame {
             unsafe {
                 vk_dev
                     .logical_device
-                    .create_command_pool(&create_info, None)?
+                    .create_command_pool(&create_info, None)
+                    .context(format!(
+                        "unable to create command pool for frame {}",
+                        frame_index
+                    ))?
             }
         };
         vk_dev.name_vulkan_object(
@@ -94,28 +88,25 @@ impl PerFrame {
     }
 
     /// Destroy per-frame resources.
-    pub fn destroy(self, vk_dev: &RenderDevice) {
-        unsafe {
-            if self.acquire_semaphore != vk::Semaphore::null() {
-                vk_dev
-                    .logical_device
-                    .destroy_semaphore(self.acquire_semaphore, None);
-            }
-            if self.release_semaphore != vk::Semaphore::null() {
-                vk_dev
-                    .logical_device
-                    .destroy_semaphore(self.release_semaphore, None);
-            }
+    pub unsafe fn destroy(self, vk_dev: &RenderDevice) {
+        if self.acquire_semaphore != vk::Semaphore::null() {
             vk_dev
                 .logical_device
-                .destroy_fence(self.queue_submit_fence, None);
-            vk_dev.logical_device.free_command_buffers(
-                self.command_pool,
-                &[self.command_buffer],
-            );
-            vk_dev
-                .logical_device
-                .destroy_command_pool(self.command_pool, None);
+                .destroy_semaphore(self.acquire_semaphore, None);
         }
+        if self.release_semaphore != vk::Semaphore::null() {
+            vk_dev
+                .logical_device
+                .destroy_semaphore(self.release_semaphore, None);
+        }
+        vk_dev
+            .logical_device
+            .destroy_fence(self.queue_submit_fence, None);
+        vk_dev
+            .logical_device
+            .free_command_buffers(self.command_pool, &[self.command_buffer]);
+        vk_dev
+            .logical_device
+            .destroy_command_pool(self.command_pool, None);
     }
 }

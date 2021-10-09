@@ -17,7 +17,7 @@ pub trait Renderer {
         &self,
         vk_dev: &RenderDevice,
         command_buffer: vk::CommandBuffer,
-        current_image: u32,
+        current_image: usize,
     ) -> Result<()>;
 
     /// Replace any swapchain-dependent resources in the renderer.

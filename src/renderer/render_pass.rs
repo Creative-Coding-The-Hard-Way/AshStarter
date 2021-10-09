@@ -64,11 +64,11 @@ impl RenderPass {
         &self,
         vk_dev: &RenderDevice,
         cmd: vk::CommandBuffer,
-        current_image: u32,
+        current_image: usize,
     ) {
         let render_pass_begin_info = vk::RenderPassBeginInfo {
             render_pass: self.render_pass,
-            framebuffer: self.framebuffers[current_image as usize],
+            framebuffer: self.framebuffers[current_image],
             render_area: vk::Rect2D {
                 offset: vk::Offset2D { x: 0, y: 0 },
                 extent: vk_dev.swapchain().extent,
