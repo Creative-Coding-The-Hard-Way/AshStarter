@@ -15,9 +15,12 @@ impl RenderPass {
         args: RenderPassArgs,
     ) -> Result<Self, VulkanError> {
         let owned_name = name.into();
-        let render_pass = vk_dev.create_render_pass_configured(&args)?;
-        let framebuffers =
-            vk_dev.create_framebuffers(&render_pass, &owned_name)?;
+        let render_pass =
+            vk_dev.create_render_pass_configured(&owned_name, &args)?;
+        let framebuffers = vk_dev.create_framebuffers(
+            &render_pass,
+            format!("{} Framebuffer", &owned_name),
+        )?;
         Ok(Self {
             args,
             render_pass,
@@ -47,9 +50,12 @@ impl RenderPass {
         vk_dev: &RenderDevice,
     ) -> Result<(), VulkanError> {
         self.destroy(vk_dev);
-        self.render_pass = vk_dev.create_render_pass_configured(&self.args)?;
-        self.framebuffers = vk_dev
-            .create_framebuffers(&self.render_pass, "Clear Frame Renderer")?;
+        self.render_pass =
+            vk_dev.create_render_pass_configured(&self.name, &self.args)?;
+        self.framebuffers = vk_dev.create_framebuffers(
+            &self.render_pass,
+            format!("{} Framebuffer", self.name),
+        )?;
         Ok(())
     }
 
@@ -146,6 +152,7 @@ impl RenderDevice {
     /// Create a render bass based on the provided render pass args.
     fn create_render_pass_configured(
         &self,
+        name: impl Into<String>,
         args: &RenderPassArgs,
     ) -> Result<vk::RenderPass, RenderDeviceError> {
         let color_attachment = vk::AttachmentDescription {
@@ -196,10 +203,16 @@ impl RenderDevice {
             p_dependencies: dependencies.as_ptr(),
             ..Default::default()
         };
-        unsafe {
+        let render_pass = unsafe {
             self.logical_device
                 .create_render_pass(&render_pass_info, None)
-                .map_err(RenderDeviceError::UnableToCreateRenderPass)
-        }
+                .map_err(RenderDeviceError::UnableToCreateRenderPass)?
+        };
+        self.name_vulkan_object(
+            format!("{} RenderPass", name.into()),
+            vk::ObjectType::RENDER_PASS,
+            render_pass,
+        )?;
+        Ok(render_pass)
     }
 }
