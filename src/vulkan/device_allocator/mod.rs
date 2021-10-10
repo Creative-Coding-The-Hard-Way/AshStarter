@@ -1,13 +1,12 @@
 //! This module defines traits and implementations for managing device (gpu)
 //! memory.
-//!
 
 mod allocation;
 mod buffer_allocator;
-mod memory_allocator;
+mod device_allocator;
 mod passthrough;
 
-use crate::vulkan::RenderDevice;
+use crate::vulkan::{Buffer, RenderDevice};
 use ash::vk;
 use thiserror::Error;
 
@@ -72,6 +71,39 @@ pub trait DeviceAllocator {
         &mut self,
         vk_dev: &RenderDevice,
         allocation: &Allocation,
+    ) -> Result<(), DeviceAllocatorError>;
+}
+
+/// Types which implement this trait can allocate memory when given specific
+/// requirements and properties.
+pub trait BufferAllocator {
+    /// Allocate a chunk of memory with the given requirements.
+    unsafe fn allocate_memory(
+        &mut self,
+        vk_dev: &RenderDevice,
+        memory_requirements: vk::MemoryRequirements,
+        property_flags: vk::MemoryPropertyFlags,
+    ) -> Result<Allocation, DeviceAllocatorError>;
+
+    /// Create a Vulkan buffer with associated memory.
+    fn create_buffer(
+        &mut self,
+        vk_dev: &RenderDevice,
+        buffer_usage_flags: vk::BufferUsageFlags,
+        memory_property_flags: vk::MemoryPropertyFlags,
+        size_in_bytes: u64,
+    ) -> Result<Buffer, DeviceAllocatorError>;
+
+    /// Destroy a Vulkan buffer.
+    ///
+    /// # unsafe
+    ///
+    /// - because the application must synchronize both GPU and CPU access to
+    ///   this buffer to ensure it's not in use when destroyed.
+    unsafe fn destroy_buffer(
+        &mut self,
+        vk_dev: &RenderDevice,
+        buffer: &mut Buffer,
     ) -> Result<(), DeviceAllocatorError>;
 }
 

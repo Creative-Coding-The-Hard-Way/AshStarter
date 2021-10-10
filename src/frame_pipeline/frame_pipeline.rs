@@ -23,19 +23,41 @@ impl FramePipeline {
         })
     }
 
-    pub fn draw_and_present<F>(
+    /// Begin rendering a single frame.
+    ///
+    /// # Returns
+    ///
+    /// A tuple containing two things:
+    ///
+    /// 1. The index of the swapchain image being targeted. This is useful for
+    ///    renderers which have per-swapchain-image resources, it is also used
+    ///    when ending the frame.
+    ///
+    /// 2. The graphics command buffer for the current frame. Renderers can
+    ///    add commands to the buffer for execution prior to the call to
+    ///    `end_frame`.
+    ///
+    pub fn begin_frame(
         &mut self,
         vk_dev: &RenderDevice,
-        build_frame_commands: F,
-    ) -> Result<(), FrameError>
-    where
-        F: FnOnce(&RenderDevice, usize, vk::CommandBuffer) -> Result<()>,
-    {
-        let index = self.acquire_next_image(vk_dev)?;
-        self.submit_frame_commands(vk_dev, index, build_frame_commands)?;
-        self.present_image(vk_dev, index)
+    ) -> Result<(usize, vk::CommandBuffer), FrameError> {
+        let current_image = self.acquire_next_image(vk_dev)?;
+        let cmd = self.prepare_frame_command_buffer(vk_dev, current_image)?;
+        Ok((current_image, cmd))
     }
 
+    /// End rendering a single frame. This submits all commands on the graphics
+    /// command buffer and schedules the swapchain image for presentation.
+    pub fn end_frame(
+        &mut self,
+        vk_dev: &RenderDevice,
+        current_image: usize,
+    ) -> Result<(), FrameError> {
+        self.submit_and_present(vk_dev, current_image)?;
+        Ok(())
+    }
+
+    /// Destroy all vulkan resources.
     pub unsafe fn destroy(&mut self, vk_dev: &RenderDevice) {
         for frame in self.frames.drain(..) {
             frame.destroy(vk_dev);
@@ -43,6 +65,7 @@ impl FramePipeline {
         self.semaphore_pool.destroy(vk_dev);
     }
 
+    /// Rebuild all swapchain-dependent resources.
     pub unsafe fn rebuild_swapchain_resources(
         &mut self,
         vk_dev: &RenderDevice,
@@ -121,18 +144,12 @@ impl FramePipeline {
         Ok(index)
     }
 
-    fn submit_frame_commands<F>(
+    fn prepare_frame_command_buffer(
         &mut self,
         vk_dev: &RenderDevice,
-        index: usize,
-        fill_command_buffer: F,
-    ) -> Result<(), FrameError>
-    where
-        F: FnOnce(&RenderDevice, usize, vk::CommandBuffer) -> Result<()>,
-    {
-        let current_frame = &self.frames[index];
-
-        // build the command buffer
+        current_image: usize,
+    ) -> Result<vk::CommandBuffer> {
+        let current_frame = &self.frames[current_image];
         unsafe {
             let begin_info = vk::CommandBufferBeginInfo {
                 flags: vk::CommandBufferUsageFlags::ONE_TIME_SUBMIT,
@@ -144,12 +161,21 @@ impl FramePipeline {
                 .with_context(|| {
                     format!(
                         "Unable to begin the command buffer for frame {}",
-                        index
+                        current_image
                     )
                 })?;
+        };
+        Ok(current_frame.command_buffer)
+    }
 
-            fill_command_buffer(vk_dev, index, current_frame.command_buffer)?;
+    fn submit_and_present(
+        &mut self,
+        vk_dev: &RenderDevice,
+        index: usize,
+    ) -> Result<(), FrameError> {
+        let current_frame = &self.frames[index];
 
+        unsafe {
             vk_dev
                 .logical_device
                 .end_command_buffer(current_frame.command_buffer)
@@ -186,14 +212,6 @@ impl FramePipeline {
                 })?;
         }
 
-        Ok(())
-    }
-
-    fn present_image(
-        &mut self,
-        vk_dev: &RenderDevice,
-        index: usize,
-    ) -> Result<(), FrameError> {
         let index_u32 = index as u32;
         let current_frame = &self.frames[index];
         let present_info = vk::PresentInfoKHR {

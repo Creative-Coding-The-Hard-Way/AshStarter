@@ -8,7 +8,9 @@ mod window_surface;
 
 pub use self::{
     buffer::{Buffer, MappedBuffer},
-    device_allocator::{create_default_allocator, Allocation, DeviceAllocator},
+    device_allocator::{
+        create_default_allocator, Allocation, BufferAllocator, DeviceAllocator,
+    },
     instance::Instance,
     render_device::{GpuQueue, RenderDevice, RenderPassArgs},
     semaphore_pool::SemaphorePool,

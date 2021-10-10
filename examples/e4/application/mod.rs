@@ -11,8 +11,8 @@ use ccthw::{
     timing::FrameRateLimit,
     vulkan,
     vulkan::{
-        errors::SwapchainError, Buffer, DeviceAllocator, RenderPassArgs,
-        SemaphorePool,
+        errors::SwapchainError, Buffer, BufferAllocator, DeviceAllocator,
+        RenderPassArgs, SemaphorePool,
     },
 };
 

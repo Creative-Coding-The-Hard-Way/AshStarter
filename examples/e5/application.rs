@@ -39,7 +39,7 @@ impl Application {
         let frame_pipeline = FramePipeline::new(&vk_dev)?;
 
         Ok(Self {
-            clear_frame: ClearFrame::new(&vk_dev, [0.0, 0.0, 1.0, 1.0])?,
+            clear_frame: ClearFrame::new(&vk_dev, [0.1, 0.1, 0.2, 1.0])?,
             finish_frame: FinishFrame::new(&vk_dev)?,
 
             frame_pipeline,
@@ -84,15 +84,14 @@ impl Application {
 
     /// Render the applications state in in a three-step process.
     fn compose_frame(&mut self) -> Result<(), FrameError> {
-        let clear_frame = &self.clear_frame;
-        let finish_frame = &self.finish_frame;
-        self.frame_pipeline.draw_and_present(
-            &self.vk_dev,
-            |vk_dev, index, cmd| {
-                clear_frame.fill_command_buffer(vk_dev, cmd, index)?;
-                finish_frame.fill_command_buffer(vk_dev, cmd, index)
-            },
-        )
+        let (index, cmd) = self.frame_pipeline.begin_frame(&self.vk_dev)?;
+
+        self.clear_frame
+            .fill_command_buffer(&self.vk_dev, cmd, index)?;
+        self.finish_frame
+            .fill_command_buffer(&self.vk_dev, cmd, index)?;
+
+        self.frame_pipeline.end_frame(&self.vk_dev, index)
     }
 
     /// Rebuild the swapchain and any dependent resources.

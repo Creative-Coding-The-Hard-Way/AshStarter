@@ -1,8 +1,9 @@
 mod clear_frame;
 mod finish_frame;
 mod render_pass;
+mod triangle_canvas;
 
-use crate::vulkan::RenderDevice;
+use crate::vulkan::{Buffer, RenderDevice};
 
 use anyhow::Result;
 use ash::vk;
@@ -38,6 +39,17 @@ pub struct ClearFrame {
 /// finishing the frame.
 pub struct FinishFrame {
     render_pass: RenderPass,
+}
+
+/// A renderer which just draws triangles on the screen.
+pub struct TriangleCanvas {
+    vertex_data: Buffer,
+    render_pass: RenderPass,
+    pipeline: vk::Pipeline,
+    pipeline_layout: vk::PipelineLayout,
+    descriptor_layout: vk::DescriptorSetLayout,
+    descriptor_pool: vk::DescriptorPool,
+    descriptor_set: vk::DescriptorSet,
 }
 
 /// Configuration values for a new render pass instance.
