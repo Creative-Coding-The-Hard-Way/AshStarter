@@ -1,4 +1,4 @@
-use crate::vulkan::RenderDevice;
+use crate::vulkan::{Buffer, RenderDevice};
 
 use ::{
     anyhow::Result,
@@ -6,44 +6,56 @@ use ::{
     std::ffi::CString,
 };
 
-pub(super) fn update_descriptor_set(
+pub(super) fn update_descriptor_sets(
     vk_dev: &RenderDevice,
-    descriptor_set: vk::DescriptorSet,
-    buffer: vk::Buffer,
+    descriptor_set: &Vec<vk::DescriptorSet>,
+    buffers: &Vec<Buffer>,
 ) {
-    let descriptor_buffer_info = vk::DescriptorBufferInfo {
-        buffer,
-        offset: 0,
-        range: vk::WHOLE_SIZE,
-    };
-    let descriptor_set_write = vk::WriteDescriptorSet {
-        dst_set: descriptor_set,
-        dst_binding: 0,
-        dst_array_element: 0,
-        descriptor_count: 1,
-        descriptor_type: vk::DescriptorType::STORAGE_BUFFER,
-        p_image_info: std::ptr::null(),
-        p_texel_buffer_view: std::ptr::null(),
-        p_buffer_info: &descriptor_buffer_info,
-        ..Default::default()
-    };
+    let descriptor_buffer_infos: Vec<vk::DescriptorBufferInfo> = buffers
+        .iter()
+        .map(|buffer| vk::DescriptorBufferInfo {
+            buffer: buffer.raw,
+            offset: 0,
+            range: vk::WHOLE_SIZE,
+        })
+        .collect();
+    let writes: Vec<vk::WriteDescriptorSet> = descriptor_buffer_infos
+        .iter()
+        .zip(descriptor_set.iter())
+        .map(|(descriptor_buffer_info, descriptor_set)| {
+            vk::WriteDescriptorSet {
+                dst_set: *descriptor_set,
+                dst_binding: 0,
+                dst_array_element: 0,
+                descriptor_count: 1,
+                descriptor_type: vk::DescriptorType::STORAGE_BUFFER,
+                p_image_info: std::ptr::null(),
+                p_texel_buffer_view: std::ptr::null(),
+                p_buffer_info: descriptor_buffer_info,
+                ..Default::default()
+            }
+        })
+        .collect();
     unsafe {
-        vk_dev
-            .logical_device
-            .update_descriptor_sets(&[descriptor_set_write], &[]);
+        vk_dev.logical_device.update_descriptor_sets(&writes, &[]);
     }
 }
 
-pub(super) fn allocate_descriptor_set(
+pub(super) fn allocate_descriptor_sets(
     vk_dev: &RenderDevice,
     descriptor_pool: vk::DescriptorPool,
     layout: vk::DescriptorSetLayout,
     debug_name: impl Into<String>,
-) -> Result<vk::DescriptorSet> {
+) -> Result<Vec<vk::DescriptorSet>> {
+    let descriptor_set_count = vk_dev.swapchain().image_views.len();
+    let mut layouts = vec![];
+    for i in 0..descriptor_set_count {
+        layouts.push(layout);
+    }
     let allocate_info = vk::DescriptorSetAllocateInfo {
         descriptor_pool,
-        descriptor_set_count: 1,
-        p_set_layouts: &layout,
+        descriptor_set_count: layouts.len() as u32,
+        p_set_layouts: layouts.as_ptr(),
         ..Default::default()
     };
     let descriptor_sets = unsafe {
@@ -51,26 +63,29 @@ pub(super) fn allocate_descriptor_set(
             .logical_device
             .allocate_descriptor_sets(&allocate_info)?
     };
-    let descriptor_set = descriptor_sets[0];
-    vk_dev.name_vulkan_object(
-        debug_name,
-        vk::ObjectType::DESCRIPTOR_SET,
-        descriptor_set,
-    )?;
-    Ok(descriptor_set)
+    let owned_name = debug_name.into();
+    for (i, descriptor_set) in descriptor_sets.iter().enumerate() {
+        vk_dev.name_vulkan_object(
+            format!("{} - {}", owned_name, i),
+            vk::ObjectType::DESCRIPTOR_SET,
+            *descriptor_set,
+        )?;
+    }
+    Ok(descriptor_sets)
 }
 
 pub(super) fn create_descriptor_pool(
     vk_dev: &RenderDevice,
     debug_name: impl Into<String>,
 ) -> Result<vk::DescriptorPool> {
+    let descriptor_count = vk_dev.swapchain().image_views.len() as u32;
     let pool_size = vk::DescriptorPoolSize {
         ty: vk::DescriptorType::STORAGE_BUFFER,
-        descriptor_count: 1,
+        descriptor_count,
     };
     let pool_create_info = vk::DescriptorPoolCreateInfo {
         flags: vk::DescriptorPoolCreateFlags::empty(),
-        max_sets: 1,
+        max_sets: descriptor_count,
         pool_size_count: 1,
         p_pool_sizes: &pool_size,
         ..Default::default()
@@ -121,12 +136,12 @@ pub(super) fn create_descriptor_set_layout(
 
 pub(super) fn create_pipeline_layout(
     vk_dev: &RenderDevice,
-    descriptor_set_layout: &[vk::DescriptorSetLayout],
+    descriptor_set_layout: vk::DescriptorSetLayout,
     debug_name: impl Into<String>,
 ) -> Result<vk::PipelineLayout> {
     let pipeline_layout_create_info = vk::PipelineLayoutCreateInfo {
-        p_set_layouts: descriptor_set_layout.as_ptr(),
-        set_layout_count: descriptor_set_layout.len() as u32,
+        p_set_layouts: &descriptor_set_layout,
+        set_layout_count: 1,
         p_push_constant_ranges: std::ptr::null(),
         push_constant_range_count: 0,
         ..Default::default()

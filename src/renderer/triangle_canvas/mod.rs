@@ -36,7 +36,7 @@ impl TriangleCanvas {
         )?;
         let pipeline_layout = pipeline::create_pipeline_layout(
             vk_dev,
-            &[descriptor_layout],
+            descriptor_layout,
             "TriangleCanvas Pipeline Layout",
         )?;
         let pipeline = pipeline::create_pipeline(
@@ -49,27 +49,24 @@ impl TriangleCanvas {
             vk_dev,
             "TriangleCanvas Descriptor Pool",
         )?;
-        let descriptor_set = pipeline::allocate_descriptor_set(
+        let descriptor_sets = pipeline::allocate_descriptor_sets(
             vk_dev,
             descriptor_pool,
             descriptor_layout,
             "TriangleCanvas Descriptor Set",
         )?;
-        let mut vertex_data = vk_alloc.create_buffer(
-            vk_dev,
-            vk::BufferUsageFlags::STORAGE_BUFFER,
-            vk::MemoryPropertyFlags::HOST_VISIBLE
-                | vk::MemoryPropertyFlags::HOST_COHERENT,
-            (MAX_VERTEX_COUNT * std::mem::size_of::<Vertex>()) as u64,
-        )?;
-        pipeline::update_descriptor_set(
-            vk_dev,
-            descriptor_set,
-            vertex_data.raw,
-        );
 
-        vertex_data = {
-            let mapped = vertex_data.map::<Vertex>(vk_dev)?;
+        let total_frames = vk_dev.swapchain().image_views.len();
+        let mut vertex_data = vec![];
+        for _ in 0..total_frames {
+            let buffer = vk_alloc.create_buffer(
+                vk_dev,
+                vk::BufferUsageFlags::STORAGE_BUFFER,
+                vk::MemoryPropertyFlags::HOST_VISIBLE
+                    | vk::MemoryPropertyFlags::HOST_COHERENT,
+                (MAX_VERTEX_COUNT * std::mem::size_of::<Vertex>()) as u64,
+            )?;
+            let mapped = buffer.map::<Vertex>(vk_dev)?;
             mapped.data[0] = Vertex {
                 pos: [0.0, 0.5],
                 rgba: [0.8, 0.1, 0.1, 1.0],
@@ -82,17 +79,23 @@ impl TriangleCanvas {
                 pos: [-0.5, -0.5],
                 rgba: [0.1, 0.1, 0.8, 1.0],
             };
-            mapped.unmap(vk_dev)
-        };
+            vertex_data.push(mapped.unmap(vk_dev));
+        }
+
+        pipeline::update_descriptor_sets(
+            vk_dev,
+            &descriptor_sets,
+            &vertex_data,
+        );
 
         Ok(Self {
             vertex_data,
+            descriptor_sets,
             render_pass,
             pipeline,
             pipeline_layout,
             descriptor_layout,
             descriptor_pool,
-            descriptor_set,
         })
     }
 
@@ -102,26 +105,97 @@ impl TriangleCanvas {
         vk_dev: &RenderDevice,
         vk_alloc: &mut impl BufferAllocator,
     ) -> Result<()> {
-        self.destroy_swapchain_resources(vk_dev);
+        self.destroy_swapchain_resources(vk_dev, vk_alloc)?;
         vk_dev
             .logical_device
             .destroy_pipeline_layout(self.pipeline_layout, None);
         vk_dev
             .logical_device
             .destroy_descriptor_set_layout(self.descriptor_layout, None);
-        vk_dev
-            .logical_device
-            .destroy_descriptor_pool(self.descriptor_pool, None);
-        vk_alloc.destroy_buffer(vk_dev, &mut self.vertex_data)?;
+        Ok(())
+    }
+
+    pub unsafe fn rebuild_swapchain_resources(
+        &mut self,
+        vk_dev: &RenderDevice,
+        vk_alloc: &mut impl BufferAllocator,
+    ) -> Result<()> {
+        self.destroy_swapchain_resources(vk_dev, vk_alloc)?;
+        self.render_pass = RenderPass::new(
+            vk_dev,
+            "TriangleCanvas",
+            RenderPassArgs {
+                ..Default::default()
+            },
+        )?;
+        self.pipeline = pipeline::create_pipeline(
+            vk_dev,
+            self.render_pass.render_pass,
+            self.pipeline_layout,
+            "TriangleCanvas Pipeline",
+        )?;
+        self.descriptor_pool = pipeline::create_descriptor_pool(
+            vk_dev,
+            "TriangleCanvas Descriptor Pool",
+        )?;
+        self.descriptor_sets = pipeline::allocate_descriptor_sets(
+            vk_dev,
+            self.descriptor_pool,
+            self.descriptor_layout,
+            "TriangleCanvas Descriptor Set",
+        )?;
+
+        let total_frames = vk_dev.swapchain().image_views.len();
+        for _ in 0..total_frames {
+            let buffer = vk_alloc.create_buffer(
+                vk_dev,
+                vk::BufferUsageFlags::STORAGE_BUFFER,
+                vk::MemoryPropertyFlags::HOST_VISIBLE
+                    | vk::MemoryPropertyFlags::HOST_COHERENT,
+                (MAX_VERTEX_COUNT * std::mem::size_of::<Vertex>()) as u64,
+            )?;
+            let mapped = buffer.map::<Vertex>(vk_dev)?;
+            mapped.data[0] = Vertex {
+                pos: [0.0, 0.5],
+                rgba: [0.8, 0.1, 0.1, 1.0],
+            };
+            mapped.data[1] = Vertex {
+                pos: [0.5, -0.5],
+                rgba: [0.1, 0.8, 0.1, 1.0],
+            };
+            mapped.data[2] = Vertex {
+                pos: [-0.5, -0.5],
+                rgba: [0.1, 0.1, 0.8, 1.0],
+            };
+            self.vertex_data.push(mapped.unmap(vk_dev));
+        }
+        pipeline::update_descriptor_sets(
+            vk_dev,
+            &self.descriptor_sets,
+            &self.vertex_data,
+        );
+
         Ok(())
     }
 }
 
 impl TriangleCanvas {
     /// Destroy only the swapchain-dependent resources owned by this renderer.
-    unsafe fn destroy_swapchain_resources(&mut self, vk_dev: &RenderDevice) {
+    unsafe fn destroy_swapchain_resources(
+        &mut self,
+        vk_dev: &RenderDevice,
+        vk_alloc: &mut impl BufferAllocator,
+    ) -> Result<()> {
         self.render_pass.destroy(vk_dev);
         vk_dev.logical_device.destroy_pipeline(self.pipeline, None);
+        for mut buffer in self.vertex_data.drain(..) {
+            vk_alloc.destroy_buffer(vk_dev, &mut buffer)?;
+        }
+        vk_dev
+            .logical_device
+            .destroy_descriptor_pool(self.descriptor_pool, None);
+        self.descriptor_sets.clear();
+        Ok(())
     }
 }
 
@@ -145,34 +219,13 @@ impl Renderer for TriangleCanvas {
                 vk::PipelineBindPoint::GRAPHICS,
                 self.pipeline_layout,
                 0,
-                &[self.descriptor_set],
+                &[self.descriptor_sets[current_image]],
                 &[],
             );
             vk_dev.logical_device.cmd_draw(cmd, 3, 1, 0, 0);
         }
 
         self.render_pass.end_render_pass(vk_dev, cmd);
-        Ok(())
-    }
-
-    unsafe fn rebuild_swapchain_resources(
-        &mut self,
-        vk_dev: &RenderDevice,
-    ) -> Result<()> {
-        self.destroy_swapchain_resources(vk_dev);
-        self.render_pass = RenderPass::new(
-            vk_dev,
-            "TriangleCanvas",
-            RenderPassArgs {
-                ..Default::default()
-            },
-        )?;
-        self.pipeline = pipeline::create_pipeline(
-            vk_dev,
-            self.render_pass.render_pass,
-            self.pipeline_layout,
-            "TriangleCanvas Pipeline",
-        )?;
         Ok(())
     }
 }

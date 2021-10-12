@@ -121,8 +121,10 @@ impl Application {
             self.clear_frame.rebuild_swapchain_resources(&self.vk_dev)?;
             self.finish_frame
                 .rebuild_swapchain_resources(&self.vk_dev)?;
-            self.triangle_canvas
-                .rebuild_swapchain_resources(&self.vk_dev)?;
+            self.triangle_canvas.rebuild_swapchain_resources(
+                &self.vk_dev,
+                &mut self.vk_alloc,
+            )?;
         }
         Ok(())
     }

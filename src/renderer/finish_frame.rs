@@ -20,6 +20,17 @@ impl FinishFrame {
         self.render_pass.destroy(vk_dev);
     }
 
+    pub unsafe fn rebuild_swapchain_resources(
+        &mut self,
+        vk_dev: &RenderDevice,
+    ) -> anyhow::Result<()> {
+        self.destroy(vk_dev);
+        self.render_pass = RenderPass::new(vk_dev, NAME, FinishFrame::args())?;
+        Ok(())
+    }
+}
+
+impl FinishFrame {
     fn args() -> RenderPassArgs {
         RenderPassArgs {
             last: true,
@@ -40,15 +51,6 @@ impl Renderer for FinishFrame {
         self.render_pass
             .begin_render_pass(vk_dev, cmd, current_image);
         self.render_pass.end_render_pass(vk_dev, cmd);
-        Ok(())
-    }
-
-    unsafe fn rebuild_swapchain_resources(
-        &mut self,
-        vk_dev: &RenderDevice,
-    ) -> anyhow::Result<()> {
-        self.destroy(vk_dev);
-        self.render_pass = RenderPass::new(vk_dev, NAME, FinishFrame::args())?;
         Ok(())
     }
 }

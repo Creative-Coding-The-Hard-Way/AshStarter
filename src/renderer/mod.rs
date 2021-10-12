@@ -20,12 +20,6 @@ pub trait Renderer {
         command_buffer: vk::CommandBuffer,
         current_image: usize,
     ) -> Result<()>;
-
-    /// Replace any swapchain-dependent resources in the renderer.
-    unsafe fn rebuild_swapchain_resources(
-        &mut self,
-        vk_dev: &RenderDevice,
-    ) -> Result<()>;
 }
 
 /// A renderer which transitions the image for rendering and clears to a known
@@ -43,13 +37,14 @@ pub struct FinishFrame {
 
 /// A renderer which just draws triangles on the screen.
 pub struct TriangleCanvas {
-    vertex_data: Buffer,
+    vertex_data: Vec<Buffer>,
+    descriptor_sets: Vec<vk::DescriptorSet>,
+
     render_pass: RenderPass,
     pipeline: vk::Pipeline,
     pipeline_layout: vk::PipelineLayout,
     descriptor_layout: vk::DescriptorSetLayout,
     descriptor_pool: vk::DescriptorPool,
-    descriptor_set: vk::DescriptorSet,
 }
 
 /// Configuration values for a new render pass instance.
