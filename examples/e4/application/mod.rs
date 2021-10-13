@@ -94,28 +94,28 @@ impl Application {
         let mut allocator = vulkan::create_default_allocator();
 
         let vertex_data = {
-            let mapped = allocator
-                .create_buffer(
-                    &vk_dev,
-                    vk::BufferUsageFlags::VERTEX_BUFFER,
-                    vk::MemoryPropertyFlags::HOST_VISIBLE
-                        | vk::MemoryPropertyFlags::HOST_COHERENT,
-                    (std::mem::size_of::<Vertex>() * 3) as u64,
-                )?
-                .map::<Vertex>(&vk_dev)?;
-            mapped.data[0] = Vertex {
+            let mut buffer = allocator.create_buffer(
+                &vk_dev,
+                vk::BufferUsageFlags::VERTEX_BUFFER,
+                vk::MemoryPropertyFlags::HOST_VISIBLE
+                    | vk::MemoryPropertyFlags::HOST_COHERENT,
+                (std::mem::size_of::<Vertex>() * 3) as u64,
+            )?;
+            buffer.map(&vk_dev)?;
+            let data = buffer.data_mut::<Vertex>()?;
+            data[0] = Vertex {
                 pos: [0.0, 0.5],
                 rgba: [0.2, 0.2, 0.8, 1.0],
             };
-            mapped.data[1] = Vertex {
+            data[1] = Vertex {
                 pos: [0.5, -0.5],
                 rgba: [0.2, 0.2, 0.8, 1.0],
             };
-            mapped.data[2] = Vertex {
+            data[2] = Vertex {
                 pos: [-0.5, -0.5],
                 rgba: [0.2, 0.2, 0.8, 1.0],
             };
-            mapped.unmap(&vk_dev)
+            buffer
         };
 
         vk_dev.name_vulkan_object(

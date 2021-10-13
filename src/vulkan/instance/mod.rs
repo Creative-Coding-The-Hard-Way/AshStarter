@@ -47,7 +47,7 @@ pub enum InstanceError {
 ///
 ///     // Typically the required extensions come from the window system.
 ///     let required_extensions = vec![
-///         "some_required_extension",
+///         String::from("some_required_extension"),
 ///     ];
 ///
 ///     let instance = Instance::new(&required_extensions);

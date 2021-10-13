@@ -1,7 +1,7 @@
 mod buffer;
-mod mapped_buffer;
+mod gpu_vec;
 
-use crate::vulkan::Allocation;
+use crate::vulkan::{errors::DeviceAllocatorError, Allocation};
 
 use ash::vk;
 use thiserror::Error;
@@ -10,6 +10,14 @@ use thiserror::Error;
 pub enum BufferError {
     #[error("Unable to map device memory")]
     UnableToMapDeviceMemory(#[source] vk::Result),
+
+    #[error(
+        "Device memory pointer was not found, did you try calling .map()?"
+    )]
+    NoMappedPointerFound,
+
+    #[error(transparent)]
+    UnableToAllocateBuffer(#[from] DeviceAllocatorError),
 }
 
 /// A Vulkan buffer and it's associated device memory.
@@ -19,21 +27,15 @@ pub struct Buffer {
 
     /// The actual memory alloctaion for this buffer
     pub allocation: Allocation,
+
+    /// The pointer to the cpu-accessible memory-mapped region of memory for
+    /// this buffer. Only valid after a call to map().
+    pub mapped_ptr: Option<*mut std::ffi::c_void>,
 }
 
-/// A CPU readable/writable buffer.
-///
-/// # Note
-///
-/// A normal buffer can be transformed into a MappedBuffer if and only if it
-/// was created with the HOST_VISIBLE property flags. No memory flushes are
-/// required if the original buffer was also created with the HOST_COHERENT
-/// flag. See the vulkan spec:
-/// https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkMemoryPropertyFlagBits.html
-pub struct MappedBuffer<'data_type, T: 'data_type + Copy> {
-    /// The mapped buffer data. Read and write this data like a normal slice.
-    pub data: &'data_type mut [T],
-
-    /// The underlying unmapped buffer.
-    pub buffer: Buffer,
+/// A resizable GPU Buffer which holds a contiguous slice of T's.
+pub struct GpuVec<T: Copy> {
+    buffer: Buffer,
+    usage_flags: vk::BufferUsageFlags,
+    _phantom_data: std::marker::PhantomData<T>,
 }

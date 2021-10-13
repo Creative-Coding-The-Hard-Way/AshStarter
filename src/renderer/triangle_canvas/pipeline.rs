@@ -49,7 +49,7 @@ pub(super) fn allocate_descriptor_sets(
 ) -> Result<Vec<vk::DescriptorSet>> {
     let descriptor_set_count = vk_dev.swapchain().image_views.len();
     let mut layouts = vec![];
-    for i in 0..descriptor_set_count {
+    for _ in 0..descriptor_set_count {
         layouts.push(layout);
     }
     let allocate_info = vk::DescriptorSetAllocateInfo {

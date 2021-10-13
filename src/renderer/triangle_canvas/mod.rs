@@ -59,27 +59,28 @@ impl TriangleCanvas {
         let total_frames = vk_dev.swapchain().image_views.len();
         let mut vertex_data = vec![];
         for _ in 0..total_frames {
-            let buffer = vk_alloc.create_buffer(
+            let mut buffer = vk_alloc.create_buffer(
                 vk_dev,
                 vk::BufferUsageFlags::STORAGE_BUFFER,
                 vk::MemoryPropertyFlags::HOST_VISIBLE
                     | vk::MemoryPropertyFlags::HOST_COHERENT,
                 (MAX_VERTEX_COUNT * std::mem::size_of::<Vertex>()) as u64,
             )?;
-            let mapped = buffer.map::<Vertex>(vk_dev)?;
-            mapped.data[0] = Vertex {
+            buffer.map(vk_dev)?;
+            let data = buffer.data_mut::<Vertex>()?;
+            data[0] = Vertex {
                 pos: [0.0, 0.5],
                 rgba: [0.8, 0.1, 0.1, 1.0],
             };
-            mapped.data[1] = Vertex {
+            data[1] = Vertex {
                 pos: [0.5, -0.5],
                 rgba: [0.1, 0.8, 0.1, 1.0],
             };
-            mapped.data[2] = Vertex {
+            data[2] = Vertex {
                 pos: [-0.5, -0.5],
                 rgba: [0.1, 0.1, 0.8, 1.0],
             };
-            vertex_data.push(mapped.unmap(vk_dev));
+            vertex_data.push(buffer);
         }
 
         pipeline::update_descriptor_sets(
@@ -147,27 +148,30 @@ impl TriangleCanvas {
 
         let total_frames = vk_dev.swapchain().image_views.len();
         for _ in 0..total_frames {
-            let buffer = vk_alloc.create_buffer(
+            let mut buffer = vk_alloc.create_buffer(
                 vk_dev,
                 vk::BufferUsageFlags::STORAGE_BUFFER,
                 vk::MemoryPropertyFlags::HOST_VISIBLE
                     | vk::MemoryPropertyFlags::HOST_COHERENT,
                 (MAX_VERTEX_COUNT * std::mem::size_of::<Vertex>()) as u64,
             )?;
-            let mapped = buffer.map::<Vertex>(vk_dev)?;
-            mapped.data[0] = Vertex {
+            buffer.map(vk_dev)?;
+
+            let data = buffer.data_mut::<Vertex>()?;
+            data[0] = Vertex {
                 pos: [0.0, 0.5],
                 rgba: [0.8, 0.1, 0.1, 1.0],
             };
-            mapped.data[1] = Vertex {
+            data[1] = Vertex {
                 pos: [0.5, -0.5],
                 rgba: [0.1, 0.8, 0.1, 1.0],
             };
-            mapped.data[2] = Vertex {
+            data[2] = Vertex {
                 pos: [-0.5, -0.5],
                 rgba: [0.1, 0.1, 0.8, 1.0],
             };
-            self.vertex_data.push(mapped.unmap(vk_dev));
+
+            self.vertex_data.push(buffer);
         }
         pipeline::update_descriptor_sets(
             vk_dev,

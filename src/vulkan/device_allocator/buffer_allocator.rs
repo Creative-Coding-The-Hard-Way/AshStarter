@@ -100,6 +100,7 @@ where
         Ok(Buffer {
             raw: buffer_handle,
             allocation,
+            mapped_ptr: None,
         })
     }
 

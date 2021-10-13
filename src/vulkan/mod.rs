@@ -7,7 +7,7 @@ mod semaphore_pool;
 mod window_surface;
 
 pub use self::{
-    buffer::{Buffer, MappedBuffer},
+    buffer::Buffer,
     device_allocator::{
         create_default_allocator, Allocation, BufferAllocator, DeviceAllocator,
     },

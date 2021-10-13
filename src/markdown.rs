@@ -1,20 +1,6 @@
 use std::fmt;
 
 /// Wrapper for &[T] which can be pretty-printed as a markdown list.
-///
-/// # Example
-///
-///     use ccthw::markdown::MdList;
-///
-///     let my_data = vec!["hello", "world"];
-///
-///     println!("My Data: {}", MdList(&my_data));
-///
-///     // produces the output-
-///     //   My Data:
-///     //   - hello
-///     //   - world
-///
 pub struct MdList<'data, T>(pub &'data [T]);
 
 impl<'data, T> fmt::Debug for MdList<'data, T>
