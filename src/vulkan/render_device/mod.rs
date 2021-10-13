@@ -1,10 +1,7 @@
-mod framebuffer;
 mod physical_device;
 mod queue;
 mod queue_family_indices;
 mod render_device;
-mod render_pass;
-mod shader_module;
 mod swapchain;
 
 use crate::vulkan::{
@@ -12,8 +9,11 @@ use crate::vulkan::{
     Instance, WindowSurface,
 };
 
-use ash::{extensions::khr, vk};
-use thiserror::Error;
+use ::{
+    ash::{extensions::khr, vk},
+    std::sync::Mutex,
+    thiserror::Error,
+};
 
 /// This enum represents the errors which can occur while attempting to find
 /// a usable physical device for the application.
@@ -52,12 +52,6 @@ pub enum RenderDeviceError {
 
     #[error("Unable to set debug name, {}, for {:?}", .0, .1)]
     UnableToSetDebugName(String, vk::ObjectType, #[source] vk::Result),
-
-    #[error("Unable to create render pass")]
-    UnableToCreateRenderPass(#[source] vk::Result),
-
-    #[error("Unable to create a framebuffer for swapchain image {}", .0)]
-    UnableToCreateFramebuffer(usize, #[source] vk::Result),
 }
 
 #[derive(Debug, Error)]
@@ -96,38 +90,38 @@ pub enum SwapchainError {
     NeedsRebuild,
 }
 
-#[derive(Debug, Error)]
-pub enum ShaderModuleError {
-    #[error(
-        "The shader's source bytes must be evenly divisible into u32 words"
-    )]
-    InvalidSourceLengthInShaderSPIRV,
-
-    #[error("Improper bytes found in compiled SPIRV shader module source")]
-    InvalidBytesInShaderSPIRV(#[source] core::array::TryFromSliceError),
-
-    #[error("Unable to create the shader module")]
-    UnableToCreateShaderModule(#[source] vk::Result),
-}
-
-/// Arguments for constructing a new RenderPass.
-#[derive(Debug, Copy, Clone)]
-pub struct RenderPassArgs {
-    /// Create the first render pass for the frame. This transitions the
-    /// color attachment from `UNDEFINED` to `OPTIMAL`.
-    pub first: bool,
-
-    /// Create the last render pass for the frame. This transitions the color
-    /// attachment to `PRESENT_SRC_KHR`.
-    pub last: bool,
-}
-
 /// This struct bundles a Vulkan queue with related data for easy tracking.
 #[derive(Debug, Clone, Copy)]
 pub struct GpuQueue {
     pub queue: vk::Queue,
     pub family_id: u32,
     pub index: u32,
+}
+
+/// The render device holds the core Vulkan state and devices which are used
+/// by all parts of the application.
+pub struct RenderDevice {
+    /// The physical device used by this application.
+    #[allow(unused)]
+    pub physical_device: vk::PhysicalDevice,
+
+    /// The Vulkan logical device used to issue commands to the physical device.
+    pub logical_device: ash::Device,
+
+    /// The GPU queue used to submit graphics commands.
+    pub graphics_queue: GpuQueue,
+
+    /// The GPU queue used to submit presentation commands.
+    pub present_queue: GpuQueue,
+
+    /// The window's swapchain and related resources.
+    pub swapchain: Mutex<Option<Swapchain>>,
+
+    /// The Vulkan presentation surface for the current window.
+    pub window_surface: WindowSurface,
+
+    /// The Vulkan library instance.
+    pub instance: Instance,
 }
 
 /// All swapchain-related resources - things which need replaced when the
@@ -150,32 +144,6 @@ pub struct Swapchain {
 
     /// The hardware pixel extent for this swapchain's images.
     pub extent: vk::Extent2D,
-}
-
-/// The render device holds the core Vulkan state and devices which are used
-/// by all parts of the application.
-pub struct RenderDevice {
-    /// The physical device used by this application.
-    #[allow(unused)]
-    pub physical_device: vk::PhysicalDevice,
-
-    /// The Vulkan logical device used to issue commands to the physical device.
-    pub logical_device: ash::Device,
-
-    /// The GPU queue used to submit graphics commands.
-    pub graphics_queue: GpuQueue,
-
-    /// The GPU queue used to submit presentation commands.
-    pub present_queue: GpuQueue,
-
-    /// The window's swapchain and related resources.
-    pub swapchain: Option<Swapchain>,
-
-    /// The Vulkan presentation surface for the current window.
-    pub window_surface: WindowSurface,
-
-    /// The Vulkan library instance.
-    pub instance: Instance,
 }
 
 /// This struct holds all of the queue indices required by this application.

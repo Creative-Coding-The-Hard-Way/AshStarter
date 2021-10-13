@@ -1,19 +1,26 @@
 mod buffer;
 mod device_allocator;
 mod ffi;
+mod framebuffer;
 mod instance;
 mod render_device;
-mod semaphore_pool;
+mod semaphore;
+mod shader_module;
+mod vulkan_debug;
 mod window_surface;
 
 pub use self::{
     buffer::Buffer,
     device_allocator::{
-        create_default_allocator, Allocation, BufferAllocator, DeviceAllocator,
+        create_default_allocator, Allocation, ComposableAllocator,
+        LockedMemoryAllocator, MemoryAllocator, PassthroughAllocator,
     },
+    framebuffer::Framebuffer,
     instance::Instance,
-    render_device::{GpuQueue, RenderDevice, RenderPassArgs},
-    semaphore_pool::SemaphorePool,
+    render_device::{GpuQueue, RenderDevice},
+    semaphore::{Semaphore, SemaphorePool},
+    shader_module::ShaderModule,
+    vulkan_debug::VulkanDebug,
     window_surface::WindowSurface,
 };
 
@@ -22,13 +29,16 @@ pub mod errors {
 
     pub use super::{
         buffer::BufferError,
-        device_allocator::DeviceAllocatorError,
+        device_allocator::AllocatorError,
+        framebuffer::FramebufferError,
         instance::InstanceError,
         render_device::{
             PhysicalDeviceError, QueueSelectionError, RenderDeviceError,
-            ShaderModuleError, SwapchainError,
+            SwapchainError,
         },
-        semaphore_pool::SemaphorePoolError,
+        semaphore::SemaphoreError,
+        shader_module::ShaderModuleError,
+        vulkan_debug::VulkanDebugError,
         window_surface::WindowSurfaceError,
     };
 
@@ -50,18 +60,24 @@ pub mod errors {
         SwapchainError(#[from] SwapchainError),
 
         #[error(transparent)]
-        SemaphorePoolError(#[from] SemaphorePoolError),
+        SemaphorePoolError(#[from] SemaphoreError),
 
         #[error(transparent)]
         WindowSurfaceError(#[from] WindowSurfaceError),
 
         #[error(transparent)]
-        DeviceAllocatorError(#[from] DeviceAllocatorError),
+        AllocatorError(#[from] AllocatorError),
 
         #[error(transparent)]
         BufferError(#[from] BufferError),
 
         #[error(transparent)]
         ShaderModuleError(#[from] ShaderModuleError),
+
+        #[error(transparent)]
+        VulkanDebugError(#[from] VulkanDebugError),
+
+        #[error(transparent)]
+        FramebufferError(#[from] FramebufferError),
     }
 }

@@ -2,7 +2,7 @@ mod pipeline;
 
 use super::{RenderPass, RenderPassArgs, Renderer, TriangleCanvas};
 
-use crate::vulkan::{BufferAllocator, RenderDevice};
+use crate::vulkan::{DeviceAllocator, RenderDevice};
 
 use ::{
     anyhow::Result,

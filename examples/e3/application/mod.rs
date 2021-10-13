@@ -8,7 +8,7 @@ use per_frame::PerFrame;
 use ccthw::{
     glfw_window::GlfwWindow,
     vulkan,
-    vulkan::{errors::SwapchainError, RenderPassArgs, SemaphorePool},
+    vulkan::{errors::SwapchainError, SemaphorePool},
 };
 
 use anyhow::{Context, Result};

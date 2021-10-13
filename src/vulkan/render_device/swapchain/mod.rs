@@ -3,14 +3,33 @@ mod selection;
 
 use super::{RenderDevice, Swapchain, SwapchainError};
 
-use ash::{version::DeviceV1_0, vk};
+use ::{
+    anyhow::Result,
+    ash::{version::DeviceV1_0, vk},
+};
 
 impl RenderDevice {
-    /// Return a borrow of the underlying swapchain struct.
+    /// Perform some action with the swapchain.
     ///
-    /// PANICS if the swapchain does not exist.
-    pub fn swapchain(&self) -> &Swapchain {
-        self.swapchain.as_ref().unwrap()
+    /// # Panic
+    ///
+    /// If the swapchain does not exist or if the swapchain mutex cannot be
+    /// acquired for any reason.
+    pub fn with_swapchain<ReturnType, Func>(&self, func: Func) -> ReturnType
+    where
+        Func: FnOnce(&Swapchain) -> ReturnType,
+    {
+        let swapchain = self
+            .swapchain
+            .lock()
+            .expect("Unable to lock the swapchain mutex");
+        let borrow = swapchain.as_ref().expect("The swapchain does not exist");
+        func(borrow)
+    }
+
+    /// Returns the number of images in the swapchain.
+    pub fn swapchain_image_count(&self) -> u32 {
+        self.with_swapchain(|swapchain| swapchain.image_views.len() as u32)
     }
 
     /// Acquire the next swapchain image index.
@@ -26,23 +45,24 @@ impl RenderDevice {
         semaphore: vk::Semaphore,
         fence: vk::Fence,
     ) -> Result<usize, SwapchainError> {
-        let swapchain = self.swapchain.as_ref().unwrap();
-        let result = unsafe {
-            swapchain.loader.acquire_next_image(
-                swapchain.khr,
-                u64::MAX,
-                semaphore,
-                fence,
-            )
-        };
-        if let Err(vk::Result::ERROR_OUT_OF_DATE_KHR) = result {
-            return Err(SwapchainError::NeedsRebuild);
-        }
-        if let Ok((_, true)) = result {
-            return Err(SwapchainError::NeedsRebuild);
-        }
-        let (index, _) = result.ok().unwrap();
-        Ok(index as usize)
+        self.with_swapchain(|swapchain| {
+            let result = unsafe {
+                swapchain.loader.acquire_next_image(
+                    swapchain.khr,
+                    u64::MAX,
+                    semaphore,
+                    fence,
+                )
+            };
+            if let Err(vk::Result::ERROR_OUT_OF_DATE_KHR) = result {
+                return Err(SwapchainError::NeedsRebuild);
+            }
+            if let Ok((_, true)) = result {
+                return Err(SwapchainError::NeedsRebuild);
+            }
+            let (index, _) = result.ok().unwrap();
+            Ok(index as usize)
+        })
     }
 
     /// Rebuild the render device's swapchain with the provided framebuffer
@@ -65,6 +85,11 @@ impl RenderDevice {
         &mut self,
         framebuffer_size: (u32, u32),
     ) -> Result<(), SwapchainError> {
+        let mut current_swapchain = self
+            .swapchain
+            .lock()
+            .expect("Unable to lock the swapchain mutex");
+
         let format = self.choose_surface_format();
         let present_mode = self.choose_present_mode();
         let extent = self.choose_swap_extent(framebuffer_size)?;
@@ -85,8 +110,8 @@ impl RenderDevice {
             present_mode,
             composite_alpha: vk::CompositeAlphaFlagsKHR::OPAQUE,
             pre_transform: vk::SurfaceTransformFlagsKHR::IDENTITY,
-            old_swapchain: if let Some(ref old_swapchain) = self.swapchain {
-                old_swapchain.khr
+            old_swapchain: if current_swapchain.is_some() {
+                current_swapchain.as_ref().unwrap().khr
             } else {
                 vk::SwapchainKHR::null()
             },
@@ -124,7 +149,7 @@ impl RenderDevice {
         let image_views =
             self.create_image_views(format.format, &swapchain_images)?;
 
-        let old_swapchain_opt = self.swapchain.replace(Swapchain {
+        let previous_swapchain = current_swapchain.replace(Swapchain {
             loader,
             khr: swapchain,
             image_views,
@@ -133,7 +158,7 @@ impl RenderDevice {
             extent,
         });
 
-        if let Some(old_swapchain) = old_swapchain_opt {
+        if let Some(old_swapchain) = previous_swapchain {
             unsafe { self.destroy_swapchain(old_swapchain)? };
         }
 

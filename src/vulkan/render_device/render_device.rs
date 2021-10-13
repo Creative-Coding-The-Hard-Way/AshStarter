@@ -3,7 +3,10 @@ use super::{
 };
 use crate::vulkan::{Instance, WindowSurface};
 
-use ash::{version::DeviceV1_0, vk};
+use ::{
+    ash::{version::DeviceV1_0, vk},
+    std::sync::Mutex,
+};
 
 impl RenderDevice {
     /// Create the Vulkan Render Device.
@@ -38,7 +41,7 @@ impl RenderDevice {
             graphics_queue,
             present_queue,
             window_surface,
-            swapchain: None,
+            swapchain: Mutex::new(None),
         };
 
         vk_dev.name_vulkan_object(
@@ -103,7 +106,11 @@ impl Drop for RenderDevice {
     /// resources which depend on it! There is no internal synchronization.
     fn drop(&mut self) {
         unsafe {
-            if let Some(swapchain) = self.swapchain.take() {
+            let mut swapchain = self
+                .swapchain
+                .lock()
+                .expect("Unable to acquire the swapchain mutex");
+            if let Some(swapchain) = swapchain.take() {
                 self.destroy_swapchain(swapchain)
                     .expect("Error while destroying the swapchain");
             }
