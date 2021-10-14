@@ -25,6 +25,9 @@ pub struct CommandBuffer {
 
     /// The CommandPool which was used to allocate this buffer.
     pub pool: Arc<CommandPool>,
+
+    /// The vulkan device which created this command buffer.
+    pub vk_dev: Arc<RenderDevice>,
 }
 
 /// A Vulkan CommandPool wrapper which automatically destroys the pool when it's

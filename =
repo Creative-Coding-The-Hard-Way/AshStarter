@@ -1,0 +1,90 @@
+use crate::{renderer::FramebufferRenderPass, vulkan::CommandBuffer};
+
+use ::{
+    ash::{version::DeviceV1_0, vk},
+    thiserror::Error,
+};
+
+#[derive(Debug, Error)]
+pub enum CommandBufferExtError {
+    #[error("Unable to begin the command buffer")]
+    UnableToBeginCommandBuffer(#[source] vk::Result),
+
+    #[error("Unable to end the command buffer")]
+    UnableToEndCommandBuffer(#[source] vk::Result),
+}
+
+pub type CommandResult<T> = Result<T, CommandBufferExtError>;
+
+/// Command buffer convenience methods.
+pub trait CommandBufferExt {
+    /// Begin recording commands into the command buffer with the
+    /// `ONE_TIME_SUBMIT` flag set.
+    unsafe fn begin_one_time_submit(&self) -> CommandResult<&Self>;
+
+    /// Finish recording commands into this command buffer.
+    unsafe fn end_commands(&self) -> CommandResult<()>;
+
+    /// Begin a renderpass
+    unsafe fn begin_framebuffer_renderpass(
+        &self,
+        fbrp: &FramebufferRenderPass,
+        current_frame: usize,
+        subpass_contents: vk::SubpassContents,
+    ) -> &Self;
+
+    /// End the current renderpass
+    unsafe fn end_renderpass(&self) -> &Self;
+}
+
+impl CommandBufferExt for CommandBuffer {
+    unsafe fn begin_one_time_submit(&self) -> CommandResult<&Self> {
+        let begin_info = vk::CommandBufferBeginInfo {
+            flags: vk::CommandBufferUsageFlags::ONE_TIME_SUBMIT,
+            ..Default::default()
+        };
+        self.vk_dev
+            .logical_device
+            .begin_command_buffer(self.raw, &begin_info)
+            .map_err(CommandBufferExtError::UnableToBeginCommandBuffer)?;
+        Ok(&self)
+    }
+
+    unsafe fn end_commands(&self) -> CommandResult<()> {
+        self.vk_dev
+            .logical_device
+            .end_command_buffer(self.raw)
+            .map_err(CommandBufferExtError::UnableToEndCommandBuffer)?;
+        Ok(())
+    }
+
+    unsafe fn begin_framebuffer_renderpass(
+        &self,
+        fbrp: &FramebufferRenderPass,
+        current_image: usize,
+        subpass_contents: vk::SubpassContents,
+    ) -> &Self {
+        let render_pass_begin_info = vk::RenderPassBeginInfo {
+            render_pass: fbrp.render_pass.raw,
+            framebuffer: fbrp.framebuffers[current_image].raw,
+            render_area: vk::Rect2D {
+                offset: vk::Offset2D { x: 0, y: 0 },
+                extent: fbrp.framebuffer_extent,
+            },
+            clear_value_count: fbrp.args.clear_count(),
+            p_clear_values: fbrp.args.clear_colors_ptr(),
+            ..Default::default()
+        };
+        self.vk_dev.logical_device.cmd_begin_render_pass(
+            self.raw,
+            &render_pass_begin_info,
+            subpass_contents,
+        );
+        &self
+    }
+
+    unsafe fn end_renderpass(&self) -> &Self {
+        self.vk_dev.logical_device.cmd_end_render_pass(self.raw);
+        &self
+    }
+}

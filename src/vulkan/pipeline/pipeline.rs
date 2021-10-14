@@ -1,4 +1,4 @@
-use super::{Pipeline, PipelineError, PipelineLayout};
+use super::{Pipeline, PipelineError};
 
 use crate::vulkan::{errors::VulkanDebugError, RenderDevice, VulkanDebug};
 

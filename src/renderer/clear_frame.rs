@@ -1,47 +1,22 @@
-use super::{ClearFrame, RenderPass, RenderPassArgs, Renderer};
+use super::{ClearFrame, FramebufferRenderPass, RenderPassArgs, Renderer};
 
-use crate::vulkan::{errors::VulkanError, RenderDevice};
+use crate::{
+    vulkan::{errors::VulkanError, CommandBuffer, RenderDevice, VulkanDebug},
+    vulkan_ext::CommandBufferExt,
+};
 
-use ::{anyhow::Result, ash::vk};
+use ::{anyhow::Result, ash::vk, std::sync::Arc};
 
-const NAME: &'static str = "ClearFrame Renderer";
+const NAME: &'static str = "ClearFrame";
 
 impl ClearFrame {
     /// Create a new render pass which clears the framebuffer to a fixed color
     /// and prepares the frame for subsequent render passes.
     pub fn new(
-        vk_dev: &RenderDevice,
+        vk_dev: Arc<RenderDevice>,
         clear_color: [f32; 4],
     ) -> Result<Self, VulkanError> {
-        Ok(Self {
-            clear_color,
-            render_pass: RenderPass::new(
-                vk_dev,
-                NAME,
-                ClearFrame::args(clear_color),
-            )?,
-        })
-    }
-
-    /// Destroy the renderer's Vulkan resources.
-    pub unsafe fn destroy(&mut self, vk_dev: &RenderDevice) {
-        self.render_pass.destroy(vk_dev);
-    }
-
-    pub unsafe fn rebuild_swapchain_resources(
-        &mut self,
-        vk_dev: &RenderDevice,
-    ) -> anyhow::Result<()> {
-        self.destroy(vk_dev);
-        self.render_pass =
-            RenderPass::new(vk_dev, NAME, ClearFrame::args(self.clear_color))?;
-        Ok(())
-    }
-}
-
-impl ClearFrame {
-    fn args(clear_color: [f32; 4]) -> RenderPassArgs {
-        RenderPassArgs {
+        let args = RenderPassArgs {
             first: true,
             clear_colors: Some(vec![vk::ClearValue {
                 color: vk::ClearColorValue {
@@ -49,7 +24,18 @@ impl ClearFrame {
                 },
             }]),
             ..Default::default()
-        }
+        };
+        let fbrp = FramebufferRenderPass::new(vk_dev, args)?;
+        fbrp.set_debug_name(NAME)?;
+        Ok(Self { fbrp })
+    }
+
+    pub unsafe fn rebuild_swapchain_resources(
+        &mut self,
+    ) -> Result<(), VulkanError> {
+        self.fbrp.rebuild_swapchain_resources()?;
+        self.fbrp.set_debug_name(NAME)?;
+        Ok(())
     }
 }
 
@@ -57,13 +43,17 @@ impl Renderer for ClearFrame {
     /// Fill a command buffer with render commands.
     fn fill_command_buffer(
         &self,
-        vk_dev: &RenderDevice,
-        cmd: vk::CommandBuffer,
+        cmd: &CommandBuffer,
         current_image: usize,
     ) -> Result<()> {
-        self.render_pass
-            .begin_render_pass(vk_dev, cmd, current_image);
-        self.render_pass.end_render_pass(vk_dev, cmd);
+        unsafe {
+            self.fbrp.begin_framebuffer_renderpass(
+                cmd,
+                current_image,
+                vk::SubpassContents::INLINE,
+            );
+            cmd.end_renderpass();
+        }
         Ok(())
     }
 }

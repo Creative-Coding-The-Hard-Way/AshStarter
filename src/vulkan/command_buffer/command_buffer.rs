@@ -11,7 +11,11 @@ impl CommandBuffer {
         command_level: vk::CommandBufferLevel,
     ) -> Result<Self, CommandBufferError> {
         let raw = unsafe { pool.allocate_command_buffer(command_level)? };
-        Ok(Self { raw, pool })
+        Ok(Self {
+            raw,
+            vk_dev: pool.vk_dev.clone(),
+            pool,
+        })
     }
 
     /// Allocate a new primary command buffer from the given pool.
@@ -27,7 +31,7 @@ impl VulkanDebug for CommandBuffer {
         &self,
         debug_name: impl Into<String>,
     ) -> Result<(), VulkanDebugError> {
-        self.pool.vk_dev.name_vulkan_object(
+        self.vk_dev.name_vulkan_object(
             debug_name,
             vk::ObjectType::COMMAND_BUFFER,
             self.raw,

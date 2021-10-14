@@ -1,26 +1,29 @@
 use super::{FrameError, FramePipeline, PerFrame};
 
-use crate::vulkan::{errors::SwapchainError, RenderDevice, SemaphorePool};
+use crate::{
+    vulkan::{
+        errors::{SwapchainError, VulkanError},
+        sync::SemaphorePool,
+        CommandBuffer, RenderDevice, VulkanDebug,
+    },
+    vulkan_ext::CommandBufferExt,
+};
 
 use ::{
-    anyhow::{Context, Result},
+    anyhow::Context,
     ash::{version::DeviceV1_0, vk},
+    std::sync::Arc,
 };
 
 impl FramePipeline {
-    pub fn new(vk_dev: &RenderDevice) -> Result<Self> {
-        let mut semaphore_pool = SemaphorePool::new();
-
-        // build per-frame resources
-        let mut frames = vec![];
-        for i in 0..vk_dev.swapchain.as_ref().unwrap().image_views.len() {
-            frames.push(PerFrame::new(&vk_dev, &mut semaphore_pool, i)?);
-        }
-
-        Ok(Self {
-            semaphore_pool,
-            frames,
-        })
+    pub fn new(vk_dev: Arc<RenderDevice>) -> Result<Self, FrameError> {
+        let mut frame_pipeline = Self {
+            frames: vec![],
+            semaphore_pool: SemaphorePool::new(vk_dev.clone()),
+            vk_dev,
+        };
+        frame_pipeline.rebuild_swapchain_resources()?;
+        Ok(frame_pipeline)
     }
 
     /// Begin rendering a single frame.
@@ -39,10 +42,9 @@ impl FramePipeline {
     ///
     pub fn begin_frame(
         &mut self,
-        vk_dev: &RenderDevice,
-    ) -> Result<(usize, vk::CommandBuffer), FrameError> {
-        let current_image = self.acquire_next_image(vk_dev)?;
-        let cmd = self.prepare_frame_command_buffer(vk_dev, current_image)?;
+    ) -> Result<(usize, &CommandBuffer), FrameError> {
+        let current_image = self.acquire_next_image()?;
+        let cmd = self.prepare_frame_command_buffer(current_image)?;
         Ok((current_image, cmd))
     }
 
@@ -50,57 +52,41 @@ impl FramePipeline {
     /// command buffer and schedules the swapchain image for presentation.
     pub fn end_frame(
         &mut self,
-        vk_dev: &RenderDevice,
         current_image: usize,
     ) -> Result<(), FrameError> {
-        self.submit_and_present(vk_dev, current_image)?;
+        self.submit_and_present(current_image)?;
         Ok(())
     }
 
-    /// Destroy all vulkan resources.
-    pub unsafe fn destroy(&mut self, vk_dev: &RenderDevice) {
-        for frame in self.frames.drain(..) {
-            frame.destroy(vk_dev);
-        }
-        self.semaphore_pool.destroy(vk_dev);
-    }
-
     /// Rebuild all swapchain-dependent resources.
-    pub unsafe fn rebuild_swapchain_resources(
-        &mut self,
-        vk_dev: &RenderDevice,
-    ) -> Result<()> {
+    pub fn rebuild_swapchain_resources(&mut self) -> Result<(), FrameError> {
         for frame in self.frames.drain(..) {
-            frame.destroy(vk_dev);
+            frame
+                .queue_submit_fence
+                .wait_and_reset()
+                .map_err(VulkanError::FenceError)?;
         }
-        for i in 0..vk_dev.swapchain.as_ref().unwrap().image_views.len() {
-            self.frames.push(PerFrame::new(
-                &vk_dev,
-                &mut self.semaphore_pool,
-                i,
-            )?);
+        for i in 0..self.vk_dev.swapchain_image_count() {
+            let frame = PerFrame::new(self.vk_dev.clone())?;
+            frame
+                .set_debug_name(format!("Frame {}", i))
+                .map_err(VulkanError::VulkanDebugError)?;
+            self.frames.push(frame);
         }
         Ok(())
     }
 }
 
 impl FramePipeline {
-    fn acquire_next_image(
-        &mut self,
-        vk_dev: &RenderDevice,
-    ) -> Result<usize, FrameError> {
-        let acquire_semaphore =
-            self.semaphore_pool.get_semaphore(vk_dev).context(
-                "unable to get a semaphore for the next swapchain image",
-            )?;
+    fn acquire_next_image(&mut self) -> Result<usize, FrameError> {
+        let acquire_semaphore = self.semaphore_pool.get_semaphore().context(
+            "unable to get a semaphore for the next swapchain image",
+        )?;
         let index = {
-            let result = vk_dev.acquire_next_swapchain_image(
-                acquire_semaphore,
+            let result = self.vk_dev.acquire_next_swapchain_image(
+                acquire_semaphore.raw,
                 vk::Fence::null(),
             );
-            if result.is_err() {
-                self.semaphore_pool.return_semaphore(acquire_semaphore);
-            }
             if let Err(SwapchainError::NeedsRebuild) = result {
                 return Err(FrameError::SwapchainNeedsRebuild);
             }
@@ -109,76 +95,53 @@ impl FramePipeline {
 
         // Replace the old acquire_semaphore with the new one which will be
         // signaled when this frame is ready.
-        self.semaphore_pool
-            .return_semaphore(self.frames[index].acquire_semaphore);
-        self.frames[index].acquire_semaphore = acquire_semaphore;
+        let old_semaphore = self.frames[index]
+            .acquire_semaphore
+            .replace(acquire_semaphore);
+        if let Some(semaphore) = old_semaphore {
+            self.semaphore_pool.return_semaphore(semaphore);
+        }
 
         // This typically is a no-op because multiple other frames have been
         // rendered between this time and the last time the frame was rendered.
-        if self.frames[index].queue_submit_fence != vk::Fence::null() {
-            unsafe {
-                vk_dev
-                    .logical_device
-                    .wait_for_fences(
-                        &[self.frames[index].queue_submit_fence],
-                        true,
-                        u64::MAX,
-                    )
-                    .context("error waiting for queue submission fence")?;
-                vk_dev
-                    .logical_device
-                    .reset_fences(&[self.frames[index].queue_submit_fence])
-                    .context("unable to reset queue submission fence")?;
-            }
-        }
+        self.frames[index]
+            .queue_submit_fence
+            .wait_and_reset()
+            .map_err(VulkanError::FenceError)?;
 
-        unsafe {
-            vk_dev
-                .logical_device
-                .reset_command_pool(
-                    self.frames[index].command_pool,
-                    vk::CommandPoolResetFlags::empty(),
-                )
-                .context("unable to reset the frame command pool")?;
-        }
+        self.frames[index]
+            .command_pool
+            .reset()
+            .map_err(VulkanError::CommandBufferError)?;
+
         Ok(index)
     }
 
     fn prepare_frame_command_buffer(
         &mut self,
-        vk_dev: &RenderDevice,
         current_image: usize,
-    ) -> Result<vk::CommandBuffer> {
+    ) -> Result<&CommandBuffer, FrameError> {
         let current_frame = &self.frames[current_image];
         unsafe {
-            let begin_info = vk::CommandBufferBeginInfo {
-                flags: vk::CommandBufferUsageFlags::ONE_TIME_SUBMIT,
-                ..Default::default()
-            };
-            vk_dev
-                .logical_device
-                .begin_command_buffer(current_frame.command_buffer, &begin_info)
+            current_frame
+                .command_buffer
+                .begin_one_time_submit()
                 .with_context(|| {
                     format!(
                         "Unable to begin the command buffer for frame {}",
                         current_image
                     )
                 })?;
-        };
-        Ok(current_frame.command_buffer)
+        }
+        Ok(&current_frame.command_buffer)
     }
 
-    fn submit_and_present(
-        &mut self,
-        vk_dev: &RenderDevice,
-        index: usize,
-    ) -> Result<(), FrameError> {
+    fn submit_and_present(&mut self, index: usize) -> Result<(), FrameError> {
         let current_frame = &self.frames[index];
-
         unsafe {
-            vk_dev
-                .logical_device
-                .end_command_buffer(current_frame.command_buffer)
+            current_frame
+                .command_buffer
+                .end_commands()
                 .with_context(|| {
                     format!("Unable to end command buffer for frame {}", index)
                 })?;
@@ -188,21 +151,25 @@ impl FramePipeline {
         let wait_stage = vk::PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT;
         let submit_info = vk::SubmitInfo {
             command_buffer_count: 1,
-            p_command_buffers: &current_frame.command_buffer,
+            p_command_buffers: &current_frame.command_buffer.raw,
             wait_semaphore_count: 1,
-            p_wait_semaphores: &current_frame.acquire_semaphore,
+            p_wait_semaphores: &current_frame
+                .acquire_semaphore
+                .as_ref()
+                .unwrap()
+                .raw,
             p_wait_dst_stage_mask: &wait_stage,
             signal_semaphore_count: 1,
-            p_signal_semaphores: &current_frame.release_semaphore,
+            p_signal_semaphores: &current_frame.release_semaphore.raw,
             ..Default::default()
         };
         unsafe {
-            vk_dev
+            self.vk_dev
                 .logical_device
                 .queue_submit(
-                    vk_dev.graphics_queue.queue,
+                    self.vk_dev.graphics_queue.queue,
                     &[submit_info],
-                    current_frame.queue_submit_fence,
+                    current_frame.queue_submit_fence.raw,
                 )
                 .with_context(|| {
                     format!(
@@ -214,21 +181,26 @@ impl FramePipeline {
 
         let index_u32 = index as u32;
         let current_frame = &self.frames[index];
-        let present_info = vk::PresentInfoKHR {
-            swapchain_count: 1,
-            p_swapchains: &vk_dev.swapchain().khr,
-            p_image_indices: &index_u32,
-            wait_semaphore_count: 1,
-            p_wait_semaphores: &current_frame.release_semaphore,
-            ..Default::default()
-        };
-        unsafe {
-            vk_dev
-                .swapchain()
-                .loader
-                .queue_present(vk_dev.present_queue.queue, &present_info)
-                .with_context(|| "Unable to present the swapchain image")?;
-        }
+
+        self.vk_dev.with_swapchain(|swapchain| {
+            let present_info = vk::PresentInfoKHR {
+                swapchain_count: 1,
+                p_swapchains: &swapchain.khr,
+                p_image_indices: &index_u32,
+                wait_semaphore_count: 1,
+                p_wait_semaphores: &current_frame.release_semaphore.raw,
+                ..Default::default()
+            };
+            unsafe {
+                swapchain
+                    .loader
+                    .queue_present(
+                        self.vk_dev.present_queue.queue,
+                        &present_info,
+                    )
+                    .with_context(|| "Unable to present the swapchain image")
+            }
+        })?;
         Ok(())
     }
 }

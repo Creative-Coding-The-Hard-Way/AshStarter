@@ -193,7 +193,7 @@ impl GlfwWindow {
             Surface::new(&instance.entry, &instance.ash),
         );
 
-        let mut device = RenderDevice::new(instance, window_surface)
+        let device = RenderDevice::new(instance, window_surface)
             .map_err(WindowError::UnexpectedRenderDeviceError)?;
 
         let (w, h) = self.window.get_framebuffer_size();

@@ -22,11 +22,9 @@ impl<T: Copy> GpuVec<T> {
             Self::element_count_to_bytes(initial_capacity),
         )?;
         buffer.map()?;
-        let capacity =
-            Self::bytes_to_element_count(buffer.allocation.byte_size);
         Ok(Self {
             buffer,
-            capacity,
+            capacity: initial_capacity,
             length: 0,
             usage_flags: buffer_usage_flags,
             _phantom_data: std::marker::PhantomData::default(),
@@ -84,11 +82,6 @@ impl<T: Copy> GpuVec<T> {
         count as u64 * std::mem::size_of::<T>() as u64
     }
 
-    /// Return the number of elements which can fit into a given space of bytes.
-    fn bytes_to_element_count(size_in_bytes: u64) -> u32 {
-        (size_in_bytes / std::mem::size_of::<T>() as u64) as u32
-    }
-
     /// Grow the buffer by allocating a new buffer, copying the old data into
     /// the new buffer, and releasing the old.
     fn grow(&mut self, desired_capacity: u32) -> Result<(), BufferError> {
@@ -101,8 +94,7 @@ impl<T: Copy> GpuVec<T> {
             Self::element_count_to_bytes(desired_capacity),
         )?;
         buffer.map()?;
-        self.capacity =
-            Self::bytes_to_element_count(buffer.allocation.byte_size);
+        self.capacity = desired_capacity;
 
         // copy the contents of the existing buffer to the new buffer
         {

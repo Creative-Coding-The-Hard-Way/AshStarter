@@ -1,12 +1,12 @@
 mod clear_frame;
 mod finish_frame;
-mod render_pass;
-mod triangle_canvas;
+mod framebuffer_render_pass;
+mod render_pass_args;
+//mod triangle_canvas;
 
-use crate::vulkan::{Buffer, RenderDevice};
+use crate::vulkan::{CommandBuffer, Framebuffer, RenderDevice, RenderPass};
 
-use anyhow::Result;
-use ash::vk;
+use ::{anyhow::Result, ash::vk, std::sync::Arc};
 
 pub trait Renderer {
     /// Fill the frame's command buffer.
@@ -16,8 +16,7 @@ pub trait Renderer {
     ///
     fn fill_command_buffer(
         &self,
-        vk_dev: &RenderDevice,
-        command_buffer: vk::CommandBuffer,
+        command_buffer: &CommandBuffer,
         current_image: usize,
     ) -> Result<()>;
 }
@@ -25,27 +24,26 @@ pub trait Renderer {
 /// A renderer which transitions the image for rendering and clears to a known
 /// value.
 pub struct ClearFrame {
-    clear_color: [f32; 4],
-    render_pass: RenderPass,
+    fbrp: FramebufferRenderPass,
 }
 
 /// A renderer which transitions the image for presentation, effectively
 /// finishing the frame.
 pub struct FinishFrame {
-    render_pass: RenderPass,
+    fbrp: FramebufferRenderPass,
 }
 
-/// A renderer which just draws triangles on the screen.
-pub struct TriangleCanvas {
-    vertex_data: Vec<Buffer>,
-    descriptor_sets: Vec<vk::DescriptorSet>,
-
-    render_pass: RenderPass,
-    pipeline: vk::Pipeline,
-    pipeline_layout: vk::PipelineLayout,
-    descriptor_layout: vk::DescriptorSetLayout,
-    descriptor_pool: vk::DescriptorPool,
-}
+///// A renderer which just draws triangles on the screen.
+//pub struct TriangleCanvas {
+//    vertex_data: Vec<Buffer>,
+//    descriptor_sets: Vec<vk::DescriptorSet>,
+//
+//    render_pass: RenderPass,
+//    pipeline: vk::Pipeline,
+//    pipeline_layout: vk::PipelineLayout,
+//    descriptor_layout: vk::DescriptorSetLayout,
+//    descriptor_pool: vk::DescriptorPool,
+//}
 
 /// Configuration values for a new render pass instance.
 #[derive(Clone)]
@@ -67,14 +65,22 @@ pub struct RenderPassArgs {
     clear_colors: Option<Vec<vk::ClearValue>>,
 }
 
-/// A Renderpass is a combination of a Vulkan RenderPass object and a set of
-/// framebuffers.
-///
-/// This combination is a highly common need for all of the Renderers defined
-/// in this module.
-pub struct RenderPass {
-    name: String,
-    args: RenderPassArgs,
-    framebuffers: Vec<vk::Framebuffer>,
-    render_pass: vk::RenderPass,
+/// A combination of a Vulkan RenderPass object and a set of framebuffers with
+/// a 1-1 mapping to swapchain images.
+pub struct FramebufferRenderPass {
+    /// Renderpass args control the creation of the underlying Vulkan renderpass
+    /// instance.
+    pub args: RenderPassArgs,
+
+    /// Framebuffers for each respective swapchain image
+    pub framebuffers: Vec<Framebuffer>,
+
+    /// The renderpass created based on the renderpass args
+    pub render_pass: RenderPass,
+
+    /// The full size of each framebuffer
+    pub framebuffer_extent: vk::Extent2D,
+
+    /// The device used to create this instance
+    pub vk_dev: Arc<RenderDevice>,
 }

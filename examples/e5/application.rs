@@ -9,22 +9,21 @@ use ccthw::{
     vulkan,
 };
 
-use anyhow::Result;
-use ash::version::DeviceV1_0;
+use ::{anyhow::Result, ash::version::DeviceV1_0, std::sync::Arc};
 
 // The main application state.
 pub struct Application {
     // renderers
     clear_frame: ClearFrame,
     finish_frame: FinishFrame,
-
     frame_pipeline: FramePipeline,
-    vk_dev: vulkan::RenderDevice,
-    glfw_window: GlfwWindow,
-    fps_limit: FrameRateLimit,
 
+    fps_limit: FrameRateLimit,
     paused: bool,
     swapchain_needs_rebuild: bool,
+
+    vk_dev: Arc<vulkan::RenderDevice>,
+    glfw_window: GlfwWindow,
 }
 
 impl Application {
@@ -35,12 +34,12 @@ impl Application {
         glfw_window.window.set_framebuffer_size_polling(true);
 
         // Create the vulkan render device
-        let vk_dev = glfw_window.create_vulkan_device()?;
-        let frame_pipeline = FramePipeline::new(&vk_dev)?;
+        let vk_dev = Arc::new(glfw_window.create_vulkan_device()?);
+        let frame_pipeline = FramePipeline::new(vk_dev.clone())?;
 
         Ok(Self {
-            clear_frame: ClearFrame::new(&vk_dev, [0.1, 0.1, 0.2, 1.0])?,
-            finish_frame: FinishFrame::new(&vk_dev)?,
+            clear_frame: ClearFrame::new(vk_dev.clone(), [0.1, 0.1, 0.2, 1.0])?,
+            finish_frame: FinishFrame::new(vk_dev.clone())?,
 
             frame_pipeline,
             vk_dev,
@@ -84,14 +83,12 @@ impl Application {
 
     /// Render the applications state in in a three-step process.
     fn compose_frame(&mut self) -> Result<(), FrameError> {
-        let (index, cmd) = self.frame_pipeline.begin_frame(&self.vk_dev)?;
+        let (index, cmd) = self.frame_pipeline.begin_frame()?;
 
-        self.clear_frame
-            .fill_command_buffer(&self.vk_dev, cmd, index)?;
-        self.finish_frame
-            .fill_command_buffer(&self.vk_dev, cmd, index)?;
+        self.clear_frame.fill_command_buffer(cmd, index)?;
+        self.finish_frame.fill_command_buffer(cmd, index)?;
 
-        self.frame_pipeline.end_frame(&self.vk_dev, index)
+        self.frame_pipeline.end_frame(index)
     }
 
     /// Rebuild the swapchain and any dependent resources.
@@ -107,11 +104,9 @@ impl Application {
         self.vk_dev.rebuild_swapchain((w as u32, h as u32))?;
 
         unsafe {
-            self.frame_pipeline
-                .rebuild_swapchain_resources(&self.vk_dev)?;
-            self.clear_frame.rebuild_swapchain_resources(&self.vk_dev)?;
-            self.finish_frame
-                .rebuild_swapchain_resources(&self.vk_dev)?;
+            self.frame_pipeline.rebuild_swapchain_resources()?;
+            self.clear_frame.rebuild_swapchain_resources()?;
+            self.finish_frame.rebuild_swapchain_resources()?;
         }
         Ok(())
     }
@@ -151,9 +146,6 @@ impl Drop for Application {
                 .logical_device
                 .device_wait_idle()
                 .expect("error while waiting for graphics device idle");
-            self.clear_frame.destroy(&self.vk_dev);
-            self.finish_frame.destroy(&self.vk_dev);
-            self.frame_pipeline.destroy(&self.vk_dev);
         }
     }
 }
