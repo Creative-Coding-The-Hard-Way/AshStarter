@@ -1,7 +1,6 @@
 //! This module defines the main application initialization, event loop, and
 //! rendering.
-use anyhow::Result;
-use ccthw::glfw_window::GlfwWindow;
+use ::{anyhow::Result, ccthw::glfw_window::GlfwWindow};
 
 // The main application state.
 pub struct Application {

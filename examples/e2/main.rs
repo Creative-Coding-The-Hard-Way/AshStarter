@@ -1,10 +1,13 @@
 mod application;
 
-use anyhow::{Context, Result};
-use application::Application;
-use flexi_logger::{DeferredNow, Logger, Record};
-use std::fmt::Write as FmtWrite;
-use textwrap::{termwidth, Options};
+use self::application::Application;
+
+use ::{
+    anyhow::{Context, Result},
+    flexi_logger::{DeferredNow, Logger, Record},
+    std::fmt::Write as FmtWrite,
+    textwrap::{termwidth, Options},
+};
 
 /// Application entry point. Execute the run() function and print a
 /// human-readable error on the terminal if anything goes wrong.

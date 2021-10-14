@@ -82,7 +82,7 @@ impl RenderDevice {
     /// else manually signal the semaphore to allow forward progress.
     ///
     pub fn rebuild_swapchain(
-        &mut self,
+        &self,
         framebuffer_size: (u32, u32),
     ) -> Result<(), SwapchainError> {
         let mut current_swapchain = self

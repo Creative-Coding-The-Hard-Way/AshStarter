@@ -31,9 +31,7 @@ impl Framebuffer {
                 }
                 Ok(framebuffers)
             },
-        );
-
-        todo!()
+        )
     }
 
     /// Create a single framebuffer with a color attachment.

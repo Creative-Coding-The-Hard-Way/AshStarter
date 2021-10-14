@@ -1,16 +1,20 @@
 mod buffer;
+mod command_buffer;
 mod device_allocator;
 mod ffi;
 mod framebuffer;
 mod instance;
 mod render_device;
-mod semaphore;
+mod render_pass;
 mod shader_module;
 mod vulkan_debug;
 mod window_surface;
 
+pub mod sync;
+
 pub use self::{
     buffer::Buffer,
+    command_buffer::{CommandBuffer, CommandPool},
     device_allocator::{
         create_default_allocator, Allocation, ComposableAllocator,
         LockedMemoryAllocator, MemoryAllocator, PassthroughAllocator,
@@ -18,7 +22,7 @@ pub use self::{
     framebuffer::Framebuffer,
     instance::Instance,
     render_device::{GpuQueue, RenderDevice},
-    semaphore::{Semaphore, SemaphorePool},
+    render_pass::RenderPass,
     shader_module::ShaderModule,
     vulkan_debug::VulkanDebug,
     window_surface::WindowSurface,
@@ -29,6 +33,7 @@ pub mod errors {
 
     pub use super::{
         buffer::BufferError,
+        command_buffer::CommandBufferError,
         device_allocator::AllocatorError,
         framebuffer::FramebufferError,
         instance::InstanceError,
@@ -36,8 +41,10 @@ pub mod errors {
             PhysicalDeviceError, QueueSelectionError, RenderDeviceError,
             SwapchainError,
         },
-        semaphore::SemaphoreError,
+        render_pass::RenderPassError,
         shader_module::ShaderModuleError,
+        sync::fence::FenceError,
+        sync::semaphore::SemaphoreError,
         vulkan_debug::VulkanDebugError,
         window_surface::WindowSurfaceError,
     };
@@ -79,5 +86,14 @@ pub mod errors {
 
         #[error(transparent)]
         FramebufferError(#[from] FramebufferError),
+
+        #[error(transparent)]
+        FenceError(#[from] FenceError),
+
+        #[error(transparent)]
+        CommandBufferError(#[from] CommandBufferError),
+
+        #[error(transparent)]
+        RenderPassError(#[from] RenderPassError),
     }
 }
