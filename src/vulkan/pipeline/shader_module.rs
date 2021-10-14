@@ -1,4 +1,4 @@
-use super::{ShaderModule, ShaderModuleError};
+use super::{PipelineError, ShaderModule};
 
 use crate::vulkan::{errors::VulkanDebugError, RenderDevice, VulkanDebug};
 
@@ -12,10 +12,9 @@ const DEFAULT_ENTRY_POINT: &'static [u8] = b"main\0";
 impl ShaderModule {
     /// Create a new owned shader module.
     pub fn from_spirv(
-        &self,
         vk_dev: Arc<RenderDevice>,
         source: &'static [u8],
-    ) -> Result<Self, ShaderModuleError> {
+    ) -> Result<Self, PipelineError> {
         let source_u32 = Self::copy_to_u32(source)?;
         let create_info = vk::ShaderModuleCreateInfo {
             p_code: source_u32.as_ptr(),
@@ -26,7 +25,7 @@ impl ShaderModule {
             vk_dev
                 .logical_device
                 .create_shader_module(&create_info, None)
-                .map_err(ShaderModuleError::UnableToCreateShaderModule)?
+                .map_err(PipelineError::UnableToCreateShaderModule)?
         };
         Ok(Self {
             raw: shader_module,
@@ -90,14 +89,12 @@ impl ShaderModule {
     /// alignment.
     ///
     /// Assumes that data is little endian and will break on other architectures.
-    fn copy_to_u32(
-        bytes: &'static [u8],
-    ) -> Result<Vec<u32>, ShaderModuleError> {
+    fn copy_to_u32(bytes: &'static [u8]) -> Result<Vec<u32>, PipelineError> {
         use std::convert::TryInto;
 
         const U32_SIZE: usize = std::mem::size_of::<u32>();
         if bytes.len() % U32_SIZE != 0 {
-            return Err(ShaderModuleError::InvalidSourceLengthInShaderSPIRV);
+            return Err(PipelineError::InvalidSourceLengthInShaderSPIRV);
         }
 
         let mut buffer: Vec<u32> = vec![];
@@ -108,7 +105,7 @@ impl ShaderModule {
             let word = u32::from_le_bytes(
                 int_slice
                     .try_into()
-                    .map_err(ShaderModuleError::InvalidBytesInShaderSPIRV)?,
+                    .map_err(PipelineError::InvalidBytesInShaderSPIRV)?,
             );
             buffer.push(word);
         }

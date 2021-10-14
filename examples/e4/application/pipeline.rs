@@ -1,35 +1,32 @@
 use super::Vertex;
 
-use anyhow::Result;
-use ash::{version::DeviceV1_0, vk};
-use ccthw::vulkan::RenderDevice;
-use memoffset::offset_of;
-use std::ffi::CString;
+use ::{
+    anyhow::Result,
+    ash::vk,
+    ccthw::vulkan::{
+        Pipeline, PipelineLayout, RenderDevice, ShaderModule, VulkanDebug,
+    },
+    memoffset::offset_of,
+    std::sync::Arc,
+};
 
 pub fn create_pipeline(
-    vk_dev: &RenderDevice,
+    vk_dev: Arc<RenderDevice>,
     render_pass: vk::RenderPass,
-) -> Result<(vk::Pipeline, vk::PipelineLayout)> {
-    let vertex_module: vk::ShaderModule = vk_dev.create_shader_module(
+) -> Result<(Pipeline, PipelineLayout)> {
+    let vertex_module = ShaderModule::from_spirv(
+        vk_dev.clone(),
         std::include_bytes!("../shaders/triangle.vert.sprv"),
     )?;
-    let fragment_module: vk::ShaderModule = vk_dev.create_shader_module(
+    let fragment_module = ShaderModule::from_spirv(
+        vk_dev.clone(),
         std::include_bytes!("../shaders/triangle.frag.sprv"),
     )?;
 
-    let shader_entry_point = CString::new("main")?;
-    let vertex_create_info = vk::PipelineShaderStageCreateInfo {
-        stage: vk::ShaderStageFlags::VERTEX,
-        module: vertex_module,
-        p_name: shader_entry_point.as_ptr(),
-        ..Default::default()
-    };
-    let fragment_create_info = vk::PipelineShaderStageCreateInfo {
-        stage: vk::ShaderStageFlags::FRAGMENT,
-        module: fragment_module,
-        p_name: shader_entry_point.as_ptr(),
-        ..Default::default()
-    };
+    let vertex_create_info =
+        vertex_module.stage_create_info(vk::ShaderStageFlags::VERTEX);
+    let fragment_create_info =
+        fragment_module.stage_create_info(vk::ShaderStageFlags::FRAGMENT);
 
     let vertex_input_binding = vk::VertexInputBindingDescription {
         binding: 0,
@@ -64,17 +61,18 @@ pub fn create_pipeline(
         primitive_restart_enable: 0,
         ..Default::default()
     };
+    let extent = vk_dev.with_swapchain(|swapchain| swapchain.extent);
     let viewports = [vk::Viewport {
         x: 0.0,
         y: 0.0,
-        width: vk_dev.swapchain().extent.width as f32,
-        height: vk_dev.swapchain().extent.height as f32,
+        width: extent.width as f32,
+        height: extent.height as f32,
         min_depth: 0.0,
         max_depth: 1.0,
     }];
     let scissors = [vk::Rect2D {
         offset: vk::Offset2D { x: 0, y: 0 },
-        extent: vk_dev.swapchain().extent,
+        extent,
     }];
     let viewport_state = vk::PipelineViewportStateCreateInfo {
         p_viewports: viewports.as_ptr(),
@@ -126,24 +124,9 @@ pub fn create_pipeline(
         attachment_count: blend_attachments.len() as u32,
         ..Default::default()
     };
-    let pipeline_layout_create_info = vk::PipelineLayoutCreateInfo {
-        p_set_layouts: std::ptr::null(),
-        set_layout_count: 0,
-        p_push_constant_ranges: std::ptr::null(),
-        push_constant_range_count: 0,
-        ..Default::default()
-    };
 
-    let pipeline_layout = unsafe {
-        vk_dev
-            .logical_device
-            .create_pipeline_layout(&pipeline_layout_create_info, None)?
-    };
-    vk_dev.name_vulkan_object(
-        "Application Pipeline Layout",
-        vk::ObjectType::PIPELINE_LAYOUT,
-        pipeline_layout,
-    )?;
+    let pipeline_layout = PipelineLayout::new(vk_dev.clone(), &[], &[])?;
+    pipeline_layout.set_debug_name("Application Pipeline Layout")?;
 
     let stages = [vertex_create_info, fragment_create_info];
     let pipeline_create_info = vk::GraphicsPipelineCreateInfo {
@@ -160,7 +143,7 @@ pub fn create_pipeline(
         p_dynamic_state: std::ptr::null(),
         p_depth_stencil_state: std::ptr::null(),
 
-        layout: pipeline_layout,
+        layout: pipeline_layout.raw,
         render_pass,
         subpass: 0,
         base_pipeline_index: -1,
@@ -169,31 +152,9 @@ pub fn create_pipeline(
         ..Default::default()
     };
 
-    let pipelines = unsafe {
-        vk_dev
-            .logical_device
-            .create_graphics_pipelines(
-                vk::PipelineCache::null(),
-                &[pipeline_create_info],
-                None,
-            )
-            .map_err(|(_, err)| err)?
-    };
-    let pipeline = pipelines[0];
-    vk_dev.name_vulkan_object(
-        "Application Graphics Pipeline",
-        vk::ObjectType::PIPELINE,
-        pipeline,
-    )?;
-
-    unsafe {
-        vk_dev
-            .logical_device
-            .destroy_shader_module(vertex_module, None);
-        vk_dev
-            .logical_device
-            .destroy_shader_module(fragment_module, None);
-    }
+    let pipeline =
+        Pipeline::new_graphics_pipeline(vk_dev.clone(), pipeline_create_info)?;
+    pipeline.set_debug_name("Application Graphics Pipeline")?;
 
     Ok((pipeline, pipeline_layout))
 }

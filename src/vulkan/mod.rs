@@ -4,16 +4,16 @@ mod device_allocator;
 mod ffi;
 mod framebuffer;
 mod instance;
+mod pipeline;
 mod render_device;
 mod render_pass;
-mod shader_module;
 mod vulkan_debug;
 mod window_surface;
 
 pub mod sync;
 
 pub use self::{
-    buffer::Buffer,
+    buffer::{Buffer, GpuVec},
     command_buffer::{CommandBuffer, CommandPool},
     device_allocator::{
         create_default_allocator, Allocation, ComposableAllocator,
@@ -21,9 +21,9 @@ pub use self::{
     },
     framebuffer::Framebuffer,
     instance::Instance,
+    pipeline::{Pipeline, PipelineLayout, ShaderModule},
     render_device::{GpuQueue, RenderDevice},
     render_pass::RenderPass,
-    shader_module::ShaderModule,
     vulkan_debug::VulkanDebug,
     window_surface::WindowSurface,
 };
@@ -37,12 +37,12 @@ pub mod errors {
         device_allocator::AllocatorError,
         framebuffer::FramebufferError,
         instance::InstanceError,
+        pipeline::PipelineError,
         render_device::{
             PhysicalDeviceError, QueueSelectionError, RenderDeviceError,
             SwapchainError,
         },
         render_pass::RenderPassError,
-        shader_module::ShaderModuleError,
         sync::fence::FenceError,
         sync::semaphore::SemaphoreError,
         vulkan_debug::VulkanDebugError,
@@ -79,7 +79,7 @@ pub mod errors {
         BufferError(#[from] BufferError),
 
         #[error(transparent)]
-        ShaderModuleError(#[from] ShaderModuleError),
+        PipelineError(#[from] PipelineError),
 
         #[error(transparent)]
         VulkanDebugError(#[from] VulkanDebugError),
