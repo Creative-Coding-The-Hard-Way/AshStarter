@@ -5,13 +5,13 @@
         "commandLine": "",
         "environment": [
         ],
-        "executable": "C:\\Users\\brad\\Documents\\projects\\AshStarter\\target\\debug\\examples\\e4.exe",
+        "executable": "C:\\Users\\brad\\Documents\\projects\\AshStarter\\target\\debug\\examples\\e6.exe",
         "inject": false,
-        "numQueuedFrames": 3,
+        "numQueuedFrames": 1,
         "options": {
             "allowFullscreen": true,
             "allowVSync": true,
-            "apiValidation": false,
+            "apiValidation": true,
             "captureAllCmdLists": true,
             "captureCallstacks": true,
             "captureCallstacksOnlyDraws": false,

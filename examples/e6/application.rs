@@ -6,12 +6,10 @@ use ccthw::{
     glfw_window::GlfwWindow,
     renderer::{ClearFrame, FinishFrame, Renderer, TriangleCanvas},
     timing::FrameRateLimit,
-    vulkan,
-    vulkan::DeviceAllocator,
+    vulkan::{self, RenderDevice},
 };
 
-use anyhow::Result;
-use ash::version::DeviceV1_0;
+use ::{anyhow::Result, ash::version::DeviceV1_0, std::sync::Arc};
 
 // The main application state.
 pub struct Application {
@@ -20,14 +18,15 @@ pub struct Application {
     finish_frame: FinishFrame,
     triangle_canvas: TriangleCanvas,
 
-    vk_alloc: Box<dyn DeviceAllocator>,
-    frame_pipeline: FramePipeline,
-    vk_dev: vulkan::RenderDevice,
-    glfw_window: GlfwWindow,
+    // app state
     fps_limit: FrameRateLimit,
-
     paused: bool,
     swapchain_needs_rebuild: bool,
+
+    // vulkan core
+    frame_pipeline: FramePipeline,
+    vk_dev: Arc<RenderDevice>,
+    glfw_window: GlfwWindow,
 }
 
 impl Application {
@@ -38,24 +37,23 @@ impl Application {
         glfw_window.window.set_framebuffer_size_polling(true);
 
         // Create the vulkan render device
-        let vk_dev = glfw_window.create_vulkan_device()?;
-        let frame_pipeline = FramePipeline::new(&vk_dev)?;
+        let vk_dev = Arc::new(glfw_window.create_vulkan_device()?);
+        let vk_alloc = vulkan::create_default_allocator(vk_dev.clone());
 
-        let mut vk_alloc = vulkan::create_default_allocator();
+        let frame_pipeline = FramePipeline::new(vk_dev.clone())?;
 
         Ok(Self {
-            clear_frame: ClearFrame::new(&vk_dev, [0.1, 0.1, 0.2, 1.0])?,
-            finish_frame: FinishFrame::new(&vk_dev)?,
-            triangle_canvas: TriangleCanvas::new(&vk_dev, &mut vk_alloc)?,
-
-            vk_alloc,
-            frame_pipeline,
-            vk_dev,
-            glfw_window,
+            clear_frame: ClearFrame::new(vk_dev.clone(), [0.1, 0.1, 0.2, 1.0])?,
+            finish_frame: FinishFrame::new(vk_dev.clone())?,
+            triangle_canvas: TriangleCanvas::new(vk_dev.clone(), vk_alloc)?,
 
             fps_limit: FrameRateLimit::new(120, 30),
             paused: false,
             swapchain_needs_rebuild: false,
+
+            frame_pipeline,
+            vk_dev,
+            glfw_window,
         })
     }
 
@@ -91,16 +89,23 @@ impl Application {
 
     /// Render the applications state in in a three-step process.
     fn compose_frame(&mut self) -> Result<(), FrameError> {
-        let (index, cmd) = self.frame_pipeline.begin_frame(&self.vk_dev)?;
+        let (index, cmd) = self.frame_pipeline.begin_frame()?;
 
-        self.clear_frame
-            .fill_command_buffer(&self.vk_dev, cmd, index)?;
-        self.triangle_canvas
-            .fill_command_buffer(&self.vk_dev, cmd, index)?;
-        self.finish_frame
-            .fill_command_buffer(&self.vk_dev, cmd, index)?;
+        self.triangle_canvas.clear(index);
+        self.triangle_canvas.set_color([0.2, 0.3, 0.4, 1.0]);
+        for _ in 0..100 {
+            self.triangle_canvas.add_triangle(
+                [0.0, 0.5],
+                [0.5, -0.5],
+                [-0.5, -0.5],
+            )?;
+        }
 
-        self.frame_pipeline.end_frame(&self.vk_dev, index)
+        self.clear_frame.fill_command_buffer(cmd, index)?;
+        self.triangle_canvas.fill_command_buffer(cmd, index)?;
+        self.finish_frame.fill_command_buffer(cmd, index)?;
+
+        self.frame_pipeline.end_frame(index)
     }
 
     /// Rebuild the swapchain and any dependent resources.
@@ -116,15 +121,10 @@ impl Application {
         self.vk_dev.rebuild_swapchain((w as u32, h as u32))?;
 
         unsafe {
-            self.frame_pipeline
-                .rebuild_swapchain_resources(&self.vk_dev)?;
-            self.clear_frame.rebuild_swapchain_resources(&self.vk_dev)?;
-            self.finish_frame
-                .rebuild_swapchain_resources(&self.vk_dev)?;
-            self.triangle_canvas.rebuild_swapchain_resources(
-                &self.vk_dev,
-                &mut self.vk_alloc,
-            )?;
+            self.frame_pipeline.rebuild_swapchain_resources()?;
+            self.clear_frame.rebuild_swapchain_resources()?;
+            self.finish_frame.rebuild_swapchain_resources()?;
+            self.triangle_canvas.rebuild_swapchain_resources()?;
         }
         Ok(())
     }
@@ -164,12 +164,6 @@ impl Drop for Application {
                 .logical_device
                 .device_wait_idle()
                 .expect("error while waiting for graphics device idle");
-            self.clear_frame.destroy(&self.vk_dev);
-            self.finish_frame.destroy(&self.vk_dev);
-            self.frame_pipeline.destroy(&self.vk_dev);
-            self.triangle_canvas
-                .destroy(&self.vk_dev, &mut self.vk_alloc)
-                .expect("unable to destroy the triangle canvas");
         }
     }
 }

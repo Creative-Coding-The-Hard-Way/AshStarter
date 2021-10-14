@@ -1,5 +1,6 @@
 mod buffer;
 mod command_buffer;
+mod descriptor_set;
 mod device_allocator;
 mod ffi;
 mod framebuffer;
@@ -15,6 +16,7 @@ pub mod sync;
 pub use self::{
     buffer::{Buffer, GpuVec},
     command_buffer::{CommandBuffer, CommandPool},
+    descriptor_set::{DescriptorPool, DescriptorSet, DescriptorSetLayout},
     device_allocator::{
         create_default_allocator, Allocation, ComposableAllocator,
         LockedMemoryAllocator, MemoryAllocator, PassthroughAllocator,
@@ -34,6 +36,7 @@ pub mod errors {
     pub use super::{
         buffer::BufferError,
         command_buffer::CommandBufferError,
+        descriptor_set::DescriptorSetError,
         device_allocator::AllocatorError,
         framebuffer::FramebufferError,
         instance::InstanceError,
@@ -95,5 +98,8 @@ pub mod errors {
 
         #[error(transparent)]
         RenderPassError(#[from] RenderPassError),
+
+        #[error(transparent)]
+        DescriptorSetError(#[from] DescriptorSetError),
     }
 }

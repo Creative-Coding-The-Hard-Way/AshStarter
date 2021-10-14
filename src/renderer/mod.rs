@@ -2,9 +2,13 @@ mod clear_frame;
 mod finish_frame;
 mod framebuffer_render_pass;
 mod render_pass_args;
-//mod triangle_canvas;
+mod triangle_canvas;
 
-use crate::vulkan::{CommandBuffer, Framebuffer, RenderDevice, RenderPass};
+use crate::vulkan::{
+    CommandBuffer, DescriptorPool, DescriptorSet, DescriptorSetLayout,
+    Framebuffer, GpuVec, MemoryAllocator, Pipeline, PipelineLayout,
+    RenderDevice, RenderPass,
+};
 
 use ::{anyhow::Result, ash::vk, std::sync::Arc};
 
@@ -33,17 +37,26 @@ pub struct FinishFrame {
     fbrp: FramebufferRenderPass,
 }
 
-///// A renderer which just draws triangles on the screen.
-//pub struct TriangleCanvas {
-//    vertex_data: Vec<Buffer>,
-//    descriptor_sets: Vec<vk::DescriptorSet>,
-//
-//    render_pass: RenderPass,
-//    pipeline: vk::Pipeline,
-//    pipeline_layout: vk::PipelineLayout,
-//    descriptor_layout: vk::DescriptorSetLayout,
-//    descriptor_pool: vk::DescriptorPool,
-//}
+#[derive(Debug, Copy, Clone)]
+pub struct Vertex2D {
+    pub pos: [f32; 2],
+    pub rgba: [f32; 4],
+}
+
+/// A renderer which just draws triangles on the screen.
+pub struct TriangleCanvas {
+    current_image: usize,
+    current_color: [f32; 4],
+    fbrp: FramebufferRenderPass,
+    vertex_data: Vec<GpuVec<Vertex2D>>,
+    pipeline: Pipeline,
+    pipeline_layout: PipelineLayout,
+    descriptor_sets: Vec<DescriptorSet>,
+    descriptor_layout: DescriptorSetLayout,
+    descriptor_pool: DescriptorPool,
+    vk_dev: Arc<RenderDevice>,
+    vk_alloc: Arc<dyn MemoryAllocator>,
+}
 
 /// Configuration values for a new render pass instance.
 #[derive(Clone)]
