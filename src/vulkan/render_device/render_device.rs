@@ -99,6 +99,48 @@ impl RenderDevice {
                 })
         }
     }
+
+    /// Query the device for MSAA support.
+    ///
+    /// # Returns
+    ///
+    /// The minimum between the `desired` sample count and the sample count
+    /// supported by the device.
+    ///
+    /// e.g. if the device supports 4xMSAA and 8xMSAA is desired, this method
+    /// will return 4xMSAA. Similarly, if the device supports 4xMSAA and 2xMSAA
+    /// is desired, then this method will return 2xMSAA.
+    pub fn get_supported_msaa(
+        &self,
+        desired: vk::SampleCountFlags,
+    ) -> vk::SampleCountFlags {
+        use ash::version::InstanceV1_0;
+
+        let props = unsafe {
+            self.instance
+                .ash
+                .get_physical_device_properties(self.physical_device)
+        };
+        let color_samples = props.limits.framebuffer_color_sample_counts;
+        let depth_samples = props.limits.framebuffer_depth_sample_counts;
+        let supported_samples = color_samples.min(depth_samples);
+
+        if supported_samples.contains(vk::SampleCountFlags::TYPE_64) {
+            desired.min(vk::SampleCountFlags::TYPE_64)
+        } else if supported_samples.contains(vk::SampleCountFlags::TYPE_32) {
+            desired.min(vk::SampleCountFlags::TYPE_32)
+        } else if supported_samples.contains(vk::SampleCountFlags::TYPE_16) {
+            desired.min(vk::SampleCountFlags::TYPE_16)
+        } else if supported_samples.contains(vk::SampleCountFlags::TYPE_8) {
+            desired.min(vk::SampleCountFlags::TYPE_8)
+        } else if supported_samples.contains(vk::SampleCountFlags::TYPE_4) {
+            desired.min(vk::SampleCountFlags::TYPE_4)
+        } else if supported_samples.contains(vk::SampleCountFlags::TYPE_2) {
+            desired.min(vk::SampleCountFlags::TYPE_2)
+        } else {
+            vk::SampleCountFlags::TYPE_1
+        }
+    }
 }
 
 impl Drop for RenderDevice {

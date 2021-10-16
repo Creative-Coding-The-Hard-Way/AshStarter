@@ -73,7 +73,7 @@ impl Drop for Instance {
 fn debug_layers() -> Vec<String> {
     vec![
         "VK_LAYER_KHRONOS_validation".to_owned(),
-        // "VK_LAYER_LUNARG_api_dump".to_owned(),
+        //"VK_LAYER_LUNARG_api_dump".to_owned(),
     ]
 }
 
@@ -106,7 +106,7 @@ fn create_instance(
         p_application_name: app_name.as_ptr(),
         application_version: vk::make_version(1, 0, 0),
         engine_version: vk::make_version(1, 0, 0),
-        api_version: vk::make_version(1, 1, 0),
+        api_version: vk::make_version(1, 2, 0),
         ..Default::default()
     };
 

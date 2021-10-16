@@ -10,7 +10,7 @@ use ccthw::{
     vulkan::{self, RenderDevice},
 };
 
-use ::{anyhow::Result, ash::version::DeviceV1_0, std::sync::Arc};
+use ::{anyhow::Result, ash::version::DeviceV1_0, ash::vk, std::sync::Arc};
 
 // The main application state.
 pub struct Application {
