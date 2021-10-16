@@ -5,7 +5,7 @@ mod render_pass_args;
 mod triangle_canvas;
 
 use crate::vulkan::{
-    CommandBuffer, DescriptorPool, DescriptorSet, DescriptorSetLayout,
+    Buffer, CommandBuffer, DescriptorPool, DescriptorSet, DescriptorSetLayout,
     Framebuffer, GpuVec, MemoryAllocator, Pipeline, PipelineLayout,
     RenderDevice, RenderPass,
 };
@@ -49,8 +49,10 @@ pub struct TriangleCanvas {
     current_color: [f32; 4],
     fbrp: FramebufferRenderPass,
     vertex_data: Vec<GpuVec<Vertex2D>>,
+    indices: Vec<GpuVec<u32>>,
     pipeline: Pipeline,
     pipeline_layout: PipelineLayout,
+    ubo: Buffer,
     descriptor_sets: Vec<DescriptorSet>,
     descriptor_layout: DescriptorSetLayout,
     descriptor_pool: DescriptorPool,

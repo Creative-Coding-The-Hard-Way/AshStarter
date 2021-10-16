@@ -4,6 +4,7 @@
 use ccthw::{
     frame_pipeline::{FrameError, FramePipeline},
     glfw_window::GlfwWindow,
+    math::projections,
     renderer::{ClearFrame, FinishFrame, Renderer, TriangleCanvas},
     timing::FrameRateLimit,
     vulkan::{self, RenderDevice},
@@ -41,11 +42,23 @@ impl Application {
         let vk_alloc = vulkan::create_default_allocator(vk_dev.clone());
 
         let frame_pipeline = FramePipeline::new(vk_dev.clone())?;
+        let (w, h) = glfw_window.window.get_framebuffer_size();
 
         Ok(Self {
             clear_frame: ClearFrame::new(vk_dev.clone(), [0.1, 0.1, 0.2, 1.0])?,
             finish_frame: FinishFrame::new(vk_dev.clone())?,
-            triangle_canvas: TriangleCanvas::new(vk_dev.clone(), vk_alloc)?,
+            triangle_canvas: TriangleCanvas::new(
+                vk_dev.clone(),
+                vk_alloc,
+                projections::ortho(
+                    0.0,      // left
+                    w as f32, // right
+                    h as f32, // bottom
+                    0.0,      // top
+                    -1.0,     // znear
+                    1.0,      // zfar
+                ),
+            )?,
 
             fps_limit: FrameRateLimit::new(120, 30),
             paused: false,
@@ -93,11 +106,20 @@ impl Application {
 
         self.triangle_canvas.clear(index);
         self.triangle_canvas.set_color([0.2, 0.3, 0.4, 1.0]);
-        for _ in 0..100 {
-            self.triangle_canvas.add_triangle(
-                [0.0, 0.5],
-                [0.5, -0.5],
-                [-0.5, -0.5],
+        self.triangle_canvas.add_triangle(
+            [50.0, 400.0],
+            [50.0, 200.0],
+            [200.0, 400.0],
+        )?;
+
+        self.triangle_canvas.set_color([0.9, 0.2, 0.1, 1.0]);
+        for i in 0..5 {
+            let step = i as f32 * 30.0;
+            self.triangle_canvas.add_quad(
+                [450.0, 100.0 + step],
+                [500.0, 100.0 + step],
+                [455.0, 113.0 + step],
+                [500.0, 110.0 + step],
             )?;
         }
 
@@ -124,7 +146,16 @@ impl Application {
             self.frame_pipeline.rebuild_swapchain_resources()?;
             self.clear_frame.rebuild_swapchain_resources()?;
             self.finish_frame.rebuild_swapchain_resources()?;
-            self.triangle_canvas.rebuild_swapchain_resources()?;
+            self.triangle_canvas.rebuild_swapchain_resources(
+                projections::ortho(
+                    0.0,      // left
+                    w as f32, // right
+                    h as f32, // bottom
+                    0.0,      // top
+                    -1.0,     // znear
+                    1.0,      // zfar
+                ),
+            )?;
         }
         Ok(())
     }
