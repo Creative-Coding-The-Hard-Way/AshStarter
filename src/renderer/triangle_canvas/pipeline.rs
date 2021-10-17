@@ -61,7 +61,8 @@ pub(super) fn create_pipeline(
     };
     let multisample_state = vk::PipelineMultisampleStateCreateInfo {
         sample_shading_enable: 0,
-        rasterization_samples: vk::SampleCountFlags::TYPE_1,
+        rasterization_samples: vk_dev
+            .get_supported_msaa(vk::SampleCountFlags::TYPE_4),
         p_sample_mask: std::ptr::null(),
         min_sample_shading: 1.0,
         alpha_to_coverage_enable: 0,

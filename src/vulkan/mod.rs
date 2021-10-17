@@ -4,6 +4,7 @@ mod descriptor_set;
 mod device_allocator;
 mod ffi;
 mod framebuffer;
+mod image;
 mod instance;
 mod pipeline;
 mod render_device;
@@ -22,6 +23,7 @@ pub use self::{
         LockedMemoryAllocator, MemoryAllocator, PassthroughAllocator,
     },
     framebuffer::Framebuffer,
+    image::{Image, ImageView},
     instance::Instance,
     pipeline::{Pipeline, PipelineLayout, ShaderModule},
     render_device::{GpuQueue, RenderDevice},
@@ -39,6 +41,7 @@ pub mod errors {
         descriptor_set::DescriptorSetError,
         device_allocator::AllocatorError,
         framebuffer::FramebufferError,
+        image::ImageError,
         instance::InstanceError,
         pipeline::PipelineError,
         render_device::{
@@ -101,5 +104,8 @@ pub mod errors {
 
         #[error(transparent)]
         DescriptorSetError(#[from] DescriptorSetError),
+
+        #[error(transparent)]
+        ImageError(#[from] ImageError),
     }
 }

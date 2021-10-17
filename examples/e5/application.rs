@@ -35,11 +35,18 @@ impl Application {
 
         // Create the vulkan render device
         let vk_dev = Arc::new(glfw_window.create_vulkan_device()?);
+        let vk_alloc = vulkan::create_default_allocator(vk_dev.clone());
         let frame_pipeline = FramePipeline::new(vk_dev.clone())?;
 
+        let clear_frame =
+            ClearFrame::new(vk_dev.clone(), vk_alloc, [0.1, 0.1, 0.2, 1.0])?;
+        let finish_frame = FinishFrame::new(
+            vk_dev.clone(),
+            clear_frame.color_render_target(),
+        )?;
         Ok(Self {
-            clear_frame: ClearFrame::new(vk_dev.clone(), [0.1, 0.1, 0.2, 1.0])?,
-            finish_frame: FinishFrame::new(vk_dev.clone())?,
+            clear_frame,
+            finish_frame,
 
             frame_pipeline,
             vk_dev,
@@ -106,7 +113,9 @@ impl Application {
         unsafe {
             self.frame_pipeline.rebuild_swapchain_resources()?;
             self.clear_frame.rebuild_swapchain_resources()?;
-            self.finish_frame.rebuild_swapchain_resources()?;
+            self.finish_frame.rebuild_swapchain_resources(
+                self.clear_frame.color_render_target(),
+            )?;
         }
         Ok(())
     }

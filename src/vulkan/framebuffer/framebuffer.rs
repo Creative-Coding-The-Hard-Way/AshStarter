@@ -20,10 +20,10 @@ impl Framebuffer {
             |swapchain| -> Result<Vec<Self>, FramebufferError> {
                 let mut framebuffers = vec![];
                 for i in 0..swapchain.image_views.len() {
-                    let framebuffer = Self::with_color_attachment(
+                    let framebuffer = Self::with_color_attachments(
                         vk_dev.clone(),
                         render_pass,
-                        swapchain.image_views[i],
+                        &[swapchain.image_views[i]],
                         swapchain.extent,
                     )?;
                     framebuffer.set_debug_name(format!("{} - {}", name, i))?;
@@ -35,18 +35,17 @@ impl Framebuffer {
     }
 
     /// Create a single framebuffer with a color attachment.
-    pub fn with_color_attachment(
+    pub fn with_color_attachments(
         vk_dev: Arc<RenderDevice>,
         render_pass: vk::RenderPass,
-        image: vk::ImageView,
+        images: &[vk::ImageView],
         extent: vk::Extent2D,
     ) -> Result<Self, FramebufferError> {
-        let attachments = [image];
         let create_info = vk::FramebufferCreateInfo {
             flags: vk::FramebufferCreateFlags::empty(),
             render_pass,
-            attachment_count: 1,
-            p_attachments: attachments.as_ptr(),
+            attachment_count: images.len() as u32,
+            p_attachments: images.as_ptr(),
             width: extent.width,
             height: extent.height,
             layers: 1,

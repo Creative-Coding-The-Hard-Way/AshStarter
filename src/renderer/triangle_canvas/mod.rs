@@ -1,13 +1,15 @@
 mod pipeline;
 
-use super::{FramebufferRenderPass, Renderer, TriangleCanvas, Vertex2D};
+use super::{
+    FramebufferRenderPass, RenderPassArgs, Renderer, TriangleCanvas, Vertex2D,
+};
 
 use crate::{
     math::Mat4,
     vulkan::{
         errors::VulkanError, Buffer, CommandBuffer, DescriptorPool,
-        DescriptorSet, DescriptorSetLayout, GpuVec, MemoryAllocator, Pipeline,
-        PipelineLayout, RenderDevice, VulkanDebug,
+        DescriptorSet, DescriptorSetLayout, GpuVec, ImageView, MemoryAllocator,
+        Pipeline, PipelineLayout, RenderDevice, VulkanDebug,
     },
     vulkan_ext::CommandBufferExt,
 };
@@ -24,10 +26,18 @@ impl TriangleCanvas {
     pub fn new(
         vk_dev: Arc<RenderDevice>,
         vk_alloc: Arc<dyn MemoryAllocator>,
+        msaa_color_target: &Arc<ImageView>,
         projection: Mat4,
     ) -> Result<TriangleCanvas, VulkanError> {
-        let fbrp =
-            FramebufferRenderPass::new(vk_dev.clone(), Default::default())?;
+        let fbrp = FramebufferRenderPass::new(
+            vk_dev.clone(),
+            RenderPassArgs {
+                samples: vk_dev
+                    .get_supported_msaa(vk::SampleCountFlags::TYPE_4),
+                ..Default::default()
+            },
+            msaa_color_target.clone(),
+        )?;
         let descriptor_layout = DescriptorSetLayout::new(
             vk_dev.clone(),
             &[
@@ -94,12 +104,14 @@ impl TriangleCanvas {
 
     pub unsafe fn rebuild_swapchain_resources(
         &mut self,
+        msaa_color_target: &Arc<ImageView>,
         projection: Mat4,
     ) -> Result<(), VulkanError> {
         self.vertex_data.clear();
         self.descriptor_sets.clear();
 
-        self.fbrp.rebuild_swapchain_resources()?;
+        self.fbrp
+            .rebuild_swapchain_resources(msaa_color_target.clone())?;
         let (pipeline, descriptor_pool, descriptor_sets, vertex_data, indices) =
             Self::build_swapchain_resources(
                 self.vk_dev.clone(),

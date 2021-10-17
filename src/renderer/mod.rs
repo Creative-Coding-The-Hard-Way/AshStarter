@@ -6,7 +6,7 @@ mod triangle_canvas;
 
 use crate::vulkan::{
     Buffer, CommandBuffer, DescriptorPool, DescriptorSet, DescriptorSetLayout,
-    Framebuffer, GpuVec, MemoryAllocator, Pipeline, PipelineLayout,
+    Framebuffer, GpuVec, ImageView, MemoryAllocator, Pipeline, PipelineLayout,
     RenderDevice, RenderPass,
 };
 
@@ -29,6 +29,12 @@ pub trait Renderer {
 /// value.
 pub struct ClearFrame {
     fbrp: FramebufferRenderPass,
+
+    /// The memory allocater used by this renderer.
+    pub vk_alloc: Arc<dyn MemoryAllocator>,
+
+    /// The device used to create vulkan resources in this renderer.
+    pub vk_dev: Arc<RenderDevice>,
 }
 
 /// A renderer which transitions the image for presentation, effectively
@@ -75,6 +81,9 @@ pub struct RenderPassArgs {
     /// transition the image format to `COLOR_ATTACHMENT_OPTIMAL`.
     last: bool,
 
+    /// The sample count for MSAA.
+    samples: vk::SampleCountFlags,
+
     /// Indicates that the render pass should use the provided values to clear
     /// the framebuffer.
     clear_colors: Option<Vec<vk::ClearValue>>,
@@ -95,6 +104,9 @@ pub struct FramebufferRenderPass {
 
     /// The full size of each framebuffer
     pub framebuffer_extent: vk::Extent2D,
+
+    /// The MSAA color render target
+    pub msaa_render_target: Arc<ImageView>,
 
     /// The device used to create this instance
     pub vk_dev: Arc<RenderDevice>,

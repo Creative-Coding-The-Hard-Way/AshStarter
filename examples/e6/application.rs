@@ -10,7 +10,7 @@ use ccthw::{
     vulkan::{self, RenderDevice},
 };
 
-use ::{anyhow::Result, ash::version::DeviceV1_0, ash::vk, std::sync::Arc};
+use ::{anyhow::Result, ash::version::DeviceV1_0, std::sync::Arc};
 
 // The main application state.
 pub struct Application {
@@ -44,21 +44,33 @@ impl Application {
         let frame_pipeline = FramePipeline::new(vk_dev.clone())?;
         let (w, h) = glfw_window.window.get_framebuffer_size();
 
+        let clear_frame = ClearFrame::new(
+            vk_dev.clone(),
+            vk_alloc.clone(),
+            [0.1, 0.1, 0.2, 1.0],
+        )?;
+        let finish_frame = FinishFrame::new(
+            vk_dev.clone(),
+            clear_frame.color_render_target(),
+        )?;
+        let triangle_canvas = TriangleCanvas::new(
+            vk_dev.clone(),
+            vk_alloc.clone(),
+            clear_frame.color_render_target(),
+            projections::ortho(
+                0.0,      // left
+                w as f32, // right
+                h as f32, // bottom
+                0.0,      // top
+                -1.0,     // znear
+                1.0,      // zfar
+            ),
+        )?;
+
         Ok(Self {
-            clear_frame: ClearFrame::new(vk_dev.clone(), [0.1, 0.1, 0.2, 1.0])?,
-            finish_frame: FinishFrame::new(vk_dev.clone())?,
-            triangle_canvas: TriangleCanvas::new(
-                vk_dev.clone(),
-                vk_alloc,
-                projections::ortho(
-                    0.0,      // left
-                    w as f32, // right
-                    h as f32, // bottom
-                    0.0,      // top
-                    -1.0,     // znear
-                    1.0,      // zfar
-                ),
-            )?,
+            clear_frame,
+            finish_frame,
+            triangle_canvas,
 
             fps_limit: FrameRateLimit::new(120, 30),
             paused: false,
@@ -145,8 +157,12 @@ impl Application {
         unsafe {
             self.frame_pipeline.rebuild_swapchain_resources()?;
             self.clear_frame.rebuild_swapchain_resources()?;
-            self.finish_frame.rebuild_swapchain_resources()?;
+
+            self.finish_frame.rebuild_swapchain_resources(
+                self.clear_frame.color_render_target(),
+            )?;
             self.triangle_canvas.rebuild_swapchain_resources(
+                self.clear_frame.color_render_target(),
                 projections::ortho(
                     0.0,      // left
                     w as f32, // right

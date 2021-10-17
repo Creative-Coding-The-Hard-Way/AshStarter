@@ -2,7 +2,7 @@ use super::{FramebufferRenderPass, RenderPassArgs};
 
 use crate::vulkan::{
     errors::{VulkanDebugError, VulkanError},
-    CommandBuffer, Framebuffer, RenderDevice, VulkanDebug,
+    CommandBuffer, ImageView, RenderDevice, VulkanDebug,
 };
 
 use ::{
@@ -15,12 +15,13 @@ impl FramebufferRenderPass {
     pub fn new(
         vk_dev: Arc<RenderDevice>,
         args: RenderPassArgs,
+        msaa_render_target: Arc<ImageView>,
     ) -> Result<Self, VulkanError> {
         let render_pass = args.create_render_pass(vk_dev.clone())?;
-        let framebuffers = Framebuffer::with_swapchain_color_attachments(
+        let framebuffers = args.create_framebuffers(
             vk_dev.clone(),
-            render_pass.raw,
-            "Framebuffer",
+            &render_pass,
+            &msaa_render_target,
         )?;
         Ok(Self {
             args,
@@ -28,6 +29,7 @@ impl FramebufferRenderPass {
             framebuffers,
             framebuffer_extent: vk_dev
                 .with_swapchain(|swapchain| swapchain.extent),
+            msaa_render_target,
             vk_dev,
         })
     }
@@ -35,14 +37,16 @@ impl FramebufferRenderPass {
     /// Called when the swapchain has been rebuilt.
     pub unsafe fn rebuild_swapchain_resources(
         &mut self,
+        msaa_render_target: Arc<ImageView>,
     ) -> Result<(), VulkanError> {
+        self.msaa_render_target = msaa_render_target;
         self.render_pass = self
             .args
             .create_render_pass(self.render_pass.vk_dev.clone())?;
-        self.framebuffers = Framebuffer::with_swapchain_color_attachments(
+        self.framebuffers = self.args.create_framebuffers(
             self.vk_dev.clone(),
-            self.render_pass.raw,
-            "Framebuffer",
+            &self.render_pass,
+            &self.msaa_render_target,
         )?;
         self.framebuffer_extent =
             self.vk_dev.with_swapchain(|swapchain| swapchain.extent);
