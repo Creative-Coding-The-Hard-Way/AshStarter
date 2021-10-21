@@ -16,7 +16,7 @@ pub mod sync;
 
 pub use self::{
     buffer::{Buffer, GpuVec},
-    command_buffer::{CommandBuffer, CommandPool},
+    command_buffer::{CommandBuffer, CommandPool, OneTimeSubmitCommandPool},
     descriptor_set::{DescriptorPool, DescriptorSet, DescriptorSetLayout},
     device_allocator::{
         create_default_allocator, Allocation, ComposableAllocator,

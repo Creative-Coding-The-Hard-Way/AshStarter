@@ -6,7 +6,7 @@ use ::{ash::vk, std::sync::Arc};
 
 impl CommandBuffer {
     /// Allocate a new command buffer from the given pool.
-    fn new(
+    pub fn new(
         pool: Arc<CommandPool>,
         command_level: vk::CommandBufferLevel,
     ) -> Result<Self, CommandBufferError> {

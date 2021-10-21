@@ -1,7 +1,8 @@
 mod command_buffer;
 mod command_pool;
+mod one_time_submit_command_pool;
 
-use crate::vulkan::RenderDevice;
+use crate::vulkan::{GpuQueue, RenderDevice};
 
 use ::{ash::vk, std::sync::Arc, thiserror::Error};
 
@@ -37,5 +38,16 @@ pub struct CommandPool {
     pub raw: vk::CommandPool,
 
     /// The vulkan device which created the command pool
+    pub vk_dev: Arc<RenderDevice>,
+}
+
+/// A command pool + command buffer combo which provides a convenient method
+/// for synchronously submitting commands to a queue.
+pub struct OneTimeSubmitCommandPool {
+    pool: Arc<CommandPool>,
+    cmd: CommandBuffer,
+    queue: GpuQueue,
+
+    /// The vulkan device used to create this
     pub vk_dev: Arc<RenderDevice>,
 }
