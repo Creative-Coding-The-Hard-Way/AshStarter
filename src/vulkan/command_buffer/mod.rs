@@ -2,9 +2,9 @@ mod command_buffer;
 mod command_pool;
 mod one_time_submit_command_pool;
 
-use crate::vulkan::{GpuQueue, RenderDevice};
-
 use ::{ash::vk, std::sync::Arc, thiserror::Error};
+
+use crate::vulkan::{GpuQueue, RenderDevice};
 
 #[derive(Debug, Error)]
 pub enum CommandBufferError {

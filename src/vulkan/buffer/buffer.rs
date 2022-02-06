@@ -1,11 +1,10 @@
-use super::{Buffer, BufferError};
-
-use crate::vulkan::{MemoryAllocator, RenderDevice, VulkanDebug};
-
 use ::{
     ash::{version::DeviceV1_0, vk},
     std::sync::Arc,
 };
+
+use super::{Buffer, BufferError};
+use crate::vulkan::{MemoryAllocator, RenderDevice, VulkanDebug};
 
 impl Buffer {
     /// Create a new Vulkan buffer and bind it to device memory with at a

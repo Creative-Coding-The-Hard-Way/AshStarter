@@ -1,8 +1,8 @@
 mod framebuffer;
 
-use crate::vulkan::{errors::VulkanDebugError, RenderDevice};
-
 use ::{ash::vk, std::sync::Arc, thiserror::Error};
+
+use crate::vulkan::{errors::VulkanDebugError, RenderDevice};
 
 #[derive(Debug, Error)]
 pub enum FramebufferError {

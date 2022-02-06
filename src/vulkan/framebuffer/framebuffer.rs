@@ -1,11 +1,10 @@
-use super::{Framebuffer, FramebufferError};
-
-use crate::vulkan::{errors::VulkanDebugError, RenderDevice, VulkanDebug};
-
 use ::{
     ash::{version::DeviceV1_0, vk},
     std::sync::Arc,
 };
+
+use super::{Framebuffer, FramebufferError};
+use crate::vulkan::{errors::VulkanDebugError, RenderDevice, VulkanDebug};
 
 impl Framebuffer {
     /// Construct new framebuffers with color attachments for each of the

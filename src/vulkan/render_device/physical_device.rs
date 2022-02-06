@@ -1,10 +1,10 @@
 //! This module defines functions for selecting a physical device with the
 //! features required by this application.
 
+use ash::{version::InstanceV1_0, vk};
+
 use super::{PhysicalDeviceError, QueueFamilyIndices};
 use crate::vulkan::WindowSurface;
-
-use ash::{version::InstanceV1_0, vk};
 
 /// Return the set of required device features for this application.
 pub fn required_features() -> vk::PhysicalDeviceFeatures {

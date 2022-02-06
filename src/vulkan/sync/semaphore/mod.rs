@@ -1,9 +1,9 @@
 mod semaphore;
 mod semaphore_pool;
 
-use crate::vulkan::RenderDevice;
-
 use ::{ash::vk, std::sync::Arc, thiserror::Error};
+
+use crate::vulkan::RenderDevice;
 
 #[derive(Debug, Error)]
 pub enum SemaphoreError {

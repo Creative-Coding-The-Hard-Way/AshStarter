@@ -1,8 +1,7 @@
-use super::{Semaphore, SemaphoreError, SemaphorePool};
-
-use crate::vulkan::RenderDevice;
-
 use ::std::sync::Arc;
+
+use super::{Semaphore, SemaphoreError, SemaphorePool};
+use crate::vulkan::RenderDevice;
 
 impl SemaphorePool {
     /// Create a new semaphore pool.

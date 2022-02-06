@@ -4,15 +4,15 @@ mod queue_family_indices;
 mod render_device;
 mod swapchain;
 
-use crate::vulkan::{
-    errors::{InstanceError, WindowSurfaceError},
-    Instance, WindowSurface,
-};
-
 use ::{
     ash::{extensions::khr, vk},
     std::sync::Mutex,
     thiserror::Error,
+};
+
+use crate::vulkan::{
+    errors::{InstanceError, WindowSurfaceError},
+    Instance, WindowSurface,
 };
 
 /// This enum represents the errors which can occur while attempting to find

@@ -1,9 +1,12 @@
+use std::sync::Arc;
+
+use anyhow::Result;
+use ash::vk;
+
 use crate::vulkan::{
     errors::VulkanError, Pipeline, PipelineLayout, RenderDevice, RenderPass,
     ShaderModule,
 };
-
-use {anyhow::Result, ash::vk, std::sync::Arc};
 
 pub(super) fn create_pipeline(
     vk_dev: Arc<RenderDevice>,

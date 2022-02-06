@@ -1,9 +1,9 @@
-use super::FrameRateLimit;
-
 use std::{
     collections::VecDeque,
     time::{Duration, Instant},
 };
+
+use super::FrameRateLimit;
 
 impl FrameRateLimit {
     /// Create a new frame rate limit for a given target fps

@@ -1,11 +1,12 @@
+use std::sync::mpsc::Receiver;
+
+use ash::{extensions::khr::Surface, version::InstanceV1_0, vk, vk::Handle};
+use thiserror::Error;
+
 use crate::vulkan::{
     errors::{InstanceError, RenderDeviceError, SwapchainError},
     Instance, RenderDevice, WindowSurface,
 };
-
-use ash::{extensions::khr::Surface, version::InstanceV1_0, vk, vk::Handle};
-use std::sync::mpsc::Receiver;
-use thiserror::Error;
 
 /// Window Errors represent things which can go wrong while creating and
 /// manipulating GLFW windows.

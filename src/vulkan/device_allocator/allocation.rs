@@ -1,6 +1,6 @@
-use super::Allocation;
-
 use ash::vk;
+
+use super::Allocation;
 
 impl Allocation {
     /// An empty allocation with null pointers and resource references.

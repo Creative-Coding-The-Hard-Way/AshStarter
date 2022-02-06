@@ -1,11 +1,10 @@
-use super::{DescriptorSetError, DescriptorSetLayout};
-
-use crate::vulkan::{errors::VulkanDebugError, RenderDevice, VulkanDebug};
-
 use ::{
     ash::{version::DeviceV1_0, vk},
     std::sync::Arc,
 };
+
+use super::{DescriptorSetError, DescriptorSetLayout};
+use crate::vulkan::{errors::VulkanDebugError, RenderDevice, VulkanDebug};
 
 impl DescriptorSetLayout {
     pub fn new(

@@ -49,8 +49,7 @@ pub mod errors {
             SwapchainError,
         },
         render_pass::RenderPassError,
-        sync::fence::FenceError,
-        sync::semaphore::SemaphoreError,
+        sync::{fence::FenceError, semaphore::SemaphoreError},
         vulkan_debug::VulkanDebugError,
         window_surface::WindowSurfaceError,
     };

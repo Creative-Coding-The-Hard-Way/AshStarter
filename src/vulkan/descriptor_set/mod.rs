@@ -2,9 +2,9 @@ mod descriptor_pool;
 mod descriptor_set;
 mod descriptor_set_layout;
 
-use crate::vulkan::RenderDevice;
-
 use ::{ash::vk, std::sync::Arc, thiserror::Error};
+
+use crate::vulkan::RenderDevice;
 
 #[derive(Debug, Error)]
 pub enum DescriptorSetError {

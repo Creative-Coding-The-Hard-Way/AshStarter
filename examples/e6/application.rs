@@ -9,7 +9,6 @@ use ccthw::{
     timing::FrameRateLimit,
     vulkan::{self, RenderDevice},
 };
-
 use ::{anyhow::Result, ash::version::DeviceV1_0, std::sync::Arc};
 
 // The main application state.

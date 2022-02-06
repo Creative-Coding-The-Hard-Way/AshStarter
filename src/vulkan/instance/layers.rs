@@ -1,8 +1,9 @@
 //! This module defines functions for checking supported Vulkan layers.
 
+use ash::{version::EntryV1_0, Entry};
+
 use super::InstanceError;
 use crate::markdown::MdList;
-use ash::{version::EntryV1_0, Entry};
 
 /// Check that each of the required layers is available on the current platform.
 pub fn check_layers(

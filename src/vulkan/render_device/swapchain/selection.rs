@@ -1,9 +1,9 @@
+use ash::vk;
+
 use crate::{
     markdown::MdList,
     vulkan::{errors::SwapchainError, RenderDevice},
 };
-
-use ash::vk;
 
 impl RenderDevice {
     /// Choose the number of images for the swapchain to manage.

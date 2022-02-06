@@ -6,7 +6,6 @@ mod pipeline;
 mod renderpass;
 
 use per_frame::PerFrame;
-
 use ::{
     anyhow::{Context, Result},
     ash::{version::DeviceV1_0, vk},

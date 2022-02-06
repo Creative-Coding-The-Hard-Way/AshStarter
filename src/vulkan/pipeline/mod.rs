@@ -2,9 +2,9 @@ mod pipeline;
 mod pipeline_layout;
 mod shader_module;
 
-use crate::vulkan::RenderDevice;
-
 use ::{ash::vk, std::sync::Arc, thiserror::Error};
+
+use crate::vulkan::RenderDevice;
 
 #[derive(Debug, Error)]
 pub enum PipelineError {

@@ -6,13 +6,13 @@ mod composable_allocator;
 mod locked_memory_allocator;
 mod passthrough;
 
-use crate::vulkan::RenderDevice;
-
 use ::{
     ash::vk,
     std::sync::{Arc, Mutex},
     thiserror::Error,
 };
+
+use crate::vulkan::RenderDevice;
 
 #[derive(Debug, Error)]
 pub enum AllocatorError {

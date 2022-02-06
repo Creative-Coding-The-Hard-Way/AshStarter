@@ -1,9 +1,9 @@
-use crate::vulkan::CommandBuffer;
-
 use ::{
     ash::{version::DeviceV1_0, vk},
     thiserror::Error,
 };
+
+use crate::vulkan::CommandBuffer;
 
 #[derive(Debug, Error)]
 pub enum CommandBufferExtError {

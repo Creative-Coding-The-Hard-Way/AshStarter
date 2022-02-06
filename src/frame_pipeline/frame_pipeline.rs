@@ -1,6 +1,11 @@
-use super::{FrameError, FramePipeline, PerFrame};
+use ::{
+    anyhow::Context,
+    ash::{version::DeviceV1_0, vk},
+    std::sync::Arc,
+};
 
 use crate::{
+    frame_pipeline::{FrameError, PerFrame},
     vulkan::{
         errors::{SwapchainError, VulkanError},
         sync::SemaphorePool,
@@ -9,11 +14,14 @@ use crate::{
     vulkan_ext::CommandBufferExt,
 };
 
-use ::{
-    anyhow::Context,
-    ash::{version::DeviceV1_0, vk},
-    std::sync::Arc,
-};
+/// A frame pipeline aids with the swapchain acquire->render->present workflow.
+pub struct FramePipeline {
+    frames: Vec<PerFrame>,
+    semaphore_pool: SemaphorePool,
+
+    /// The device used to create this frame pipeline.
+    pub vk_dev: Arc<RenderDevice>,
+}
 
 impl FramePipeline {
     pub fn new(vk_dev: Arc<RenderDevice>) -> Result<Self, FrameError> {

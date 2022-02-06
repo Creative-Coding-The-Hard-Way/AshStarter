@@ -1,5 +1,4 @@
 use ash::{extensions::khr, vk};
-
 use thiserror::Error;
 
 #[derive(Debug, Error)]

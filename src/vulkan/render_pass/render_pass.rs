@@ -1,11 +1,10 @@
-use super::{RenderPass, RenderPassError};
-
-use crate::vulkan::{errors::VulkanDebugError, RenderDevice, VulkanDebug};
-
 use ::{
     ash::{version::DeviceV1_0, vk},
     std::sync::Arc,
 };
+
+use super::{RenderPass, RenderPassError};
+use crate::vulkan::{errors::VulkanDebugError, RenderDevice, VulkanDebug};
 
 impl RenderPass {
     /// Create a new render pass with the given create info.

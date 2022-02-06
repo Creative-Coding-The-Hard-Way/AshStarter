@@ -1,12 +1,11 @@
-use super::RenderPassArgs;
+use ::{ash::vk, std::sync::Arc};
 
+use super::RenderPassArgs;
 use crate::vulkan::{
     errors::{FramebufferError, RenderPassError, VulkanError},
     Framebuffer, Image, ImageView, MemoryAllocator, RenderDevice, RenderPass,
     VulkanDebug,
 };
-
-use ::{ash::vk, std::sync::Arc};
 
 impl Default for RenderPassArgs {
     fn default() -> Self {

@@ -1,5 +1,6 @@
-use super::{FinishFrame, FramebufferRenderPass, RenderPassArgs, Renderer};
+use ::{anyhow::Result, ash::vk, std::sync::Arc};
 
+use super::{FinishFrame, FramebufferRenderPass, RenderPassArgs, Renderer};
 use crate::{
     vulkan::{
         errors::VulkanError, CommandBuffer, ImageView, RenderDevice,
@@ -7,8 +8,6 @@ use crate::{
     },
     vulkan_ext::CommandBufferExt,
 };
-
-use ::{anyhow::Result, ash::vk, std::sync::Arc};
 
 const NAME: &'static str = "FinishFrame";
 

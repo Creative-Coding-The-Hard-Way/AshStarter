@@ -1,11 +1,10 @@
-use super::{Image, ImageError, ImageView};
-
-use crate::vulkan::{errors::VulkanDebugError, VulkanDebug};
-
 use ::{
     ash::{version::DeviceV1_0, vk},
     std::sync::Arc,
 };
+
+use super::{Image, ImageError, ImageView};
+use crate::vulkan::{errors::VulkanDebugError, VulkanDebug};
 
 impl ImageView {
     /// Create a new image view for a given image.

@@ -1,5 +1,3 @@
-use super::Vertex;
-
 use ::{
     anyhow::Result,
     ash::vk,
@@ -9,6 +7,8 @@ use ::{
     memoffset::offset_of,
     std::sync::Arc,
 };
+
+use super::Vertex;
 
 pub fn create_pipeline(
     vk_dev: Arc<RenderDevice>,

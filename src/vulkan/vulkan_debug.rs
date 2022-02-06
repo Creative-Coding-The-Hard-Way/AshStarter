@@ -1,6 +1,6 @@
-use crate::vulkan::errors::RenderDeviceError;
-
 use ::thiserror::Error;
+
+use crate::vulkan::errors::RenderDeviceError;
 
 #[derive(Debug, Error)]
 pub enum VulkanDebugError {

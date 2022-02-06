@@ -1,6 +1,6 @@
-use super::{Allocation, AllocatorError, ComposableAllocator};
-
 use ::ash::vk;
+
+use super::{Allocation, AllocatorError, ComposableAllocator};
 
 impl ComposableAllocator for Box<dyn ComposableAllocator> {
     unsafe fn allocate(

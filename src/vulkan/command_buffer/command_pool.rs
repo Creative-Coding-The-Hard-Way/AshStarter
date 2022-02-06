@@ -1,12 +1,11 @@
-use super::{CommandBufferError, CommandPool};
-
-use crate::vulkan::{
-    errors::VulkanDebugError, GpuQueue, RenderDevice, VulkanDebug,
-};
-
 use ::{
     ash::{version::DeviceV1_0, vk},
     std::sync::Arc,
+};
+
+use super::{CommandBufferError, CommandPool};
+use crate::vulkan::{
+    errors::VulkanDebugError, GpuQueue, RenderDevice, VulkanDebug,
 };
 
 impl CommandPool {

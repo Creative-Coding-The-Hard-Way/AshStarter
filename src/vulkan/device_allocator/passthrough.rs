@@ -1,13 +1,12 @@
-use crate::vulkan::RenderDevice;
-
-use super::{
-    Allocation, AllocatorError, ComposableAllocator, PassthroughAllocator,
-};
-
 use ::{
     ash::{version::DeviceV1_0, vk},
     std::sync::Arc,
 };
+
+use super::{
+    Allocation, AllocatorError, ComposableAllocator, PassthroughAllocator,
+};
+use crate::vulkan::RenderDevice;
 
 impl PassthroughAllocator {
     pub fn new(vk_dev: Arc<RenderDevice>) -> Self {

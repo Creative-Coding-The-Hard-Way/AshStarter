@@ -1,8 +1,8 @@
 mod fence;
 
-use crate::vulkan::RenderDevice;
-
 use ::{ash::vk, std::sync::Arc, thiserror::Error};
+
+use crate::vulkan::RenderDevice;
 
 #[derive(Debug, Error)]
 pub enum FenceError {

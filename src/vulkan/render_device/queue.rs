@@ -1,6 +1,6 @@
-use super::GpuQueue;
-
 use ash::vk;
+
+use super::GpuQueue;
 
 impl GpuQueue {
     /// Build a queue wrapper from the raw queue handle.

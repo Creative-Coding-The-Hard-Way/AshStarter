@@ -1,6 +1,6 @@
-use crate::vulkan::{errors::SwapchainError, RenderDevice};
-
 use ash::{version::DeviceV1_0, vk};
+
+use crate::vulkan::{errors::SwapchainError, RenderDevice};
 
 impl RenderDevice {
     pub(super) fn create_image_views(

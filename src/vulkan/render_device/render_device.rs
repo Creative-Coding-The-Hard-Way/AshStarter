@@ -1,12 +1,12 @@
-use super::{
-    physical_device, QueueFamilyIndices, RenderDevice, RenderDeviceError,
-};
-use crate::vulkan::{Instance, WindowSurface};
-
 use ::{
     ash::{version::DeviceV1_0, vk},
     std::sync::Mutex,
 };
+
+use super::{
+    physical_device, QueueFamilyIndices, RenderDevice, RenderDeviceError,
+};
+use crate::vulkan::{Instance, WindowSurface};
 
 impl RenderDevice {
     /// Create the Vulkan Render Device.

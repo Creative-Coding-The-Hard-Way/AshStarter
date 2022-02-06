@@ -1,11 +1,9 @@
+use std::sync::Arc;
+
+use ash::{version::DeviceV1_0, vk};
+
 use super::{Pipeline, PipelineError};
-
 use crate::vulkan::{errors::VulkanDebugError, RenderDevice, VulkanDebug};
-
-use {
-    ash::{version::DeviceV1_0, vk},
-    std::sync::Arc,
-};
 
 impl Pipeline {
     /// Create a new graphics pipeline.

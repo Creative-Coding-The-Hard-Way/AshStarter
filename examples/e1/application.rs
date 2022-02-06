@@ -1,8 +1,8 @@
 //! This module defines the main application initialization, event loop, and
 //! rendering.
-use anyhow::{bail, Context, Result};
-
 use std::sync::mpsc::Receiver;
+
+use anyhow::{bail, Context, Result};
 
 pub type EventReceiver = Receiver<(f64, glfw::WindowEvent)>;
 

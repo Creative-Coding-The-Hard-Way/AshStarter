@@ -4,13 +4,13 @@ mod framebuffer_render_pass;
 mod render_pass_args;
 mod triangle_canvas;
 
+use ::{anyhow::Result, ash::vk, std::sync::Arc};
+
 use crate::vulkan::{
     Buffer, CommandBuffer, DescriptorPool, DescriptorSet, DescriptorSetLayout,
     Framebuffer, GpuVec, ImageView, MemoryAllocator, Pipeline, PipelineLayout,
     RenderDevice, RenderPass,
 };
-
-use ::{anyhow::Result, ash::vk, std::sync::Arc};
 
 pub trait Renderer {
     /// Fill the frame's command buffer.

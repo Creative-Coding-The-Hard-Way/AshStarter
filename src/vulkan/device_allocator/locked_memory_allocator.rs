@@ -1,14 +1,13 @@
-use super::{
-    Allocation, AllocatorError, ComposableAllocator, LockedMemoryAllocator,
-    MemoryAllocator,
-};
-
-use crate::vulkan::RenderDevice;
-
 use ::{
     ash::vk,
     std::sync::{Arc, Mutex},
 };
+
+use super::{
+    Allocation, AllocatorError, ComposableAllocator, LockedMemoryAllocator,
+    MemoryAllocator,
+};
+use crate::vulkan::RenderDevice;
 
 impl<Alloc: ComposableAllocator> LockedMemoryAllocator<Alloc> {
     pub fn new(vk_dev: Arc<RenderDevice>, allocater: Alloc) -> Self {

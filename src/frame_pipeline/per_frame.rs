@@ -1,4 +1,4 @@
-use super::PerFrame;
+use ::{anyhow::Result, std::sync::Arc};
 
 use crate::vulkan::{
     errors::{VulkanDebugError, VulkanError},
@@ -6,7 +6,25 @@ use crate::vulkan::{
     CommandBuffer, CommandPool, RenderDevice, VulkanDebug,
 };
 
-use ::{anyhow::Result, std::sync::Arc};
+/// All per-frame resources required for coordinating the swapchain with
+/// multiple frames in-flight.
+pub struct PerFrame {
+    /// Signalled when the frame is ready to be used for rendering.
+    pub acquire_semaphore: Option<Semaphore>,
+
+    /// Signalled when all graphics operations are complete and the frame is
+    /// ready for presentation.
+    pub release_semaphore: Semaphore,
+
+    /// Signalled when all submitted graphics commands have completed.
+    pub queue_submit_fence: Fence,
+
+    /// The command buffer for operations in this frame.
+    pub command_buffer: CommandBuffer,
+
+    /// The command pool for operations in this frame.
+    pub command_pool: Arc<CommandPool>,
+}
 
 impl PerFrame {
     /// Create new per-frame resources.

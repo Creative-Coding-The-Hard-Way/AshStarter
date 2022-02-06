@@ -1,9 +1,13 @@
 mod pipeline;
 
+use std::sync::Arc;
+
+use anyhow::Result;
+use ash::{version::DeviceV1_0, vk};
+
 use super::{
     FramebufferRenderPass, RenderPassArgs, Renderer, TriangleCanvas, Vertex2D,
 };
-
 use crate::{
     math::Mat4,
     vulkan::{
@@ -12,12 +16,6 @@ use crate::{
         Pipeline, PipelineLayout, RenderDevice, VulkanDebug,
     },
     vulkan_ext::CommandBufferExt,
-};
-
-use {
-    anyhow::Result,
-    ash::{version::DeviceV1_0, vk},
-    std::sync::Arc,
 };
 
 const NAME: &str = "TriangleCanvas";

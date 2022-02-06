@@ -1,11 +1,9 @@
+use std::sync::Arc;
+
+use ash::{version::DeviceV1_0, vk};
+
 use super::{PipelineError, PipelineLayout};
-
 use crate::vulkan::{errors::VulkanDebugError, RenderDevice, VulkanDebug};
-
-use {
-    ash::{version::DeviceV1_0, vk},
-    std::sync::Arc,
-};
 
 impl PipelineLayout {
     pub fn new(

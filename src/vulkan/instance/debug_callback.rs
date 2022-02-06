@@ -1,4 +1,5 @@
-use super::InstanceError;
+use std::{borrow::Cow, ffi::CStr};
+
 use ash::{
     extensions::ext::DebugUtils,
     vk,
@@ -8,7 +9,8 @@ use ash::{
     },
     Entry,
 };
-use std::{borrow::Cow, ffi::CStr};
+
+use super::InstanceError;
 
 /// Create the vulkan debug callback for validation.
 pub fn create_debug_logger(

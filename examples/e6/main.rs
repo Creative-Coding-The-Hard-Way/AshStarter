@@ -1,9 +1,10 @@
 mod application;
 
+use std::fmt::Write as FmtWrite;
+
 use anyhow::{Context, Result};
 use application::Application;
 use flexi_logger::{DeferredNow, Logger, Record};
-use std::fmt::Write as FmtWrite;
 use textwrap::{termwidth, Options};
 
 /// Application entry point. Execute the run() function and print a

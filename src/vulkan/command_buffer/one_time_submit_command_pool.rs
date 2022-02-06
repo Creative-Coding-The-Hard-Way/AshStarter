@@ -1,15 +1,14 @@
-use super::{
-    CommandBuffer, CommandBufferError, CommandPool, OneTimeSubmitCommandPool,
-};
-
-use crate::vulkan::{
-    errors::VulkanDebugError, GpuQueue, RenderDevice, VulkanDebug,
-};
-
 use ::{
     anyhow::Result,
     ash::{version::DeviceV1_0, vk},
     std::sync::Arc,
+};
+
+use super::{
+    CommandBuffer, CommandBufferError, CommandPool, OneTimeSubmitCommandPool,
+};
+use crate::vulkan::{
+    errors::VulkanDebugError, GpuQueue, RenderDevice, VulkanDebug,
 };
 
 impl OneTimeSubmitCommandPool {

@@ -1,8 +1,7 @@
-use super::DescriptorSet;
-
-use crate::vulkan::{errors::VulkanDebugError, VulkanDebug};
-
 use ash::{version::DeviceV1_0, vk};
+
+use super::DescriptorSet;
+use crate::vulkan::{errors::VulkanDebugError, VulkanDebug};
 
 impl DescriptorSet {
     /// Write a buffer binding to this descripor set.

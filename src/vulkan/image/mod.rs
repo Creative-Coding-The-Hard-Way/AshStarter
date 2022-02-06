@@ -1,11 +1,11 @@
 mod image;
 mod image_view;
 
+use ::{ash::vk, std::sync::Arc, thiserror::Error};
+
 use crate::vulkan::{
     errors::AllocatorError, Allocation, MemoryAllocator, RenderDevice,
 };
-
-use ::{ash::vk, std::sync::Arc, thiserror::Error};
 
 #[derive(Debug, Error)]
 pub enum ImageError {

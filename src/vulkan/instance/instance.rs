@@ -1,11 +1,11 @@
-use super::{debug_callback, extensions, layers, Instance, InstanceError};
-use crate::{markdown::MdList, vulkan::ffi::to_os_ptrs};
-
 use ash::{
     extensions::ext::DebugUtils,
     version::{EntryV1_0, InstanceV1_0},
     vk, Entry,
 };
+
+use super::{debug_callback, extensions, layers, Instance, InstanceError};
+use crate::{markdown::MdList, vulkan::ffi::to_os_ptrs};
 
 impl Instance {
     /// Create a new ash instance with the required extensions.

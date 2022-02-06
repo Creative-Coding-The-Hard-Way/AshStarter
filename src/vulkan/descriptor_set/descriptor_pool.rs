@@ -1,13 +1,11 @@
+use std::sync::Arc;
+
+use ash::{version::DeviceV1_0, vk};
+
 use super::{
     DescriptorPool, DescriptorSet, DescriptorSetError, DescriptorSetLayout,
 };
-
 use crate::vulkan::{errors::VulkanDebugError, RenderDevice, VulkanDebug};
-
-use {
-    ash::{version::DeviceV1_0, vk},
-    std::sync::Arc,
-};
 
 impl DescriptorPool {
     /// Create a new descriptor pool with capacity for `descriptor_count`

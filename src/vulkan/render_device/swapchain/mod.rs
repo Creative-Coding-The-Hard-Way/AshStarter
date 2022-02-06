@@ -1,12 +1,12 @@
 mod images;
 mod selection;
 
-use super::{RenderDevice, Swapchain, SwapchainError};
-
 use ::{
     anyhow::Result,
     ash::{version::DeviceV1_0, vk},
 };
+
+use super::{RenderDevice, Swapchain, SwapchainError};
 
 impl RenderDevice {
     /// Perform some action with the swapchain.

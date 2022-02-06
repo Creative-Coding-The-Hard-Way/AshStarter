@@ -1,13 +1,12 @@
-use super::{FramebufferRenderPass, RenderPassArgs};
-
-use crate::vulkan::{
-    errors::{VulkanDebugError, VulkanError},
-    CommandBuffer, ImageView, RenderDevice, VulkanDebug,
-};
-
 use ::{
     ash::{version::DeviceV1_0, vk},
     std::sync::Arc,
+};
+
+use super::{FramebufferRenderPass, RenderPassArgs};
+use crate::vulkan::{
+    errors::{VulkanDebugError, VulkanError},
+    CommandBuffer, ImageView, RenderDevice, VulkanDebug,
 };
 
 impl FramebufferRenderPass {

@@ -1,8 +1,7 @@
-use super::{CommandBuffer, CommandBufferError, CommandPool};
-
-use crate::vulkan::{errors::VulkanDebugError, VulkanDebug};
-
 use ::{ash::vk, std::sync::Arc};
+
+use super::{CommandBuffer, CommandBufferError, CommandPool};
+use crate::vulkan::{errors::VulkanDebugError, VulkanDebug};
 
 impl CommandBuffer {
     /// Allocate a new command buffer from the given pool.

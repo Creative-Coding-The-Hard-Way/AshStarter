@@ -4,8 +4,6 @@
 mod per_frame;
 mod renderpass;
 
-use self::per_frame::PerFrame;
-
 use ::{
     anyhow::{Context, Result},
     ash::{version::DeviceV1_0, vk},
@@ -20,6 +18,8 @@ use ::{
     std::sync::Arc,
     thiserror::Error,
 };
+
+use self::per_frame::PerFrame;
 
 #[derive(Debug, Error)]
 pub enum FrameError {

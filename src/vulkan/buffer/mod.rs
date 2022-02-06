@@ -1,11 +1,11 @@
 mod buffer;
 mod gpu_vec;
 
+use ::{ash::vk, std::sync::Arc, thiserror::Error};
+
 use crate::vulkan::{
     errors::AllocatorError, Allocation, MemoryAllocator, RenderDevice,
 };
-
-use ::{ash::vk, std::sync::Arc, thiserror::Error};
 
 #[derive(Debug, Error)]
 pub enum BufferError {

@@ -1,10 +1,10 @@
-use super::{GpuQueue, QueueFamilyIndices, QueueSelectionError};
-use crate::vulkan::WindowSurface;
-
 use ash::{
     version::{DeviceV1_0, InstanceV1_0},
     vk,
 };
+
+use super::{GpuQueue, QueueFamilyIndices, QueueSelectionError};
+use crate::vulkan::WindowSurface;
 
 const SINGLE_QUEUE_PRIORITY: [f32; 1] = [1.0];
 

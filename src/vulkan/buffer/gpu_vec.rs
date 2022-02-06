@@ -1,10 +1,9 @@
-use super::{Buffer, BufferError, GpuVec};
+use ::{ash::vk, std::sync::Arc};
 
+use super::{Buffer, BufferError, GpuVec};
 use crate::vulkan::{
     errors::VulkanDebugError, MemoryAllocator, RenderDevice, VulkanDebug,
 };
-
-use ::{ash::vk, std::sync::Arc};
 
 impl<T: Copy> GpuVec<T> {
     pub fn new(

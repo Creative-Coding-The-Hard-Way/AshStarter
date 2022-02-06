@@ -1,12 +1,11 @@
-use super::{Image, ImageError};
-
-use crate::vulkan::{
-    errors::VulkanDebugError, MemoryAllocator, RenderDevice, VulkanDebug,
-};
-
 use ::{
     ash::{version::DeviceV1_0, vk},
     std::sync::Arc,
+};
+
+use super::{Image, ImageError};
+use crate::vulkan::{
+    errors::VulkanDebugError, MemoryAllocator, RenderDevice, VulkanDebug,
 };
 
 impl Image {

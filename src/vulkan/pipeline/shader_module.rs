@@ -1,11 +1,9 @@
+use std::sync::Arc;
+
+use ash::{version::DeviceV1_0, vk};
+
 use super::{PipelineError, ShaderModule};
-
 use crate::vulkan::{errors::VulkanDebugError, RenderDevice, VulkanDebug};
-
-use {
-    ash::{version::DeviceV1_0, vk},
-    std::sync::Arc,
-};
 
 const DEFAULT_ENTRY_POINT: &'static [u8] = b"main\0";
 
