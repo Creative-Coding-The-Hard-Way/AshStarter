@@ -1,7 +1,23 @@
 use ::{ash::vk, std::sync::Arc};
 
-use super::{CommandBuffer, CommandBufferError, CommandPool};
-use crate::vulkan::{errors::VulkanDebugError, VulkanDebug};
+use crate::vulkan::{
+    command_buffer::{CommandBufferError, CommandPool},
+    errors::VulkanDebugError,
+    RenderDevice, VulkanDebug,
+};
+
+/// A Vulkan CommandBuffer wrapper which automatically frees the buffer when
+/// its dropped.
+pub struct CommandBuffer {
+    /// The raw vulkan command buffer handle.
+    pub raw: vk::CommandBuffer,
+
+    /// The CommandPool which was used to allocate this buffer.
+    pub pool: Arc<CommandPool>,
+
+    /// The vulkan device which created this command buffer.
+    pub vk_dev: Arc<RenderDevice>,
+}
 
 impl CommandBuffer {
     /// Allocate a new command buffer from the given pool.

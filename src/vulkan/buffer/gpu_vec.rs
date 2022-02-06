@@ -1,9 +1,29 @@
 use ::{ash::vk, std::sync::Arc};
 
-use super::{Buffer, BufferError, GpuVec};
 use crate::vulkan::{
-    errors::VulkanDebugError, MemoryAllocator, RenderDevice, VulkanDebug,
+    buffer::{Buffer, BufferError},
+    errors::VulkanDebugError,
+    MemoryAllocator, RenderDevice, VulkanDebug,
 };
+
+/// A resizable GPU Buffer which holds a contiguous slice of T's.
+pub struct GpuVec<T: Copy> {
+    /// The device buffer which holds the actual data.
+    pub buffer: Buffer,
+
+    /// The number of elements (not bytes) which this buffer is able to hold.
+    capacity: u32,
+
+    /// The number of elements (not bytes) which this buffer is currently
+    /// holding.
+    length: u32,
+
+    /// Buffer usage flags - used when the underlying buffer needs to be
+    /// reallocated.
+    usage_flags: vk::BufferUsageFlags,
+
+    _phantom_data: std::marker::PhantomData<T>,
+}
 
 impl<T: Copy> GpuVec<T> {
     pub fn new(

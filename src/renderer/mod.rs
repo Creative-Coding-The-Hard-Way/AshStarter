@@ -4,13 +4,16 @@ mod framebuffer_render_pass;
 mod render_pass_args;
 mod triangle_canvas;
 
-use ::{anyhow::Result, ash::vk, std::sync::Arc};
+use ::anyhow::Result;
 
-use crate::vulkan::{
-    Buffer, CommandBuffer, DescriptorPool, DescriptorSet, DescriptorSetLayout,
-    Framebuffer, GpuVec, ImageView, MemoryAllocator, Pipeline, PipelineLayout,
-    RenderDevice, RenderPass,
+pub use self::{
+    clear_frame::ClearFrame,
+    finish_frame::FinishFrame,
+    framebuffer_render_pass::FramebufferRenderPass,
+    render_pass_args::RenderPassArgs,
+    triangle_canvas::{TriangleCanvas, Vertex2D},
 };
+use crate::vulkan::CommandBuffer;
 
 pub trait Renderer {
     /// Fill the frame's command buffer.
@@ -23,91 +26,4 @@ pub trait Renderer {
         command_buffer: &CommandBuffer,
         current_image: usize,
     ) -> Result<()>;
-}
-
-/// A renderer which transitions the image for rendering and clears to a known
-/// value.
-pub struct ClearFrame {
-    fbrp: FramebufferRenderPass,
-
-    /// The memory allocater used by this renderer.
-    pub vk_alloc: Arc<dyn MemoryAllocator>,
-
-    /// The device used to create vulkan resources in this renderer.
-    pub vk_dev: Arc<RenderDevice>,
-}
-
-/// A renderer which transitions the image for presentation, effectively
-/// finishing the frame.
-pub struct FinishFrame {
-    fbrp: FramebufferRenderPass,
-}
-
-#[derive(Debug, Copy, Clone)]
-pub struct Vertex2D {
-    pub pos: [f32; 2],
-    pub rgba: [f32; 4],
-}
-
-/// A renderer which just draws triangles on the screen.
-pub struct TriangleCanvas {
-    current_image: usize,
-    current_color: [f32; 4],
-    fbrp: FramebufferRenderPass,
-    vertex_data: Vec<GpuVec<Vertex2D>>,
-    indices: Vec<GpuVec<u32>>,
-    pipeline: Pipeline,
-    pipeline_layout: PipelineLayout,
-    ubo: Buffer,
-    descriptor_sets: Vec<DescriptorSet>,
-    descriptor_layout: DescriptorSetLayout,
-    descriptor_pool: DescriptorPool,
-    vk_dev: Arc<RenderDevice>,
-    vk_alloc: Arc<dyn MemoryAllocator>,
-}
-
-/// Configuration values for a new render pass instance.
-#[derive(Clone)]
-pub struct RenderPassArgs {
-    /// Indicates that the render pass is the first in the frame. Renderpasses
-    /// configured this way will expect the image format to be `UNKNOWN`.
-    /// When false, the render pass will expect a previous pass in the frame to
-    /// have already transitioned the frame to `COLOR_ATTACHMENT_OPTIMAL`.
-    first: bool,
-
-    /// Indicates that the render pass is the last in the frame. RenderPasses
-    /// configured this way will transition the image format to
-    /// `PRESENT_SRC_KHR`. When false (the default), the render pass will
-    /// transition the image format to `COLOR_ATTACHMENT_OPTIMAL`.
-    last: bool,
-
-    /// The sample count for MSAA.
-    samples: vk::SampleCountFlags,
-
-    /// Indicates that the render pass should use the provided values to clear
-    /// the framebuffer.
-    clear_colors: Option<Vec<vk::ClearValue>>,
-}
-
-/// A combination of a Vulkan RenderPass object and a set of framebuffers with
-/// a 1-1 mapping to swapchain images.
-pub struct FramebufferRenderPass {
-    /// Renderpass args control the creation of the underlying Vulkan renderpass
-    /// instance.
-    pub args: RenderPassArgs,
-
-    /// Framebuffers for each respective swapchain image
-    pub framebuffers: Vec<Framebuffer>,
-
-    /// The renderpass created based on the renderpass args
-    pub render_pass: RenderPass,
-
-    /// The full size of each framebuffer
-    pub framebuffer_extent: vk::Extent2D,
-
-    /// The MSAA color render target
-    pub msaa_render_target: Arc<ImageView>,
-
-    /// The device used to create this instance
-    pub vk_dev: Arc<RenderDevice>,
 }

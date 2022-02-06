@@ -5,11 +5,9 @@ use std::sync::Arc;
 use anyhow::Result;
 use ash::{version::DeviceV1_0, vk};
 
-use super::{
-    FramebufferRenderPass, RenderPassArgs, Renderer, TriangleCanvas, Vertex2D,
-};
 use crate::{
     math::Mat4,
+    renderer::{FramebufferRenderPass, RenderPassArgs, Renderer},
     vulkan::{
         errors::VulkanError, Buffer, CommandBuffer, DescriptorPool,
         DescriptorSet, DescriptorSetLayout, GpuVec, ImageView, MemoryAllocator,
@@ -19,6 +17,29 @@ use crate::{
 };
 
 const NAME: &str = "TriangleCanvas";
+
+#[derive(Debug, Copy, Clone)]
+pub struct Vertex2D {
+    pub pos: [f32; 2],
+    pub rgba: [f32; 4],
+}
+
+/// A renderer which just draws triangles on the screen.
+pub struct TriangleCanvas {
+    current_image: usize,
+    current_color: [f32; 4],
+    fbrp: FramebufferRenderPass,
+    vertex_data: Vec<GpuVec<Vertex2D>>,
+    indices: Vec<GpuVec<u32>>,
+    pipeline: Pipeline,
+    pipeline_layout: PipelineLayout,
+    ubo: Buffer,
+    descriptor_sets: Vec<DescriptorSet>,
+    descriptor_layout: DescriptorSetLayout,
+    descriptor_pool: DescriptorPool,
+    vk_dev: Arc<RenderDevice>,
+    vk_alloc: Arc<dyn MemoryAllocator>,
+}
 
 impl TriangleCanvas {
     pub fn new(

@@ -1,7 +1,7 @@
 use ::{anyhow::Result, ash::vk, std::sync::Arc};
 
-use super::{ClearFrame, FramebufferRenderPass, RenderPassArgs, Renderer};
 use crate::{
+    renderer::{FramebufferRenderPass, RenderPassArgs, Renderer},
     vulkan::{
         errors::VulkanError, CommandBuffer, ImageView, MemoryAllocator,
         RenderDevice, VulkanDebug,
@@ -10,6 +10,18 @@ use crate::{
 };
 
 const NAME: &'static str = "ClearFrame";
+
+/// A renderer which transitions the image for rendering and clears to a known
+/// value.
+pub struct ClearFrame {
+    fbrp: FramebufferRenderPass,
+
+    /// The memory allocater used by this renderer.
+    pub vk_alloc: Arc<dyn MemoryAllocator>,
+
+    /// The device used to create vulkan resources in this renderer.
+    pub vk_dev: Arc<RenderDevice>,
+}
 
 impl ClearFrame {
     /// Create a new render pass which clears the framebuffer to a fixed color

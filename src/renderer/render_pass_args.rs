@@ -1,6 +1,5 @@
 use ::{ash::vk, std::sync::Arc};
 
-use super::RenderPassArgs;
 use crate::vulkan::{
     errors::{FramebufferError, RenderPassError, VulkanError},
     Framebuffer, Image, ImageView, MemoryAllocator, RenderDevice, RenderPass,
@@ -16,6 +15,29 @@ impl Default for RenderPassArgs {
             clear_colors: None,
         }
     }
+}
+
+/// Configuration values for a new render pass instance.
+#[derive(Clone)]
+pub struct RenderPassArgs {
+    /// Indicates that the render pass is the first in the frame. Renderpasses
+    /// configured this way will expect the image format to be `UNKNOWN`.
+    /// When false, the render pass will expect a previous pass in the frame to
+    /// have already transitioned the frame to `COLOR_ATTACHMENT_OPTIMAL`.
+    pub first: bool,
+
+    /// Indicates that the render pass is the last in the frame. RenderPasses
+    /// configured this way will transition the image format to
+    /// `PRESENT_SRC_KHR`. When false (the default), the render pass will
+    /// transition the image format to `COLOR_ATTACHMENT_OPTIMAL`.
+    pub last: bool,
+
+    /// The sample count for MSAA.
+    pub samples: vk::SampleCountFlags,
+
+    /// Indicates that the render pass should use the provided values to clear
+    /// the framebuffer.
+    pub clear_colors: Option<Vec<vk::ClearValue>>,
 }
 
 impl RenderPassArgs {

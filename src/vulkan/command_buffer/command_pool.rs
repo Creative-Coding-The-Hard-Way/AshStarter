@@ -3,10 +3,20 @@ use ::{
     std::sync::Arc,
 };
 
-use super::{CommandBufferError, CommandPool};
 use crate::vulkan::{
-    errors::VulkanDebugError, GpuQueue, RenderDevice, VulkanDebug,
+    command_buffer::CommandBufferError, errors::VulkanDebugError, GpuQueue,
+    RenderDevice, VulkanDebug,
 };
+
+/// A Vulkan CommandPool wrapper which automatically destroys the pool when it's
+/// dropped.
+pub struct CommandPool {
+    /// The raw vulkan command pool handle
+    pub raw: vk::CommandPool,
+
+    /// The vulkan device which created the command pool
+    pub vk_dev: Arc<RenderDevice>,
+}
 
 impl CommandPool {
     /// Create a new command pool.

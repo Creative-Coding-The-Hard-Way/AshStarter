@@ -4,12 +4,22 @@ use ::{
     std::sync::Arc,
 };
 
-use super::{
-    CommandBuffer, CommandBufferError, CommandPool, OneTimeSubmitCommandPool,
-};
 use crate::vulkan::{
-    errors::VulkanDebugError, GpuQueue, RenderDevice, VulkanDebug,
+    command_buffer::{CommandBuffer, CommandBufferError, CommandPool},
+    errors::VulkanDebugError,
+    GpuQueue, RenderDevice, VulkanDebug,
 };
+
+/// A command pool + command buffer combo which provides a convenient method
+/// for synchronously submitting commands to a queue.
+pub struct OneTimeSubmitCommandPool {
+    pool: Arc<CommandPool>,
+    cmd: CommandBuffer,
+    queue: GpuQueue,
+
+    /// The vulkan device used to create this
+    pub vk_dev: Arc<RenderDevice>,
+}
 
 impl OneTimeSubmitCommandPool {
     /// Create a new pool for submitting commands to the provided GPU queue.

@@ -3,8 +3,29 @@ use ::{
     std::sync::Arc,
 };
 
-use super::{Buffer, BufferError};
-use crate::vulkan::{MemoryAllocator, RenderDevice, VulkanDebug};
+use crate::vulkan::{
+    buffer::BufferError, Allocation, MemoryAllocator, RenderDevice, VulkanDebug,
+};
+
+/// A Vulkan buffer and it's associated device memory.
+pub struct Buffer {
+    /// The underlying Vulkan buffer type
+    pub raw: vk::Buffer,
+
+    /// The actual memory alloctaion for this buffer
+    pub allocation: Allocation,
+
+    /// The pointer to the cpu-accessible memory-mapped region of memory for
+    /// this buffer. Only valid after a call to map().
+    pub mapped_ptr: Option<*mut std::ffi::c_void>,
+
+    /// The allocator implementation used to provision memory from the Vulkan
+    /// device.
+    pub vk_alloc: Arc<dyn MemoryAllocator>,
+
+    /// The device used to create and destroy this buffer's memory.
+    pub vk_dev: Arc<RenderDevice>,
+}
 
 impl Buffer {
     /// Create a new Vulkan buffer and bind it to device memory with at a

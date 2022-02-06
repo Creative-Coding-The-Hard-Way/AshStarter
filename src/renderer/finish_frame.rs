@@ -1,7 +1,7 @@
 use ::{anyhow::Result, ash::vk, std::sync::Arc};
 
-use super::{FinishFrame, FramebufferRenderPass, RenderPassArgs, Renderer};
 use crate::{
+    renderer::{FramebufferRenderPass, RenderPassArgs, Renderer},
     vulkan::{
         errors::VulkanError, CommandBuffer, ImageView, RenderDevice,
         VulkanDebug,
@@ -10,6 +10,12 @@ use crate::{
 };
 
 const NAME: &'static str = "FinishFrame";
+
+/// A renderer which transitions the image for presentation, effectively
+/// finishing the frame.
+pub struct FinishFrame {
+    fbrp: FramebufferRenderPass,
+}
 
 impl FinishFrame {
     /// Create a new render pass which clears the framebuffer to a fixed color

@@ -3,11 +3,37 @@ use ::{
     std::sync::Arc,
 };
 
-use super::{FramebufferRenderPass, RenderPassArgs};
-use crate::vulkan::{
-    errors::{VulkanDebugError, VulkanError},
-    CommandBuffer, ImageView, RenderDevice, VulkanDebug,
+use crate::{
+    renderer::RenderPassArgs,
+    vulkan::{
+        errors::{VulkanDebugError, VulkanError},
+        CommandBuffer, Framebuffer, ImageView, RenderDevice, RenderPass,
+        VulkanDebug,
+    },
 };
+
+/// A combination of a Vulkan RenderPass object and a set of framebuffers with
+/// a 1-1 mapping to swapchain images.
+pub struct FramebufferRenderPass {
+    /// Renderpass args control the creation of the underlying Vulkan renderpass
+    /// instance.
+    pub args: RenderPassArgs,
+
+    /// Framebuffers for each respective swapchain image
+    pub framebuffers: Vec<Framebuffer>,
+
+    /// The renderpass created based on the renderpass args
+    pub render_pass: RenderPass,
+
+    /// The full size of each framebuffer
+    pub framebuffer_extent: vk::Extent2D,
+
+    /// The MSAA color render target
+    pub msaa_render_target: Arc<ImageView>,
+
+    /// The device used to create this instance
+    pub vk_dev: Arc<RenderDevice>,
+}
 
 impl FramebufferRenderPass {
     /// Create a new render pass wrapper.
