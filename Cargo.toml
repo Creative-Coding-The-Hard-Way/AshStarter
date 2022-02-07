@@ -8,7 +8,7 @@ edition = "2018"
 anyhow = "1.0.44"
 flexi_logger = "0.17.1"
 log = "0.4.13"
-ash = "0.31.0"
+ash = { version = "0.35.1", features = ["linked"] }
 aquamarine = "*"
 nalgebra = "*"
 memoffset = "*"

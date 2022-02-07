@@ -1,8 +1,4 @@
-use ::{
-    anyhow::Context,
-    ash::{version::DeviceV1_0, vk},
-    std::sync::Arc,
-};
+use ::{anyhow::Context, ash::vk, std::sync::Arc};
 
 use crate::{
     frame_pipeline::{FrameError, PerFrame},

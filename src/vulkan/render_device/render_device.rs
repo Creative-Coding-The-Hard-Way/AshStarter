@@ -1,7 +1,4 @@
-use ::{
-    ash::{version::DeviceV1_0, vk},
-    std::sync::Mutex,
-};
+use ::{ash::vk, std::sync::Mutex};
 
 use crate::vulkan::{
     render_device::{
@@ -143,8 +140,6 @@ impl RenderDevice {
         &self,
         desired: vk::SampleCountFlags,
     ) -> vk::SampleCountFlags {
-        use ash::version::InstanceV1_0;
-
         let props = unsafe {
             self.instance
                 .ash

@@ -1,7 +1,4 @@
-use ash::{
-    version::{DeviceV1_0, InstanceV1_0},
-    vk,
-};
+use ash::vk;
 
 use crate::vulkan::{
     render_device::{GpuQueue, QueueSelectionError},

@@ -1,7 +1,7 @@
 //! This module provides functions for verifying the available Vulkan
 //! extensions.
 
-use ash::{version::EntryV1_0, Entry};
+use ash::Entry;
 
 use crate::{markdown::MdList, vulkan::instance::InstanceError};
 

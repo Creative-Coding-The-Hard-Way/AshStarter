@@ -1,6 +1,6 @@
 //! This module defines functions for checking supported Vulkan layers.
 
-use ash::{version::EntryV1_0, Entry};
+use ash::Entry;
 
 use crate::{markdown::MdList, vulkan::instance::InstanceError};
 

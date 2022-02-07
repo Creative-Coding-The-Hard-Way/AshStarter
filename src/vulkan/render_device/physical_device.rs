@@ -1,7 +1,7 @@
 //! This module defines functions for selecting a physical device with the
 //! features required by this application.
 
-use ash::{version::InstanceV1_0, vk};
+use ash::vk;
 
 use crate::vulkan::{
     render_device::{PhysicalDeviceError, QueueFamilyIndices},

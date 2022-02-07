@@ -1,8 +1,4 @@
-use ash::{
-    extensions::ext::DebugUtils,
-    version::{EntryV1_0, InstanceV1_0},
-    vk, Entry,
-};
+use ash::{extensions::ext::DebugUtils, vk, Entry};
 
 use crate::{
     markdown::MdList,
@@ -122,7 +118,7 @@ fn create_instance(
 ) -> Result<(ash::Instance, Entry), InstanceError> {
     use std::ffi::CString;
 
-    let entry = Entry::new().map_err(InstanceError::VulkanLoadingError)?;
+    let entry = Entry::linked();
 
     let mut required_with_debug = required_extensions.clone();
     required_with_debug.push(
@@ -143,9 +139,9 @@ fn create_instance(
     let app_info = vk::ApplicationInfo {
         p_engine_name: engine_name.as_ptr(),
         p_application_name: app_name.as_ptr(),
-        application_version: vk::make_version(1, 0, 0),
-        engine_version: vk::make_version(1, 0, 0),
-        api_version: vk::make_version(1, 3, 0),
+        application_version: vk::make_api_version(0, 1, 0, 0),
+        engine_version: vk::make_api_version(0, 1, 0, 0),
+        api_version: vk::make_api_version(0, 1, 3, 0),
         ..Default::default()
     };
 

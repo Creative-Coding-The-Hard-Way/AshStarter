@@ -1,8 +1,4 @@
-use ::{
-    anyhow::Result,
-    ash::{version::DeviceV1_0, vk},
-    std::sync::Arc,
-};
+use ::{anyhow::Result, ash::vk, std::sync::Arc};
 
 use crate::vulkan::{
     command_buffer::{CommandBuffer, CommandBufferError, CommandPool},

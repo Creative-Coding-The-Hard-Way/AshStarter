@@ -1,9 +1,6 @@
 mod pipeline;
 
-use std::sync::Arc;
-
-use anyhow::Result;
-use ash::{version::DeviceV1_0, vk};
+use ::{anyhow::Result, ash::vk, std::sync::Arc};
 
 use crate::{
     math::Mat4,

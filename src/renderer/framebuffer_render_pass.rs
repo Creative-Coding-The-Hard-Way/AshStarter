@@ -1,7 +1,4 @@
-use ::{
-    ash::{version::DeviceV1_0, vk},
-    std::sync::Arc,
-};
+use ::{ash::vk, std::sync::Arc};
 
 use crate::{
     renderer::RenderPassArgs,

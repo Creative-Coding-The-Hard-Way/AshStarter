@@ -8,7 +8,7 @@ use ccthw::{
     timing::FrameRateLimit,
     vulkan,
 };
-use ::{anyhow::Result, ash::version::DeviceV1_0, std::sync::Arc};
+use ::{anyhow::Result, std::sync::Arc};
 
 // The main application state.
 pub struct Application {

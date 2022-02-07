@@ -35,8 +35,6 @@ impl<Alloc: ComposableAllocator> MemoryAllocator
         memory_requirements: vk::MemoryRequirements,
         property_flags: vk::MemoryPropertyFlags,
     ) -> Result<Allocation, AllocatorError> {
-        use ash::version::InstanceV1_0;
-
         let memory_properties = self
             .vk_dev
             .instance

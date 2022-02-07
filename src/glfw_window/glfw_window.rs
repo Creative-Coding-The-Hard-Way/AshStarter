@@ -1,4 +1,4 @@
-use ash::{extensions::khr::Surface, version::InstanceV1_0, vk, vk::Handle};
+use ash::{extensions::khr::Surface, vk, vk::Handle};
 
 use crate::{
     glfw_window::{EventReceiver, WindowError},
@@ -128,10 +128,16 @@ impl GlfwWindow {
 
     /// Create the Vulkan instance and surface for the current window.
     pub fn create_vulkan_device(&self) -> Result<RenderDevice, WindowError> {
-        let required_extensions = self
+        let mut required_extensions = self
             .glfw
             .get_required_instance_extensions()
             .ok_or(WindowError::RequiredExtensionsUnavailable)?;
+        required_extensions.push(
+            ash::extensions::khr::DynamicRendering::name()
+                .to_str()
+                .unwrap()
+                .to_owned(),
+        );
         let instance = Instance::new(&required_extensions)?;
 
         let mut surface_handle: u64 = 0;

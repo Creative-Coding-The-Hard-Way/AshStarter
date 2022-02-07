@@ -3,7 +3,7 @@ mod selection;
 
 use ::{
     anyhow::Result,
-    ash::{extensions::khr, version::DeviceV1_0, vk},
+    ash::{extensions::khr, vk},
 };
 
 use crate::vulkan::render_device::{RenderDevice, SwapchainError};

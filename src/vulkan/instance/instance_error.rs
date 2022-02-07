@@ -1,5 +1,4 @@
-use ash::vk;
-use thiserror::Error;
+use ::{ash::vk, thiserror::Error};
 
 /// This enum represents errors which can occur when building and handling the
 /// Vulkan instance.
@@ -27,7 +26,7 @@ pub enum InstanceError {
     InvalidDebugLayerName(#[source] std::str::Utf8Error),
 
     #[error("Unable to create the Vulkan instance")]
-    UnableToCreateInstance(#[source] ash::InstanceError),
+    UnableToCreateInstance(#[source] vk::Result),
 
     #[error("Unable to create the logical device")]
     UnableToCreateLogicalDevice(#[source] vk::Result),
