@@ -4,8 +4,46 @@ use ash::{
     vk, Entry,
 };
 
-use super::{debug_callback, extensions, layers, Instance, InstanceError};
-use crate::{markdown::MdList, vulkan::ffi::to_os_ptrs};
+use crate::{
+    markdown::MdList,
+    vulkan::{
+        ffi::to_os_ptrs,
+        instance::{debug_callback, extensions, layers, InstanceError},
+    },
+};
+
+/// The Instance struct holds the ash entry and ash library handle along with
+/// the debug callback.
+///
+/// # Example
+///
+///     use ccthw::vulkan::Instance;
+///
+///     // Typically the required extensions come from the window system.
+///     let required_extensions = vec![
+///         String::from("some_required_extension"),
+///     ];
+///
+///     let instance = Instance::new(&required_extensions);
+///
+pub struct Instance {
+    /// The Ash Vulkan library entrypoint.
+    pub ash: ash::Instance,
+
+    /// The Debug entrypoint, used to set debug names for vulkan objects.
+    pub debug: DebugUtils,
+
+    /// The layers applied to this vulkan instance
+    #[allow(unused)]
+    layers: Vec<String>,
+
+    /// The instance's debug messenger
+    debug_messenger: vk::DebugUtilsMessengerEXT,
+
+    /// The vulkan function loader
+    #[allow(unused)]
+    pub entry: Entry,
+}
 
 impl Instance {
     /// Create a new ash instance with the required extensions.

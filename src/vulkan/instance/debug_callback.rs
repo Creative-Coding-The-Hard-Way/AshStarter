@@ -10,7 +10,7 @@ use ash::{
     Entry,
 };
 
-use super::InstanceError;
+use crate::vulkan::instance::InstanceError;
 
 /// Create the vulkan debug callback for validation.
 pub fn create_debug_logger(

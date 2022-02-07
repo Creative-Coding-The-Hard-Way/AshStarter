@@ -3,10 +3,26 @@ use ::{
     std::sync::Arc,
 };
 
-use super::{Image, ImageError};
 use crate::vulkan::{
-    errors::VulkanDebugError, MemoryAllocator, RenderDevice, VulkanDebug,
+    errors::VulkanDebugError, image::ImageError, Allocation, MemoryAllocator,
+    RenderDevice, VulkanDebug,
 };
+
+/// A owned Vulkan image handle which is automatically destroyed when it is
+/// dropped.
+pub struct Image {
+    /// The Vulkan image handle.
+    pub raw: vk::Image,
+
+    /// A region of allocated memory which is bound to the image.
+    pub allocation: Allocation,
+
+    /// The memory allocater used to create the image.
+    pub vk_alloc: Arc<dyn MemoryAllocator>,
+
+    /// The render device used to create the image.
+    pub vk_dev: Arc<RenderDevice>,
+}
 
 impl Image {
     pub fn new(

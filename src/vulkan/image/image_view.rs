@@ -3,8 +3,24 @@ use ::{
     std::sync::Arc,
 };
 
-use super::{Image, ImageError, ImageView};
-use crate::vulkan::{errors::VulkanDebugError, VulkanDebug};
+use crate::vulkan::{
+    errors::VulkanDebugError,
+    image::{Image, ImageError},
+    RenderDevice, VulkanDebug,
+};
+
+/// An owned Vulkan image view which is automatically destroyed when it is
+/// dropped.
+pub struct ImageView {
+    /// The raw image view handle
+    pub raw: vk::ImageView,
+
+    /// The image associated with this view.
+    pub image: Arc<Image>,
+
+    /// The render device used to create the image view.
+    pub vk_dev: Arc<RenderDevice>,
+}
 
 impl ImageView {
     /// Create a new image view for a given image.

@@ -3,8 +3,17 @@ use ::{
     std::sync::Arc,
 };
 
-use super::{Framebuffer, FramebufferError};
-use crate::vulkan::{errors::VulkanDebugError, RenderDevice, VulkanDebug};
+use crate::vulkan::{
+    errors::VulkanDebugError, framebuffer::FramebufferError, RenderDevice,
+    VulkanDebug,
+};
+
+/// An owned Vulkan framebuffer which is automatically destroyed when it is
+/// dropped.
+pub struct Framebuffer {
+    pub raw: vk::Framebuffer,
+    pub vk_dev: Arc<RenderDevice>,
+}
 
 impl Framebuffer {
     /// Construct new framebuffers with color attachments for each of the

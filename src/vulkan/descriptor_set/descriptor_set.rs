@@ -1,7 +1,18 @@
-use ash::{version::DeviceV1_0, vk};
+use ::{
+    ash::{version::DeviceV1_0, vk},
+    std::sync::Arc,
+};
 
-use super::DescriptorSet;
-use crate::vulkan::{errors::VulkanDebugError, VulkanDebug};
+use crate::vulkan::{errors::VulkanDebugError, RenderDevice, VulkanDebug};
+
+/// A Vulkan descriptor set wrapper.
+pub struct DescriptorSet {
+    /// the raw Vulkan descriptor set handle.
+    pub raw: vk::DescriptorSet,
+
+    /// The device used to create the descriptor set.
+    pub vk_dev: Arc<RenderDevice>,
+}
 
 impl DescriptorSet {
     /// Write a buffer binding to this descripor set.

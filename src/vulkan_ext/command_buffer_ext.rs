@@ -1,20 +1,9 @@
-use ::{
-    ash::{version::DeviceV1_0, vk},
-    thiserror::Error,
+use ::ash::{version::DeviceV1_0, vk};
+
+use crate::{
+    vulkan::CommandBuffer,
+    vulkan_ext::{CommandBufferExtError, CommandResult},
 };
-
-use crate::vulkan::CommandBuffer;
-
-#[derive(Debug, Error)]
-pub enum CommandBufferExtError {
-    #[error("Unable to begin the command buffer")]
-    UnableToBeginCommandBuffer(#[source] vk::Result),
-
-    #[error("Unable to end the command buffer")]
-    UnableToEndCommandBuffer(#[source] vk::Result),
-}
-
-pub type CommandResult<T> = Result<T, CommandBufferExtError>;
 
 /// Command buffer convenience methods.
 pub trait CommandBufferExt {

@@ -2,8 +2,17 @@ use std::sync::Arc;
 
 use ash::{version::DeviceV1_0, vk};
 
-use super::{Pipeline, PipelineError};
-use crate::vulkan::{errors::VulkanDebugError, RenderDevice, VulkanDebug};
+use crate::vulkan::{
+    errors::VulkanDebugError, pipeline::PipelineError, RenderDevice,
+    VulkanDebug,
+};
+
+/// An owned Pipeline which is destroyed automatically when it's dropped.
+pub struct Pipeline {
+    pub raw: vk::Pipeline,
+    pub bind_point: vk::PipelineBindPoint,
+    pub vk_dev: Arc<RenderDevice>,
+}
 
 impl Pipeline {
     /// Create a new graphics pipeline.

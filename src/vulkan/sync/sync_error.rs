@@ -1,8 +1,4 @@
-mod fence;
-
-use ::{ash::vk, std::sync::Arc, thiserror::Error};
-
-use crate::vulkan::RenderDevice;
+use ::{ash::vk, thiserror::Error};
 
 #[derive(Debug, Error)]
 pub enum FenceError {
@@ -16,11 +12,8 @@ pub enum FenceError {
     UnexpectedResetError(#[source] vk::Result),
 }
 
-/// An owned Vulkan fence object which is automatically destroyed when dropped.
-pub struct Fence {
-    /// The raw fence handle.
-    pub raw: vk::Fence,
-
-    /// The device which created the fence.
-    pub vk_dev: Arc<RenderDevice>,
+#[derive(Debug, Error)]
+pub enum SemaphoreError {
+    #[error("Unable to create a new semaphore")]
+    UnableToCreateSemaphore(#[source] vk::Result),
 }

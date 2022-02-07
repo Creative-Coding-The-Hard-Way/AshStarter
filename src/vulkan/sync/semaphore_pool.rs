@@ -1,7 +1,17 @@
 use ::std::sync::Arc;
 
-use super::{Semaphore, SemaphoreError, SemaphorePool};
-use crate::vulkan::RenderDevice;
+use crate::vulkan::{
+    sync::{Semaphore, SemaphoreError},
+    RenderDevice,
+};
+
+/// A semaphore pool maintains a collection of binary semaphores which are
+/// available for re-use.
+/// Unused semaphores are automatically destroyed when the pool is dropped.
+pub struct SemaphorePool {
+    recycled_semaphores: Vec<Semaphore>,
+    pub vk_dev: Arc<RenderDevice>,
+}
 
 impl SemaphorePool {
     /// Create a new semaphore pool.

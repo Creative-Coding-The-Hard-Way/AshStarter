@@ -3,8 +3,20 @@ use ::{
     std::sync::Arc,
 };
 
-use super::{DescriptorSetError, DescriptorSetLayout};
-use crate::vulkan::{errors::VulkanDebugError, RenderDevice, VulkanDebug};
+use crate::vulkan::{
+    descriptor_set::DescriptorSetError, errors::VulkanDebugError, RenderDevice,
+    VulkanDebug,
+};
+
+/// An owned Descriptor Set Layout which is automatically destroyed when
+/// dropped.
+pub struct DescriptorSetLayout {
+    /// The raw vulkan Descriptor Set Layout handle
+    pub raw: vk::DescriptorSetLayout,
+
+    /// The device used to create the layout
+    pub vk_dev: Arc<RenderDevice>,
+}
 
 impl DescriptorSetLayout {
     pub fn new(

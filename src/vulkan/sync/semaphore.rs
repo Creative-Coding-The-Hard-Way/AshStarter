@@ -3,8 +3,15 @@ use ::{
     std::sync::Arc,
 };
 
-use super::{Semaphore, SemaphoreError};
-use crate::vulkan::{errors::VulkanDebugError, RenderDevice, VulkanDebug};
+use crate::vulkan::{
+    errors::VulkanDebugError, sync::SemaphoreError, RenderDevice, VulkanDebug,
+};
+
+/// An owned semaphore which is automatically destroyed when it is dropped.
+pub struct Semaphore {
+    pub raw: vk::Semaphore,
+    pub vk_dev: Arc<RenderDevice>,
+}
 
 impl Semaphore {
     /// Create a new semaphore.

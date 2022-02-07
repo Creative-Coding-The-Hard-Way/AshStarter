@@ -2,10 +2,19 @@ use std::sync::Arc;
 
 use ash::{version::DeviceV1_0, vk};
 
-use super::{PipelineError, ShaderModule};
-use crate::vulkan::{errors::VulkanDebugError, RenderDevice, VulkanDebug};
+use crate::vulkan::{
+    errors::VulkanDebugError, pipeline::PipelineError, RenderDevice,
+    VulkanDebug,
+};
 
 const DEFAULT_ENTRY_POINT: &'static [u8] = b"main\0";
+
+/// An owned vk::ShaderModule which is destroyed automatically when it falls
+/// out of scope.
+pub struct ShaderModule {
+    pub raw: vk::ShaderModule,
+    pub vk_dev: Arc<RenderDevice>,
+}
 
 impl ShaderModule {
     /// Create a new owned shader module.

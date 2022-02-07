@@ -2,10 +2,20 @@ use std::sync::Arc;
 
 use ash::{version::DeviceV1_0, vk};
 
-use super::{
-    DescriptorPool, DescriptorSet, DescriptorSetError, DescriptorSetLayout,
+use crate::vulkan::{
+    descriptor_set::{DescriptorSet, DescriptorSetError, DescriptorSetLayout},
+    errors::VulkanDebugError,
+    RenderDevice, VulkanDebug,
 };
-use crate::vulkan::{errors::VulkanDebugError, RenderDevice, VulkanDebug};
+
+/// An owned Descriptor Pool which is automatically destroyed when dropped.
+pub struct DescriptorPool {
+    /// The raw vulkan descriptor pool handle.
+    pub raw: vk::DescriptorPool,
+
+    /// The device used to create the pool.
+    pub vk_dev: Arc<RenderDevice>,
+}
 
 impl DescriptorPool {
     /// Create a new descriptor pool with capacity for `descriptor_count`

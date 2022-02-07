@@ -1,9 +1,13 @@
 //! Vulkan synchronization privite wrappers.
 
-pub(super) mod fence;
-pub(super) mod semaphore;
+mod fence;
+mod semaphore;
+mod semaphore_pool;
+mod sync_error;
 
 pub use self::{
     fence::Fence,
-    semaphore::{Semaphore, SemaphorePool},
+    semaphore::Semaphore,
+    semaphore_pool::SemaphorePool,
+    sync_error::{FenceError, SemaphoreError},
 };

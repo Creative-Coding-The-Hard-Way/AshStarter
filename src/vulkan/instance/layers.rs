@@ -2,8 +2,7 @@
 
 use ash::{version::EntryV1_0, Entry};
 
-use super::InstanceError;
-use crate::markdown::MdList;
+use crate::{markdown::MdList, vulkan::instance::InstanceError};
 
 /// Check that each of the required layers is available on the current platform.
 pub fn check_layers(

@@ -3,8 +3,16 @@ use ::{
     std::sync::Arc,
 };
 
-use super::{RenderPass, RenderPassError};
-use crate::vulkan::{errors::VulkanDebugError, RenderDevice, VulkanDebug};
+use crate::vulkan::{
+    errors::VulkanDebugError, render_pass::RenderPassError, RenderDevice,
+    VulkanDebug,
+};
+
+/// An owned Vulkan RenderPass which automatically destroys itself when dropped.
+pub struct RenderPass {
+    pub raw: vk::RenderPass,
+    pub vk_dev: Arc<RenderDevice>,
+}
 
 impl RenderPass {
     /// Create a new render pass with the given create info.

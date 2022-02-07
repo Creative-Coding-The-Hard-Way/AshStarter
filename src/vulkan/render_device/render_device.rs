@@ -3,10 +3,39 @@ use ::{
     std::sync::Mutex,
 };
 
-use super::{
-    physical_device, QueueFamilyIndices, RenderDevice, RenderDeviceError,
+use crate::vulkan::{
+    render_device::{
+        physical_device, GpuQueue, QueueFamilyIndices, RenderDeviceError,
+        Swapchain,
+    },
+    Instance, WindowSurface,
 };
-use crate::vulkan::{Instance, WindowSurface};
+
+/// The render device holds the core Vulkan state and devices which are used
+/// by all parts of the application.
+pub struct RenderDevice {
+    /// The physical device used by this application.
+    #[allow(unused)]
+    pub physical_device: vk::PhysicalDevice,
+
+    /// The Vulkan logical device used to issue commands to the physical device.
+    pub logical_device: ash::Device,
+
+    /// The GPU queue used to submit graphics commands.
+    pub graphics_queue: GpuQueue,
+
+    /// The GPU queue used to submit presentation commands.
+    pub present_queue: GpuQueue,
+
+    /// The window's swapchain and related resources.
+    pub swapchain: Mutex<Option<Swapchain>>,
+
+    /// The Vulkan presentation surface for the current window.
+    pub window_surface: WindowSurface,
+
+    /// The Vulkan library instance.
+    pub instance: Instance,
+}
 
 impl RenderDevice {
     /// Create the Vulkan Render Device.

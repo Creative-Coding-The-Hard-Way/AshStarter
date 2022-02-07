@@ -3,10 +3,16 @@ use ::{
     std::sync::Arc,
 };
 
-use super::{
-    Allocation, AllocatorError, ComposableAllocator, PassthroughAllocator,
+use crate::vulkan::{
+    device_allocator::{Allocation, AllocatorError, ComposableAllocator},
+    RenderDevice,
 };
-use crate::vulkan::RenderDevice;
+
+/// A composable allocator which just defers all allocation to the underlying
+/// Vulkan device.
+pub struct PassthroughAllocator {
+    vk_dev: Arc<RenderDevice>,
+}
 
 impl PassthroughAllocator {
     pub fn new(vk_dev: Arc<RenderDevice>) -> Self {

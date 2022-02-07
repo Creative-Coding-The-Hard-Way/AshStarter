@@ -3,10 +3,21 @@ use ash::{
     vk,
 };
 
-use super::{GpuQueue, QueueFamilyIndices, QueueSelectionError};
-use crate::vulkan::WindowSurface;
+use crate::vulkan::{
+    render_device::{GpuQueue, QueueSelectionError},
+    WindowSurface,
+};
 
 const SINGLE_QUEUE_PRIORITY: [f32; 1] = [1.0];
+
+/// This struct holds all of the queue indices required by this application.
+pub struct QueueFamilyIndices {
+    /// the index for the graphics queue
+    graphics_family_index: u32,
+
+    /// the index for the presentation queue
+    present_family_index: u32,
+}
 
 impl QueueFamilyIndices {
     /// Find all of the queue families required by this application.

@@ -3,11 +3,19 @@ use ::{
     std::sync::{Arc, Mutex},
 };
 
-use super::{
-    Allocation, AllocatorError, ComposableAllocator, LockedMemoryAllocator,
-    MemoryAllocator,
+use crate::vulkan::{
+    device_allocator::{
+        Allocation, AllocatorError, ComposableAllocator, MemoryAllocator,
+    },
+    RenderDevice,
 };
-use crate::vulkan::RenderDevice;
+
+/// A memory allocator implementation which decorates a composed allocator
+/// with a mutex.
+pub struct LockedMemoryAllocator<Alloc: ComposableAllocator> {
+    composed_allocator: Mutex<Alloc>,
+    vk_dev: Arc<RenderDevice>,
+}
 
 impl<Alloc: ComposableAllocator> LockedMemoryAllocator<Alloc> {
     pub fn new(vk_dev: Arc<RenderDevice>, allocater: Alloc) -> Self {

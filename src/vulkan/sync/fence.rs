@@ -1,10 +1,19 @@
-use ::{
-    ash::{version::DeviceV1_0, vk},
-    std::sync::Arc,
+use std::sync::Arc;
+
+use ash::{version::DeviceV1_0, vk};
+
+use crate::vulkan::{
+    errors::VulkanDebugError, sync::FenceError, RenderDevice, VulkanDebug,
 };
 
-use super::{Fence, FenceError};
-use crate::vulkan::{errors::VulkanDebugError, RenderDevice, VulkanDebug};
+/// An owned Vulkan fence object which is automatically destroyed when dropped.
+pub struct Fence {
+    /// The raw fence handle.
+    pub raw: vk::Fence,
+
+    /// The device which created the fence.
+    pub vk_dev: Arc<RenderDevice>,
+}
 
 impl Fence {
     pub fn new(vk_dev: Arc<RenderDevice>) -> Result<Self, FenceError> {

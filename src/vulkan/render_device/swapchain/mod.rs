@@ -3,10 +3,32 @@ mod selection;
 
 use ::{
     anyhow::Result,
-    ash::{version::DeviceV1_0, vk},
+    ash::{extensions::khr, version::DeviceV1_0, vk},
 };
 
-use super::{RenderDevice, Swapchain, SwapchainError};
+use crate::vulkan::render_device::{RenderDevice, SwapchainError};
+
+/// All swapchain-related resources - things which need replaced when the
+/// swapchain is rebuilt.
+pub struct Swapchain {
+    /// The swapchain extension function loader provided by the ash library.
+    pub loader: khr::Swapchain,
+
+    /// The Vulkan SwapchainKHR used for most swapchain operations.
+    pub khr: vk::SwapchainKHR,
+
+    /// The array of image views for this swapchain's images.
+    pub image_views: Vec<vk::ImageView>,
+
+    /// The image format for this swapchain's images.
+    pub format: vk::Format,
+
+    /// The color space used for this swapchain's images.
+    pub color_space: vk::ColorSpaceKHR,
+
+    /// The hardware pixel extent for this swapchain's images.
+    pub extent: vk::Extent2D,
+}
 
 impl RenderDevice {
     /// Perform some action with the swapchain.

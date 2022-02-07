@@ -3,8 +3,10 @@
 
 use ash::{version::InstanceV1_0, vk};
 
-use super::{PhysicalDeviceError, QueueFamilyIndices};
-use crate::vulkan::WindowSurface;
+use crate::vulkan::{
+    render_device::{PhysicalDeviceError, QueueFamilyIndices},
+    WindowSurface,
+};
 
 /// Return the set of required device features for this application.
 pub fn required_features() -> vk::PhysicalDeviceFeatures {

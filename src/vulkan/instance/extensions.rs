@@ -3,8 +3,7 @@
 
 use ash::{version::EntryV1_0, Entry};
 
-use super::InstanceError;
-use crate::markdown::MdList;
+use crate::{markdown::MdList, vulkan::instance::InstanceError};
 
 /// Check that each of the provided extensions is available on the current
 /// platform.
