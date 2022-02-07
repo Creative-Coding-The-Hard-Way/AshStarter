@@ -1,1 +1,0 @@
-initSidebarItems({"trait":[["RenderTarget","Types which implement this interface can be passed to the frame's draw callback."]]});

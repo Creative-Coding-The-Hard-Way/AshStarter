@@ -1,7 +1,9 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `C:\Users\brad\.cargo\registry\src\github.com-1ecc6299db9ec823\flexi_logger-0.17.1\src\writers\file_log_writer.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>file_log_writer.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings"></script><script src="../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../../favicon.svg">
-<link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png">
-<link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../flexi_logger/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
-                <a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `C:\Users\Bradley\.cargo\registry\src\github.com-1ecc6299db9ec823\flexi_logger-0.17.1\src\writers\file_log_writer.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>file_log_writer.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><script defer src="../../../main.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../flexi_logger/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"></h2>
+    </nav>
+    <nav class="sidebar"><a class="sidebar-logo" href="../../../flexi_logger/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
+        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../flexi_logger/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><div class="theme-picker hidden"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="22" height="22" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -472,22 +474,21 @@
 <span id="469">469</span>
 <span id="470">470</span>
 <span id="471">471</span>
-</pre><div class="example-wrap"><pre class="rust ">
-<span class="kw">mod</span> <span class="ident">builder</span>;
+</pre><pre class="rust"><code><span class="kw">mod</span> <span class="ident">builder</span>;
 <span class="kw">mod</span> <span class="ident">config</span>;
 <span class="kw">mod</span> <span class="ident">state</span>;
 
-<span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span>::<span class="ident">builder</span>::<span class="ident">FileLogWriterBuilder</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::builder::FileLogWriterBuilder</span>;
 
-<span class="kw">use</span> <span class="self">self</span>::<span class="ident">config</span>::{<span class="ident">Config</span>, <span class="ident">FilenameConfig</span>, <span class="ident">RotationConfig</span>};
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">primary_writer</span>::<span class="ident">buffer_with</span>;
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">writers</span>::<span class="ident">LogWriter</span>;
+<span class="kw">use</span> <span class="ident"><span class="self">self</span>::config</span>::{<span class="ident">Config</span>, <span class="ident">FilenameConfig</span>, <span class="ident">RotationConfig</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::primary_writer::buffer_with</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::writers::LogWriter</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">DeferredNow</span>, <span class="ident">FormatFunction</span>};
-<span class="kw">use</span> <span class="ident">log</span>::<span class="ident">Record</span>;
-<span class="kw">use</span> <span class="ident">state</span>::<span class="ident">State</span>;
-<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">Write</span>;
-<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">path</span>::<span class="ident">PathBuf</span>;
-<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">sync</span>::<span class="ident">Mutex</span>;
+<span class="kw">use</span> <span class="ident">log::Record</span>;
+<span class="kw">use</span> <span class="ident">state::State</span>;
+<span class="kw">use</span> <span class="ident">std::io::Write</span>;
+<span class="kw">use</span> <span class="ident">std::path::PathBuf</span>;
+<span class="kw">use</span> <span class="ident">std::sync::Mutex</span>;
 
 <span class="kw">const</span> <span class="ident">WINDOWS_LINE_ENDING</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="string">b&quot;\r\n&quot;</span>;
 <span class="kw">const</span> <span class="ident">UNIX_LINE_ENDING</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="string">b&quot;\n&quot;</span>;
@@ -495,7 +496,7 @@
 <span class="doccomment">/// A configurable `LogWriter` implementation that writes to a file or a sequence of files.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// See [writers](crate::writers) for usage guidance.</span>
-<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy</span>::<span class="ident">module_name_repetitions</span>)]</span>
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::module_name_repetitions</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">FileLogWriter</span> {
     <span class="ident">format</span>: <span class="ident">FormatFunction</span>,
     <span class="ident">line_ending</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>],
@@ -503,15 +504,15 @@
     <span class="comment">// which translates into a non-mutating `LogWriter::write()`,</span>
     <span class="comment">// we need internal mutability and thread-safety.</span>
     <span class="ident">state</span>: <span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">State</span><span class="op">&gt;</span>,
-    <span class="ident">max_log_level</span>: <span class="ident">log</span>::<span class="ident">LevelFilter</span>,
+    <span class="ident">max_log_level</span>: <span class="ident">log::LevelFilter</span>,
 }
 <span class="kw">impl</span> <span class="ident">FileLogWriter</span> {
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">new</span>(
         <span class="ident">format</span>: <span class="ident">FormatFunction</span>,
         <span class="ident">line_ending</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>],
         <span class="ident">state</span>: <span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">State</span><span class="op">&gt;</span>,
-        <span class="ident">max_log_level</span>: <span class="ident">log</span>::<span class="ident">LevelFilter</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">FileLogWriter</span> {
+        <span class="ident">max_log_level</span>: <span class="ident">log::LevelFilter</span>,
+    ) -&gt; <span class="ident">FileLogWriter</span> {
         <span class="ident">FileLogWriter</span> {
             <span class="ident">format</span>,
             <span class="ident">line_ending</span>,
@@ -522,31 +523,31 @@
 
     <span class="doccomment">/// Instantiates a builder for `FileLogWriter`.</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">builder</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">FileLogWriterBuilder</span> {
-        <span class="ident">FileLogWriterBuilder</span>::<span class="ident">new</span>()
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">builder</span>() -&gt; <span class="ident">FileLogWriterBuilder</span> {
+        <span class="ident">FileLogWriterBuilder::new</span>()
     }
 
     <span class="doccomment">/// Returns a reference to its configured output format function.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">format</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">FormatFunction</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">format</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">FormatFunction</span> {
         <span class="self">self</span>.<span class="ident">format</span>
     }
 
     <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">current_filename</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">PathBuf</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">current_filename</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">PathBuf</span> {
         <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>().<span class="ident">current_filename</span>()
     }
 }
 
 <span class="kw">impl</span> <span class="ident">LogWriter</span> <span class="kw">for</span> <span class="ident">FileLogWriter</span> {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">write</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">now</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">DeferredNow</span>, <span class="ident">record</span>: <span class="kw-2">&amp;</span><span class="ident">Record</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">io</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">write</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">now</span>: <span class="kw-2">&amp;mut</span> <span class="ident">DeferredNow</span>, <span class="ident">record</span>: <span class="kw-2">&amp;</span><span class="ident">Record</span>) -&gt; <span class="ident">std::io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="ident">buffer_with</span>(<span class="op">|</span><span class="ident">tl_buf</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">tl_buf</span>.<span class="ident">try_borrow_mut</span>() {
-            <span class="prelude-val">Ok</span>(<span class="kw-2">mut</span> <span class="ident">buffer</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                (<span class="self">self</span>.<span class="ident">format</span>)(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="ident">buffer</span>, <span class="ident">now</span>, <span class="ident">record</span>).<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">write_err</span>(<span class="ident">ERR_1</span>, <span class="kw-2">&amp;</span><span class="ident">e</span>));
+            <span class="prelude-val">Ok</span>(<span class="kw-2">mut</span> <span class="ident">buffer</span>) =&gt; {
+                (<span class="self">self</span>.<span class="ident">format</span>)(<span class="kw-2">&amp;mut</span> <span class="kw-2">*</span><span class="ident">buffer</span>, <span class="ident">now</span>, <span class="ident">record</span>).<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">write_err</span>(<span class="ident">ERR_1</span>, <span class="kw-2">&amp;</span><span class="ident">e</span>));
 
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">state_guard</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>();
-                <span class="kw">let</span> <span class="ident">state</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="ident">state_guard</span>;
+                <span class="kw">let</span> <span class="ident">state</span> <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="kw-2">*</span><span class="ident">state_guard</span>;
 
                 <span class="ident">buffer</span>
                     .<span class="ident">write_all</span>(<span class="self">self</span>.<span class="ident">line_ending</span>)
@@ -557,16 +558,16 @@
                     .<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">write_err</span>(<span class="ident">ERR_2</span>, <span class="kw-2">&amp;</span><span class="ident">e</span>));
                 <span class="ident">buffer</span>.<span class="ident">clear</span>();
             }
-            <span class="prelude-val">Err</span>(<span class="ident">_e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="prelude-val">Err</span>(<span class="ident">_e</span>) =&gt; {
                 <span class="comment">// We arrive here in the rare cases of recursive logging</span>
                 <span class="comment">// (e.g. log calls in Debug or Display implementations)</span>
                 <span class="comment">// we print the inner calls, in chronological order, before finally the</span>
                 <span class="comment">// outer most message is printed</span>
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tmp_buf</span> <span class="op">=</span> <span class="ident">Vec</span>::<span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>::<span class="ident">with_capacity</span>(<span class="number">200</span>);
-                (<span class="self">self</span>.<span class="ident">format</span>)(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">tmp_buf</span>, <span class="ident">now</span>, <span class="ident">record</span>).<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">write_err</span>(<span class="ident">ERR_1</span>, <span class="kw-2">&amp;</span><span class="ident">e</span>));
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tmp_buf</span> <span class="op">=</span> <span class="ident">Vec</span>::<span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="ident">::with_capacity</span>(<span class="number">200</span>);
+                (<span class="self">self</span>.<span class="ident">format</span>)(<span class="kw-2">&amp;mut</span> <span class="ident">tmp_buf</span>, <span class="ident">now</span>, <span class="ident">record</span>).<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">write_err</span>(<span class="ident">ERR_1</span>, <span class="kw-2">&amp;</span><span class="ident">e</span>));
 
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">state_guard</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>();
-                <span class="kw">let</span> <span class="ident">state</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="ident">state_guard</span>;
+                <span class="kw">let</span> <span class="ident">state</span> <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="kw-2">*</span><span class="ident">state_guard</span>;
 
                 <span class="ident">tmp_buf</span>
                     .<span class="ident">write_all</span>(<span class="self">self</span>.<span class="ident">line_ending</span>)
@@ -582,7 +583,7 @@
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">flush</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">io</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">flush</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">std::io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">state</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">lock</span>() {
             <span class="ident">state</span>.<span class="ident">flush</span>()
         } <span class="kw">else</span> {
@@ -591,7 +592,7 @@
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">max_log_level</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">log</span>::<span class="ident">LevelFilter</span> {
+    <span class="kw">fn</span> <span class="ident">max_log_level</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">log::LevelFilter</span> {
         <span class="self">self</span>.<span class="ident">max_log_level</span>
     }
 
@@ -613,18 +614,18 @@
 <span class="kw">const</span> <span class="ident">ERR_1</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;FileLogWriter: formatting failed with &quot;</span>;
 <span class="kw">const</span> <span class="ident">ERR_2</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;FileLogWriter: writing failed with &quot;</span>;
 
-<span class="kw">fn</span> <span class="ident">write_err</span>(<span class="ident">msg</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">err</span>: <span class="kw-2">&amp;</span><span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">Error</span>) {
-    <span class="macro">eprintln</span><span class="macro">!</span>(<span class="string">&quot;[flexi_logger] {} with {}&quot;</span>, <span class="ident">msg</span>, <span class="ident">err</span>);
+<span class="kw">fn</span> <span class="ident">write_err</span>(<span class="ident">msg</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">err</span>: <span class="kw-2">&amp;</span><span class="ident">std::io::Error</span>) {
+    <span class="macro">eprintln!</span>(<span class="string">&quot;[flexi_logger] {} with {}&quot;</span>, <span class="ident">msg</span>, <span class="ident">err</span>);
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">test</span> {
-    <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">writers</span>::<span class="ident">LogWriter</span>;
+    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::writers::LogWriter</span>;
     <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">Cleanup</span>, <span class="ident">Criterion</span>, <span class="ident">DeferredNow</span>, <span class="ident">Naming</span>};
-    <span class="kw">use</span> <span class="ident">chrono</span>::<span class="ident">Local</span>;
+    <span class="kw">use</span> <span class="ident">chrono::Local</span>;
 
-    <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">ops</span>::<span class="ident">Add</span>;
-    <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">path</span>::{<span class="ident">Path</span>, <span class="ident">PathBuf</span>};
+    <span class="kw">use</span> <span class="ident">std::ops::Add</span>;
+    <span class="kw">use</span> <span class="ident">std::path</span>::{<span class="ident">Path</span>, <span class="ident">PathBuf</span>};
     <span class="kw">const</span> <span class="ident">DIRECTORY</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="string">r&quot;log_files/rotate&quot;</span>;
     <span class="kw">const</span> <span class="ident">ONE</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;ONE&quot;</span>;
     <span class="kw">const</span> <span class="ident">TWO</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;TWO&quot;</span>;
@@ -641,158 +642,158 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_rotate_no_append_numbers</span>() {
         <span class="comment">// we use timestamp as discriminant to allow repeated runs</span>
-        <span class="kw">let</span> <span class="ident">ts</span> <span class="op">=</span> <span class="ident">Local</span>::<span class="ident">now</span>()
+        <span class="kw">let</span> <span class="ident">ts</span> <span class="op">=</span> <span class="ident">Local::now</span>()
             .<span class="ident">format</span>(<span class="string">&quot;false-numbers-%Y-%m-%d_%H-%M-%S&quot;</span>)
             .<span class="ident">to_string</span>();
-        <span class="kw">let</span> <span class="ident">naming</span> <span class="op">=</span> <span class="ident">Naming</span>::<span class="ident">Numbers</span>;
+        <span class="kw">let</span> <span class="ident">naming</span> <span class="op">=</span> <span class="ident">Naming::Numbers</span>;
 
         <span class="comment">// ensure we start with -/-/-</span>
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">not_exists</span>(<span class="string">&quot;00000&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>));
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">not_exists</span>(<span class="string">&quot;00001&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>));
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">not_exists</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>));
+        <span class="macro">assert!</span>(<span class="ident">not_exists</span>(<span class="string">&quot;00000&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>));
+        <span class="macro">assert!</span>(<span class="ident">not_exists</span>(<span class="string">&quot;00001&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>));
+        <span class="macro">assert!</span>(<span class="ident">not_exists</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>));
 
         <span class="comment">// ensure this produces -/-/ONE</span>
         <span class="ident">write_loglines</span>(<span class="bool-val">false</span>, <span class="ident">naming</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="kw-2">&amp;</span>[<span class="ident">ONE</span>]);
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">not_exists</span>(<span class="string">&quot;00000&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>));
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">not_exists</span>(<span class="string">&quot;00001&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>));
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">contains</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">ONE</span>));
+        <span class="macro">assert!</span>(<span class="ident">not_exists</span>(<span class="string">&quot;00000&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>));
+        <span class="macro">assert!</span>(<span class="ident">not_exists</span>(<span class="string">&quot;00001&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>));
+        <span class="macro">assert!</span>(<span class="ident">contains</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">ONE</span>));
 
         <span class="comment">// ensure this produces ONE/-/TWO</span>
         <span class="ident">write_loglines</span>(<span class="bool-val">false</span>, <span class="ident">naming</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="kw-2">&amp;</span>[<span class="ident">TWO</span>]);
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">contains</span>(<span class="string">&quot;00000&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">ONE</span>));
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">not_exists</span>(<span class="string">&quot;00001&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>));
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">contains</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">TWO</span>));
+        <span class="macro">assert!</span>(<span class="ident">contains</span>(<span class="string">&quot;00000&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">ONE</span>));
+        <span class="macro">assert!</span>(<span class="ident">not_exists</span>(<span class="string">&quot;00001&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>));
+        <span class="macro">assert!</span>(<span class="ident">contains</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">TWO</span>));
 
         <span class="comment">// ensure this also produces ONE/-/TWO</span>
         <span class="ident">remove</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>);
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">not_exists</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>));
+        <span class="macro">assert!</span>(<span class="ident">not_exists</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>));
         <span class="ident">write_loglines</span>(<span class="bool-val">false</span>, <span class="ident">naming</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="kw-2">&amp;</span>[<span class="ident">TWO</span>]);
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">contains</span>(<span class="string">&quot;00000&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">ONE</span>));
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">not_exists</span>(<span class="string">&quot;00001&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>));
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">contains</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">TWO</span>));
+        <span class="macro">assert!</span>(<span class="ident">contains</span>(<span class="string">&quot;00000&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">ONE</span>));
+        <span class="macro">assert!</span>(<span class="ident">not_exists</span>(<span class="string">&quot;00001&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>));
+        <span class="macro">assert!</span>(<span class="ident">contains</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">TWO</span>));
 
         <span class="comment">// ensure this produces ONE/TWO/THREE</span>
         <span class="ident">write_loglines</span>(<span class="bool-val">false</span>, <span class="ident">naming</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="kw-2">&amp;</span>[<span class="ident">THREE</span>]);
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">contains</span>(<span class="string">&quot;00000&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">ONE</span>));
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">contains</span>(<span class="string">&quot;00001&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">TWO</span>));
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">contains</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">THREE</span>));
+        <span class="macro">assert!</span>(<span class="ident">contains</span>(<span class="string">&quot;00000&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">ONE</span>));
+        <span class="macro">assert!</span>(<span class="ident">contains</span>(<span class="string">&quot;00001&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">TWO</span>));
+        <span class="macro">assert!</span>(<span class="ident">contains</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">THREE</span>));
     }
 
-    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy</span>::<span class="ident">cognitive_complexity</span>)]</span>
+    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::cognitive_complexity</span>)]</span>
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_rotate_with_append_numbers</span>() {
         <span class="comment">// we use timestamp as discriminant to allow repeated runs</span>
-        <span class="kw">let</span> <span class="ident">ts</span> <span class="op">=</span> <span class="ident">Local</span>::<span class="ident">now</span>()
+        <span class="kw">let</span> <span class="ident">ts</span> <span class="op">=</span> <span class="ident">Local::now</span>()
             .<span class="ident">format</span>(<span class="string">&quot;true-numbers-%Y-%m-%d_%H-%M-%S&quot;</span>)
             .<span class="ident">to_string</span>();
-        <span class="kw">let</span> <span class="ident">naming</span> <span class="op">=</span> <span class="ident">Naming</span>::<span class="ident">Numbers</span>;
+        <span class="kw">let</span> <span class="ident">naming</span> <span class="op">=</span> <span class="ident">Naming::Numbers</span>;
 
         <span class="comment">// ensure we start with -/-/-</span>
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">not_exists</span>(<span class="string">&quot;00000&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>));
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">not_exists</span>(<span class="string">&quot;00001&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>));
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">not_exists</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>));
+        <span class="macro">assert!</span>(<span class="ident">not_exists</span>(<span class="string">&quot;00000&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>));
+        <span class="macro">assert!</span>(<span class="ident">not_exists</span>(<span class="string">&quot;00001&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>));
+        <span class="macro">assert!</span>(<span class="ident">not_exists</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>));
 
         <span class="comment">// ensure this produces 12/-/3</span>
         <span class="ident">write_loglines</span>(<span class="bool-val">true</span>, <span class="ident">naming</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="kw-2">&amp;</span>[<span class="ident">ONE</span>, <span class="ident">TWO</span>, <span class="ident">THREE</span>]);
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">contains</span>(<span class="string">&quot;00000&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">ONE</span>));
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">contains</span>(<span class="string">&quot;00000&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">TWO</span>));
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">not_exists</span>(<span class="string">&quot;00001&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>));
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">contains</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">THREE</span>));
+        <span class="macro">assert!</span>(<span class="ident">contains</span>(<span class="string">&quot;00000&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">ONE</span>));
+        <span class="macro">assert!</span>(<span class="ident">contains</span>(<span class="string">&quot;00000&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">TWO</span>));
+        <span class="macro">assert!</span>(<span class="ident">not_exists</span>(<span class="string">&quot;00001&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>));
+        <span class="macro">assert!</span>(<span class="ident">contains</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">THREE</span>));
 
         <span class="comment">// ensure this produces 12/34/56</span>
         <span class="ident">write_loglines</span>(<span class="bool-val">true</span>, <span class="ident">naming</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="kw-2">&amp;</span>[<span class="ident">FOUR</span>, <span class="ident">FIVE</span>, <span class="ident">SIX</span>]);
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">contains</span>(<span class="string">&quot;00000&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">ONE</span>));
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">contains</span>(<span class="string">&quot;00000&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">TWO</span>));
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">contains</span>(<span class="string">&quot;00001&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">THREE</span>));
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">contains</span>(<span class="string">&quot;00001&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">FOUR</span>));
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">contains</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">FIVE</span>));
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">contains</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">SIX</span>));
+        <span class="macro">assert!</span>(<span class="ident">contains</span>(<span class="string">&quot;00000&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">ONE</span>));
+        <span class="macro">assert!</span>(<span class="ident">contains</span>(<span class="string">&quot;00000&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">TWO</span>));
+        <span class="macro">assert!</span>(<span class="ident">contains</span>(<span class="string">&quot;00001&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">THREE</span>));
+        <span class="macro">assert!</span>(<span class="ident">contains</span>(<span class="string">&quot;00001&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">FOUR</span>));
+        <span class="macro">assert!</span>(<span class="ident">contains</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">FIVE</span>));
+        <span class="macro">assert!</span>(<span class="ident">contains</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">SIX</span>));
 
         <span class="comment">// ensure this also produces 12/34/56</span>
         <span class="ident">remove</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>);
         <span class="ident">remove</span>(<span class="string">&quot;00001&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>);
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">not_exists</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>));
+        <span class="macro">assert!</span>(<span class="ident">not_exists</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>));
         <span class="ident">write_loglines</span>(<span class="bool-val">true</span>, <span class="ident">naming</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="kw-2">&amp;</span>[<span class="ident">THREE</span>, <span class="ident">FOUR</span>, <span class="ident">FIVE</span>, <span class="ident">SIX</span>]);
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">contains</span>(<span class="string">&quot;00000&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">ONE</span>));
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">contains</span>(<span class="string">&quot;00000&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">TWO</span>));
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">contains</span>(<span class="string">&quot;00001&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">THREE</span>));
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">contains</span>(<span class="string">&quot;00001&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">FOUR</span>));
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">contains</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">FIVE</span>));
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">contains</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">SIX</span>));
+        <span class="macro">assert!</span>(<span class="ident">contains</span>(<span class="string">&quot;00000&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">ONE</span>));
+        <span class="macro">assert!</span>(<span class="ident">contains</span>(<span class="string">&quot;00000&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">TWO</span>));
+        <span class="macro">assert!</span>(<span class="ident">contains</span>(<span class="string">&quot;00001&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">THREE</span>));
+        <span class="macro">assert!</span>(<span class="ident">contains</span>(<span class="string">&quot;00001&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">FOUR</span>));
+        <span class="macro">assert!</span>(<span class="ident">contains</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">FIVE</span>));
+        <span class="macro">assert!</span>(<span class="ident">contains</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">SIX</span>));
 
         <span class="comment">// ensure this produces 12/34/56/78/9</span>
         <span class="ident">write_loglines</span>(<span class="bool-val">true</span>, <span class="ident">naming</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="kw-2">&amp;</span>[<span class="ident">SEVEN</span>, <span class="ident">EIGHT</span>, <span class="ident">NINE</span>]);
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">contains</span>(<span class="string">&quot;00002&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">FIVE</span>));
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">contains</span>(<span class="string">&quot;00002&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">SIX</span>));
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">contains</span>(<span class="string">&quot;00003&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">SEVEN</span>));
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">contains</span>(<span class="string">&quot;00003&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">EIGHT</span>));
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">contains</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">NINE</span>));
+        <span class="macro">assert!</span>(<span class="ident">contains</span>(<span class="string">&quot;00002&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">FIVE</span>));
+        <span class="macro">assert!</span>(<span class="ident">contains</span>(<span class="string">&quot;00002&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">SIX</span>));
+        <span class="macro">assert!</span>(<span class="ident">contains</span>(<span class="string">&quot;00003&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">SEVEN</span>));
+        <span class="macro">assert!</span>(<span class="ident">contains</span>(<span class="string">&quot;00003&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">EIGHT</span>));
+        <span class="macro">assert!</span>(<span class="ident">contains</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">NINE</span>));
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_rotate_no_append_timestamps</span>() {
         <span class="comment">// we use timestamp as discriminant to allow repeated runs</span>
-        <span class="kw">let</span> <span class="ident">ts</span> <span class="op">=</span> <span class="ident">Local</span>::<span class="ident">now</span>()
+        <span class="kw">let</span> <span class="ident">ts</span> <span class="op">=</span> <span class="ident">Local::now</span>()
             .<span class="ident">format</span>(<span class="string">&quot;false-timestamps-%Y-%m-%d_%H-%M-%S&quot;</span>)
             .<span class="ident">to_string</span>();
 
-        <span class="kw">let</span> <span class="ident">basename</span> <span class="op">=</span> <span class="ident">String</span>::<span class="ident">from</span>(<span class="ident">DIRECTORY</span>).<span class="ident">add</span>(<span class="string">&quot;/&quot;</span>).<span class="ident">add</span>(
-            <span class="kw-2">&amp;</span><span class="ident">Path</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="ident">std</span>::<span class="ident">env</span>::<span class="ident">args</span>().<span class="ident">next</span>().<span class="ident">unwrap</span>())
+        <span class="kw">let</span> <span class="ident">basename</span> <span class="op">=</span> <span class="ident">String::from</span>(<span class="ident">DIRECTORY</span>).<span class="ident">add</span>(<span class="string">&quot;/&quot;</span>).<span class="ident">add</span>(
+            <span class="kw-2">&amp;</span><span class="ident">Path::new</span>(<span class="kw-2">&amp;</span><span class="ident">std::env::args</span>().<span class="ident">next</span>().<span class="ident">unwrap</span>())
                 .<span class="ident">file_stem</span>().<span class="ident">unwrap</span>(<span class="comment">/*cannot fail*/</span>)
                 .<span class="ident">to_string_lossy</span>().<span class="ident">to_string</span>(),
         );
-        <span class="kw">let</span> <span class="ident">naming</span> <span class="op">=</span> <span class="ident">Naming</span>::<span class="ident">Timestamps</span>;
+        <span class="kw">let</span> <span class="ident">naming</span> <span class="op">=</span> <span class="ident">Naming::Timestamps</span>;
 
         <span class="comment">// ensure we start with -/-/-</span>
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">list_rotated_files</span>(<span class="kw-2">&amp;</span><span class="ident">basename</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>).<span class="ident">is_empty</span>());
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">not_exists</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>));
+        <span class="macro">assert!</span>(<span class="ident">list_rotated_files</span>(<span class="kw-2">&amp;</span><span class="ident">basename</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>).<span class="ident">is_empty</span>());
+        <span class="macro">assert!</span>(<span class="ident">not_exists</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>));
 
         <span class="comment">// ensure this produces -/-/ONE</span>
         <span class="ident">write_loglines</span>(<span class="bool-val">false</span>, <span class="ident">naming</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="kw-2">&amp;</span>[<span class="ident">ONE</span>]);
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">list_rotated_files</span>(<span class="kw-2">&amp;</span><span class="ident">basename</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>).<span class="ident">is_empty</span>());
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">contains</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">ONE</span>));
+        <span class="macro">assert!</span>(<span class="ident">list_rotated_files</span>(<span class="kw-2">&amp;</span><span class="ident">basename</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>).<span class="ident">is_empty</span>());
+        <span class="macro">assert!</span>(<span class="ident">contains</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">ONE</span>));
 
-        <span class="ident">std</span>::<span class="ident">thread</span>::<span class="ident">sleep</span>(<span class="ident">std</span>::<span class="ident">time</span>::<span class="ident">Duration</span>::<span class="ident">from_secs</span>(<span class="number">2</span>));
+        <span class="ident">std::thread::sleep</span>(<span class="ident">std::time::Duration::from_secs</span>(<span class="number">2</span>));
         <span class="comment">// ensure this produces ONE/-/TWO</span>
         <span class="ident">write_loglines</span>(<span class="bool-val">false</span>, <span class="ident">naming</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="kw-2">&amp;</span>[<span class="ident">TWO</span>]);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">list_rotated_files</span>(<span class="kw-2">&amp;</span><span class="ident">basename</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>).<span class="ident">len</span>(), <span class="number">1</span>);
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">contains</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">TWO</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">list_rotated_files</span>(<span class="kw-2">&amp;</span><span class="ident">basename</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>).<span class="ident">len</span>(), <span class="number">1</span>);
+        <span class="macro">assert!</span>(<span class="ident">contains</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">TWO</span>));
 
-        <span class="ident">std</span>::<span class="ident">thread</span>::<span class="ident">sleep</span>(<span class="ident">std</span>::<span class="ident">time</span>::<span class="ident">Duration</span>::<span class="ident">from_secs</span>(<span class="number">2</span>));
+        <span class="ident">std::thread::sleep</span>(<span class="ident">std::time::Duration::from_secs</span>(<span class="number">2</span>));
         <span class="comment">// ensure this produces ONE/TWO/THREE</span>
         <span class="ident">write_loglines</span>(<span class="bool-val">false</span>, <span class="ident">naming</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="kw-2">&amp;</span>[<span class="ident">THREE</span>]);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">list_rotated_files</span>(<span class="kw-2">&amp;</span><span class="ident">basename</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>).<span class="ident">len</span>(), <span class="number">2</span>);
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">contains</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">THREE</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">list_rotated_files</span>(<span class="kw-2">&amp;</span><span class="ident">basename</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>).<span class="ident">len</span>(), <span class="number">2</span>);
+        <span class="macro">assert!</span>(<span class="ident">contains</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">THREE</span>));
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_rotate_with_append_timestamps</span>() {
         <span class="comment">// we use timestamp as discriminant to allow repeated runs</span>
-        <span class="kw">let</span> <span class="ident">ts</span> <span class="op">=</span> <span class="ident">Local</span>::<span class="ident">now</span>()
+        <span class="kw">let</span> <span class="ident">ts</span> <span class="op">=</span> <span class="ident">Local::now</span>()
             .<span class="ident">format</span>(<span class="string">&quot;true-timestamps-%Y-%m-%d_%H-%M-%S&quot;</span>)
             .<span class="ident">to_string</span>();
 
-        <span class="kw">let</span> <span class="ident">basename</span> <span class="op">=</span> <span class="ident">String</span>::<span class="ident">from</span>(<span class="ident">DIRECTORY</span>).<span class="ident">add</span>(<span class="string">&quot;/&quot;</span>).<span class="ident">add</span>(
-            <span class="kw-2">&amp;</span><span class="ident">Path</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="ident">std</span>::<span class="ident">env</span>::<span class="ident">args</span>().<span class="ident">next</span>().<span class="ident">unwrap</span>())
+        <span class="kw">let</span> <span class="ident">basename</span> <span class="op">=</span> <span class="ident">String::from</span>(<span class="ident">DIRECTORY</span>).<span class="ident">add</span>(<span class="string">&quot;/&quot;</span>).<span class="ident">add</span>(
+            <span class="kw-2">&amp;</span><span class="ident">Path::new</span>(<span class="kw-2">&amp;</span><span class="ident">std::env::args</span>().<span class="ident">next</span>().<span class="ident">unwrap</span>())
                 .<span class="ident">file_stem</span>().<span class="ident">unwrap</span>(<span class="comment">/*cannot fail*/</span>)
                 .<span class="ident">to_string_lossy</span>().<span class="ident">to_string</span>(),
         );
-        <span class="kw">let</span> <span class="ident">naming</span> <span class="op">=</span> <span class="ident">Naming</span>::<span class="ident">Timestamps</span>;
+        <span class="kw">let</span> <span class="ident">naming</span> <span class="op">=</span> <span class="ident">Naming::Timestamps</span>;
 
         <span class="comment">// ensure we start with -/-/-</span>
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">list_rotated_files</span>(<span class="kw-2">&amp;</span><span class="ident">basename</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>).<span class="ident">is_empty</span>());
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">not_exists</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>));
+        <span class="macro">assert!</span>(<span class="ident">list_rotated_files</span>(<span class="kw-2">&amp;</span><span class="ident">basename</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>).<span class="ident">is_empty</span>());
+        <span class="macro">assert!</span>(<span class="ident">not_exists</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>));
 
         <span class="comment">// ensure this produces 12/-/3</span>
         <span class="ident">write_loglines</span>(<span class="bool-val">true</span>, <span class="ident">naming</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="kw-2">&amp;</span>[<span class="ident">ONE</span>, <span class="ident">TWO</span>, <span class="ident">THREE</span>]);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">list_rotated_files</span>(<span class="kw-2">&amp;</span><span class="ident">basename</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>).<span class="ident">len</span>(), <span class="number">1</span>);
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">contains</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">THREE</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">list_rotated_files</span>(<span class="kw-2">&amp;</span><span class="ident">basename</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>).<span class="ident">len</span>(), <span class="number">1</span>);
+        <span class="macro">assert!</span>(<span class="ident">contains</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">THREE</span>));
 
         <span class="comment">// // ensure this produces 12/34/56</span>
         <span class="ident">write_loglines</span>(<span class="bool-val">true</span>, <span class="ident">naming</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="kw-2">&amp;</span>[<span class="ident">FOUR</span>, <span class="ident">FIVE</span>, <span class="ident">SIX</span>]);
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">contains</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">FIVE</span>));
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">contains</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">SIX</span>));
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">list_rotated_files</span>(<span class="kw-2">&amp;</span><span class="ident">basename</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>).<span class="ident">len</span>(), <span class="number">2</span>);
+        <span class="macro">assert!</span>(<span class="ident">contains</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">FIVE</span>));
+        <span class="macro">assert!</span>(<span class="ident">contains</span>(<span class="string">&quot;CURRENT&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>, <span class="ident">SIX</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">list_rotated_files</span>(<span class="kw-2">&amp;</span><span class="ident">basename</span>, <span class="kw-2">&amp;</span><span class="ident">ts</span>).<span class="ident">len</span>(), <span class="number">2</span>);
 
         <span class="comment">// // ensure this produces 12/34/56/78/9</span>
         <span class="comment">// write_loglines(true, naming, &amp;ts, &amp;[SEVEN, EIGHT, NINE]);</span>
@@ -808,13 +809,13 @@
         <span class="kw">const</span> <span class="ident">LOG_FOLDER</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;log_files/issue_38&quot;</span>;
 
         <span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">NUMBER_OF_PSEUDO_PROCESSES</span> {
-            <span class="kw">let</span> <span class="ident">flw</span> <span class="op">=</span> <span class="kw">super</span>::<span class="ident">FileLogWriter</span>::<span class="ident">builder</span>()
+            <span class="kw">let</span> <span class="ident">flw</span> <span class="op">=</span> <span class="ident"><span class="kw">super</span>::FileLogWriter::builder</span>()
                 .<span class="ident">directory</span>(<span class="ident">LOG_FOLDER</span>)
                 .<span class="ident">discriminant</span>(<span class="ident">ISSUE_38</span>)
                 .<span class="ident">rotate</span>(
-                    <span class="ident">Criterion</span>::<span class="ident">Size</span>(<span class="number">500</span>),
-                    <span class="ident">Naming</span>::<span class="ident">Timestamps</span>,
-                    <span class="ident">Cleanup</span>::<span class="ident">KeepLogFiles</span>(<span class="ident">NUMBER_OF_FILES</span>),
+                    <span class="ident">Criterion::Size</span>(<span class="number">500</span>),
+                    <span class="ident">Naming::Timestamps</span>,
+                    <span class="ident">Cleanup::KeepLogFiles</span>(<span class="ident">NUMBER_OF_FILES</span>),
                 )
                 .<span class="ident">o_append</span>(<span class="bool-val">false</span>)
                 .<span class="ident">try_build</span>()
@@ -823,10 +824,10 @@
             <span class="comment">// write some lines, but not enough to rotate</span>
             <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">4</span> {
                 <span class="ident">flw</span>.<span class="ident">write</span>(
-                    <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">DeferredNow</span>::<span class="ident">new</span>(),
-                    <span class="kw-2">&amp;</span><span class="ident">log</span>::<span class="ident">Record</span>::<span class="ident">builder</span>()
-                        .<span class="ident">args</span>(<span class="macro">format_args</span><span class="macro">!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">i</span>))
-                        .<span class="ident">level</span>(<span class="ident">log</span>::<span class="ident">Level</span>::<span class="ident">Error</span>)
+                    <span class="kw-2">&amp;mut</span> <span class="ident">DeferredNow::new</span>(),
+                    <span class="kw-2">&amp;</span><span class="ident">log::Record::builder</span>()
+                        .<span class="ident">args</span>(<span class="macro">format_args!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">i</span>))
+                        .<span class="ident">level</span>(<span class="ident">log::Level::Error</span>)
                         .<span class="ident">target</span>(<span class="string">&quot;myApp&quot;</span>)
                         .<span class="ident">file</span>(<span class="prelude-val">Some</span>(<span class="string">&quot;server.rs&quot;</span>))
                         .<span class="ident">line</span>(<span class="prelude-val">Some</span>(<span class="number">144</span>))
@@ -838,12 +839,12 @@
         }
 
         <span class="comment">// give the cleanup thread a short moment of time</span>
-        <span class="ident">std</span>::<span class="ident">thread</span>::<span class="ident">sleep</span>(<span class="ident">std</span>::<span class="ident">time</span>::<span class="ident">Duration</span>::<span class="ident">from_millis</span>(<span class="number">50</span>));
+        <span class="ident">std::thread::sleep</span>(<span class="ident">std::time::Duration::from_millis</span>(<span class="number">50</span>));
 
-        <span class="kw">let</span> <span class="ident">fn_pattern</span> <span class="op">=</span> <span class="ident">String</span>::<span class="ident">with_capacity</span>(<span class="number">180</span>)
+        <span class="kw">let</span> <span class="ident">fn_pattern</span> <span class="op">=</span> <span class="ident">String::with_capacity</span>(<span class="number">180</span>)
             .<span class="ident">add</span>(
-                <span class="kw-2">&amp;</span><span class="ident">String</span>::<span class="ident">from</span>(<span class="ident">LOG_FOLDER</span>).<span class="ident">add</span>(<span class="string">&quot;/&quot;</span>).<span class="ident">add</span>(
-                    <span class="kw-2">&amp;</span><span class="ident">Path</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="ident">std</span>::<span class="ident">env</span>::<span class="ident">args</span>().<span class="ident">next</span>().<span class="ident">unwrap</span>())
+                <span class="kw-2">&amp;</span><span class="ident">String::from</span>(<span class="ident">LOG_FOLDER</span>).<span class="ident">add</span>(<span class="string">&quot;/&quot;</span>).<span class="ident">add</span>(
+                    <span class="kw-2">&amp;</span><span class="ident">Path::new</span>(<span class="kw-2">&amp;</span><span class="ident">std::env::args</span>().<span class="ident">next</span>().<span class="ident">unwrap</span>())
             .<span class="ident">file_stem</span>().<span class="ident">unwrap</span>(<span class="comment">/*cannot fail*/</span>)
             .<span class="ident">to_string_lossy</span>().<span class="ident">to_string</span>(),
                 ),
@@ -853,33 +854,33 @@
             .<span class="ident">add</span>(<span class="string">&quot;_r[0-9]*&quot;</span>)
             .<span class="ident">add</span>(<span class="string">&quot;.log&quot;</span>);
 
-        <span class="macro">assert_eq</span><span class="macro">!</span>(
-            <span class="ident">glob</span>::<span class="ident">glob</span>(<span class="kw-2">&amp;</span><span class="ident">fn_pattern</span>)
+        <span class="macro">assert_eq!</span>(
+            <span class="ident">glob::glob</span>(<span class="kw-2">&amp;</span><span class="ident">fn_pattern</span>)
                 .<span class="ident">unwrap</span>()
-                .<span class="ident">filter_map</span>(<span class="prelude-ty">Result</span>::<span class="ident">ok</span>)
+                .<span class="ident">filter_map</span>(<span class="ident">Result::ok</span>)
                 .<span class="ident">count</span>(),
             <span class="ident">NUMBER_OF_FILES</span>
         );
     }
 
     <span class="kw">fn</span> <span class="ident">remove</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">discr</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) {
-        <span class="ident">std</span>::<span class="ident">fs</span>::<span class="ident">remove_file</span>(<span class="ident">get_hackyfilepath</span>(<span class="ident">s</span>, <span class="ident">discr</span>)).<span class="ident">unwrap</span>();
+        <span class="ident">std::fs::remove_file</span>(<span class="ident">get_hackyfilepath</span>(<span class="ident">s</span>, <span class="ident">discr</span>)).<span class="ident">unwrap</span>();
     }
 
-    <span class="kw">fn</span> <span class="ident">not_exists</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">discr</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">fn</span> <span class="ident">not_exists</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">discr</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">bool</span> {
         <span class="op">!</span><span class="ident">get_hackyfilepath</span>(<span class="ident">s</span>, <span class="ident">discr</span>).<span class="ident">exists</span>()
     }
 
-    <span class="kw">fn</span> <span class="ident">contains</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">discr</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">text</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="kw">match</span> <span class="ident">std</span>::<span class="ident">fs</span>::<span class="ident">read_to_string</span>(<span class="ident">get_hackyfilepath</span>(<span class="ident">s</span>, <span class="ident">discr</span>)) {
-            <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
-            <span class="prelude-val">Ok</span>(<span class="ident">s</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>.<span class="ident">contains</span>(<span class="ident">text</span>),
+    <span class="kw">fn</span> <span class="ident">contains</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">discr</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">text</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">bool</span> {
+        <span class="kw">match</span> <span class="ident">std::fs::read_to_string</span>(<span class="ident">get_hackyfilepath</span>(<span class="ident">s</span>, <span class="ident">discr</span>)) {
+            <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="bool-val">false</span>,
+            <span class="prelude-val">Ok</span>(<span class="ident">s</span>) =&gt; <span class="ident">s</span>.<span class="ident">contains</span>(<span class="ident">text</span>),
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">get_hackyfilepath</span>(<span class="ident">infix</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">discr</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">arg0</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">env</span>::<span class="ident">args</span>().<span class="ident">next</span>().<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">s_filename</span> <span class="op">=</span> <span class="ident">Path</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="ident">arg0</span>)
+    <span class="kw">fn</span> <span class="ident">get_hackyfilepath</span>(<span class="ident">infix</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">discr</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">arg0</span> <span class="op">=</span> <span class="ident">std::env::args</span>().<span class="ident">next</span>().<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">s_filename</span> <span class="op">=</span> <span class="ident">Path::new</span>(<span class="kw-2">&amp;</span><span class="ident">arg0</span>)
             .<span class="ident">file_stem</span>()
             .<span class="ident">unwrap</span>()
             .<span class="ident">to_string_lossy</span>()
@@ -889,7 +890,7 @@
         <span class="ident">s_filename</span> <span class="op">+</span><span class="op">=</span> <span class="string">&quot;_r&quot;</span>;
         <span class="ident">s_filename</span> <span class="op">+</span><span class="op">=</span> <span class="ident">infix</span>;
         <span class="ident">s_filename</span> <span class="op">+</span><span class="op">=</span> <span class="string">&quot;.log&quot;</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">path_buf</span> <span class="op">=</span> <span class="ident">PathBuf</span>::<span class="ident">from</span>(<span class="ident">DIRECTORY</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">path_buf</span> <span class="op">=</span> <span class="ident">PathBuf::from</span>(<span class="ident">DIRECTORY</span>);
         <span class="ident">path_buf</span>.<span class="ident">push</span>(<span class="ident">s_filename</span>);
         <span class="ident">path_buf</span>.<span class="ident">into_boxed_path</span>()
     }
@@ -898,10 +899,10 @@
         <span class="kw">let</span> <span class="ident">flw</span> <span class="op">=</span> <span class="ident">get_file_log_writer</span>(<span class="ident">append</span>, <span class="ident">naming</span>, <span class="ident">discr</span>);
         <span class="kw">for</span> <span class="ident">text</span> <span class="kw">in</span> <span class="ident">texts</span> {
             <span class="ident">flw</span>.<span class="ident">write</span>(
-                <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">DeferredNow</span>::<span class="ident">new</span>(),
-                <span class="kw-2">&amp;</span><span class="ident">log</span>::<span class="ident">Record</span>::<span class="ident">builder</span>()
-                    .<span class="ident">args</span>(<span class="macro">format_args</span><span class="macro">!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">text</span>))
-                    .<span class="ident">level</span>(<span class="ident">log</span>::<span class="ident">Level</span>::<span class="ident">Error</span>)
+                <span class="kw-2">&amp;mut</span> <span class="ident">DeferredNow::new</span>(),
+                <span class="kw-2">&amp;</span><span class="ident">log::Record::builder</span>()
+                    .<span class="ident">args</span>(<span class="macro">format_args!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">text</span>))
+                    .<span class="ident">level</span>(<span class="ident">log::Level::Error</span>)
                     .<span class="ident">target</span>(<span class="string">&quot;myApp&quot;</span>)
                     .<span class="ident">file</span>(<span class="prelude-val">Some</span>(<span class="string">&quot;server.rs&quot;</span>))
                     .<span class="ident">line</span>(<span class="prelude-val">Some</span>(<span class="number">144</span>))
@@ -916,33 +917,34 @@
         <span class="ident">append</span>: <span class="ident">bool</span>,
         <span class="ident">naming</span>: <span class="ident">Naming</span>,
         <span class="ident">discr</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">crate</span>::<span class="ident">writers</span>::<span class="ident">FileLogWriter</span> {
-        <span class="kw">super</span>::<span class="ident">FileLogWriter</span>::<span class="ident">builder</span>()
+    ) -&gt; <span class="ident"><span class="kw">crate</span>::writers::FileLogWriter</span> {
+        <span class="ident"><span class="kw">super</span>::FileLogWriter::builder</span>()
             .<span class="ident">directory</span>(<span class="ident">DIRECTORY</span>)
             .<span class="ident">discriminant</span>(<span class="ident">discr</span>)
             .<span class="ident">rotate</span>(
-                <span class="ident">Criterion</span>::<span class="ident">Size</span>(<span class="kw">if</span> <span class="ident">append</span> { <span class="number">28</span> } <span class="kw">else</span> { <span class="number">10</span> }),
+                <span class="ident">Criterion::Size</span>(<span class="kw">if</span> <span class="ident">append</span> { <span class="number">28</span> } <span class="kw">else</span> { <span class="number">10</span> }),
                 <span class="ident">naming</span>,
-                <span class="ident">Cleanup</span>::<span class="ident">Never</span>,
+                <span class="ident">Cleanup::Never</span>,
             )
             .<span class="ident">o_append</span>(<span class="ident">append</span>)
             .<span class="ident">try_build</span>()
             .<span class="ident">unwrap</span>()
     }
 
-    <span class="kw">fn</span> <span class="ident">list_rotated_files</span>(<span class="ident">basename</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">discr</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">fn_pattern</span> <span class="op">=</span> <span class="ident">String</span>::<span class="ident">with_capacity</span>(<span class="number">180</span>)
+    <span class="kw">fn</span> <span class="ident">list_rotated_files</span>(<span class="ident">basename</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">discr</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">fn_pattern</span> <span class="op">=</span> <span class="ident">String::with_capacity</span>(<span class="number">180</span>)
             .<span class="ident">add</span>(<span class="ident">basename</span>)
             .<span class="ident">add</span>(<span class="string">&quot;_&quot;</span>)
             .<span class="ident">add</span>(<span class="ident">discr</span>)
             .<span class="ident">add</span>(<span class="string">&quot;_r2[0-9]*&quot;</span>) <span class="comment">// Year 3000 problem!!!</span>
             .<span class="ident">add</span>(<span class="string">&quot;.log&quot;</span>);
 
-        <span class="ident">glob</span>::<span class="ident">glob</span>(<span class="kw-2">&amp;</span><span class="ident">fn_pattern</span>)
+        <span class="ident">glob::glob</span>(<span class="kw-2">&amp;</span><span class="ident">fn_pattern</span>)
             .<span class="ident">unwrap</span>()
             .<span class="ident">map</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> <span class="ident">r</span>.<span class="ident">unwrap</span>().<span class="ident">into_os_string</span>().<span class="ident">to_string_lossy</span>().<span class="ident">to_string</span>())
             .<span class="ident">collect</span>()
     }
 }
-</pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../../";window.currentCrate = "flexi_logger";</script><script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script><script defer src="../../../search-index.js"></script></body></html>
+</code></pre></div>
+</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="flexi_logger" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.60.0-nightly (88fb06a1f 2022-02-05)" ></div>
+</body></html>

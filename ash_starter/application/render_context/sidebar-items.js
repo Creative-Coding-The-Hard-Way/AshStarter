@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["SwapchainState",""]],"mod":[["frame",""],["render_target",""]],"struct":[["RenderContext","The RenderContext is responsible for requesting an image from the swapchain, picking the corresponding Frame instance, and dispatching to the RenderTarget."]]});

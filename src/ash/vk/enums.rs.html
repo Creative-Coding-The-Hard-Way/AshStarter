@@ -1,7 +1,9 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `C:\Users\brad\.cargo\registry\src\github.com-1ecc6299db9ec823\ash-0.31.0\src\vk\enums.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>enums.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings"></script><script src="../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../../favicon.svg">
-<link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png">
-<link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../ash/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
-                <a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">   1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `C:\Users\Bradley\.cargo\registry\src\github.com-1ecc6299db9ec823\ash-0.31.0\src\vk\enums.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>enums.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><script defer src="../../../main.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../ash/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"></h2>
+    </nav>
+    <nav class="sidebar"><a class="sidebar-logo" href="../../../ash/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
+        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../ash/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><div class="theme-picker hidden"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="22" height="22" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">   1</span>
 <span id="2">   2</span>
 <span id="3">   3</span>
 <span id="4">   4</span>
@@ -2102,17 +2104,16 @@
 <span id="2099">2099</span>
 <span id="2100">2100</span>
 <span id="2101">2101</span>
-</pre><div class="example-wrap"><pre class="rust ">
-<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">fmt</span>;
+</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">std::fmt</span>;
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>, <span class="ident">Hash</span>, <span class="ident">Default</span>)]</span>
 <span class="attribute">#[<span class="ident">repr</span>(<span class="ident">transparent</span>)]</span>
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkImageLayout.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ImageLayout</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">ImageLayout</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">ImageLayout</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -2141,10 +2142,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkAttachmentLoadOp.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">AttachmentLoadOp</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">AttachmentLoadOp</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">AttachmentLoadOp</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -2158,10 +2159,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkAttachmentStoreOp.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">AttachmentStoreOp</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">AttachmentStoreOp</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">AttachmentStoreOp</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -2174,10 +2175,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkImageType.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ImageType</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">ImageType</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">ImageType</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -2191,10 +2192,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkImageTiling.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ImageTiling</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">ImageTiling</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">ImageTiling</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -2207,10 +2208,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkImageViewType.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ImageViewType</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">ImageViewType</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">ImageViewType</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -2228,10 +2229,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkCommandBufferLevel.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CommandBufferLevel</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">CommandBufferLevel</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">CommandBufferLevel</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -2244,10 +2245,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkComponentSwizzle.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ComponentSwizzle</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">ComponentSwizzle</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">ComponentSwizzle</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -2265,10 +2266,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkDescriptorType.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DescriptorType</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">DescriptorType</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">DescriptorType</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -2290,10 +2291,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkQueryType.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">QueryType</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">QueryType</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">QueryType</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -2308,10 +2309,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkBorderColor.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">BorderColor</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">BorderColor</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">BorderColor</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -2328,10 +2329,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPipelineBindPoint.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">PipelineBindPoint</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">PipelineBindPoint</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">PipelineBindPoint</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -2344,10 +2345,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPipelineCacheHeaderVersion.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">PipelineCacheHeaderVersion</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">PipelineCacheHeaderVersion</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">PipelineCacheHeaderVersion</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -2359,10 +2360,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPrimitiveTopology.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">PrimitiveTopology</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">PrimitiveTopology</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">PrimitiveTopology</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -2384,10 +2385,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkSharingMode.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SharingMode</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">SharingMode</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">SharingMode</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -2400,10 +2401,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkIndexType.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">IndexType</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">IndexType</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">IndexType</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -2416,10 +2417,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkFilter.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Filter</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">Filter</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">Filter</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -2432,10 +2433,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkSamplerMipmapMode.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SamplerMipmapMode</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">SamplerMipmapMode</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">SamplerMipmapMode</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -2450,10 +2451,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkSamplerAddressMode.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SamplerAddressMode</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">SamplerAddressMode</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">SamplerAddressMode</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -2468,10 +2469,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkCompareOp.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CompareOp</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">CompareOp</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">CompareOp</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -2490,10 +2491,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPolygonMode.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">PolygonMode</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">PolygonMode</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">PolygonMode</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -2507,10 +2508,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkFrontFace.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">FrontFace</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">FrontFace</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">FrontFace</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -2523,10 +2524,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkBlendFactor.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">BlendFactor</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">BlendFactor</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">BlendFactor</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -2556,10 +2557,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkBlendOp.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">BlendOp</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">BlendOp</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">BlendOp</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -2575,10 +2576,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkStencilOp.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">StencilOp</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">StencilOp</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">StencilOp</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -2597,10 +2598,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkLogicOp.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">LogicOp</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">LogicOp</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">LogicOp</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -2627,10 +2628,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkInternalAllocationType.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">InternalAllocationType</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">InternalAllocationType</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">InternalAllocationType</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -2642,10 +2643,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkSystemAllocationScope.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SystemAllocationScope</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">SystemAllocationScope</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">SystemAllocationScope</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -2661,10 +2662,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPhysicalDeviceType.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">PhysicalDeviceType</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">PhysicalDeviceType</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">PhysicalDeviceType</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -2680,10 +2681,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkVertexInputRate.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">VertexInputRate</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">VertexInputRate</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">VertexInputRate</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -2696,10 +2697,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkFormat.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Format</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">Format</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">Format</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -2895,10 +2896,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkStructureType.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">StructureType</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">StructureType</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">StructureType</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -2960,10 +2961,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkSubpassContents.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SubpassContents</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">SubpassContents</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">SubpassContents</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -2976,10 +2977,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkResult.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="prelude-ty">Result</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="prelude-ty">Result</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="prelude-ty">Result</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3023,80 +3024,80 @@
     <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;An unknown error has occurred, due to an implementation or application bug&quot;</span>]</span>
     <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ERROR_UNKNOWN</span>: <span class="self">Self</span> <span class="op">=</span> <span class="self">Self</span>(<span class="op">-</span><span class="number">13</span>);
 }
-<span class="kw">impl</span> ::<span class="ident">std</span>::<span class="ident">error</span>::<span class="ident">Error</span> <span class="kw">for</span> <span class="prelude-ty">Result</span> {
-    <span class="kw">fn</span> <span class="ident">description</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">str</span> {
+<span class="kw">impl</span> <span class="ident">::std::error::Error</span> <span class="kw">for</span> <span class="prelude-ty">Result</span> {
+    <span class="kw">fn</span> <span class="ident">description</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">str</span> {
         <span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-            <span class="prelude-ty">Result</span>::<span class="ident">SUCCESS</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;Command completed successfully&quot;</span>),
-            <span class="prelude-ty">Result</span>::<span class="ident">NOT_READY</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;A fence or query has not yet completed&quot;</span>),
-            <span class="prelude-ty">Result</span>::<span class="ident">TIMEOUT</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;A wait operation has not completed in the specified time&quot;</span>),
-            <span class="prelude-ty">Result</span>::<span class="ident">EVENT_SET</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;An event is signaled&quot;</span>),
-            <span class="prelude-ty">Result</span>::<span class="ident">EVENT_RESET</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;An event is unsignaled&quot;</span>),
-            <span class="prelude-ty">Result</span>::<span class="ident">INCOMPLETE</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;A return array was too small for the result&quot;</span>),
-            <span class="prelude-ty">Result</span>::<span class="ident">ERROR_OUT_OF_HOST_MEMORY</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;A host memory allocation has failed&quot;</span>),
-            <span class="prelude-ty">Result</span>::<span class="ident">ERROR_OUT_OF_DEVICE_MEMORY</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;A device memory allocation has failed&quot;</span>),
-            <span class="prelude-ty">Result</span>::<span class="ident">ERROR_INITIALIZATION_FAILED</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;Initialization of a object has failed&quot;</span>),
-            <span class="prelude-ty">Result</span>::<span class="ident">ERROR_DEVICE_LOST</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Result::SUCCESS</span> =&gt; <span class="prelude-val">Some</span>(<span class="string">&quot;Command completed successfully&quot;</span>),
+            <span class="ident">Result::NOT_READY</span> =&gt; <span class="prelude-val">Some</span>(<span class="string">&quot;A fence or query has not yet completed&quot;</span>),
+            <span class="ident">Result::TIMEOUT</span> =&gt; <span class="prelude-val">Some</span>(<span class="string">&quot;A wait operation has not completed in the specified time&quot;</span>),
+            <span class="ident">Result::EVENT_SET</span> =&gt; <span class="prelude-val">Some</span>(<span class="string">&quot;An event is signaled&quot;</span>),
+            <span class="ident">Result::EVENT_RESET</span> =&gt; <span class="prelude-val">Some</span>(<span class="string">&quot;An event is unsignaled&quot;</span>),
+            <span class="ident">Result::INCOMPLETE</span> =&gt; <span class="prelude-val">Some</span>(<span class="string">&quot;A return array was too small for the result&quot;</span>),
+            <span class="ident">Result::ERROR_OUT_OF_HOST_MEMORY</span> =&gt; <span class="prelude-val">Some</span>(<span class="string">&quot;A host memory allocation has failed&quot;</span>),
+            <span class="ident">Result::ERROR_OUT_OF_DEVICE_MEMORY</span> =&gt; <span class="prelude-val">Some</span>(<span class="string">&quot;A device memory allocation has failed&quot;</span>),
+            <span class="ident">Result::ERROR_INITIALIZATION_FAILED</span> =&gt; <span class="prelude-val">Some</span>(<span class="string">&quot;Initialization of a object has failed&quot;</span>),
+            <span class="ident">Result::ERROR_DEVICE_LOST</span> =&gt; {
                 <span class="prelude-val">Some</span>(<span class="string">&quot;The logical device has been lost. See &lt;&lt;devsandqueues-lost-device&gt;&gt;&quot;</span>)
             }
-            <span class="prelude-ty">Result</span>::<span class="ident">ERROR_MEMORY_MAP_FAILED</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;Mapping of a memory object has failed&quot;</span>),
-            <span class="prelude-ty">Result</span>::<span class="ident">ERROR_LAYER_NOT_PRESENT</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;Layer specified does not exist&quot;</span>),
-            <span class="prelude-ty">Result</span>::<span class="ident">ERROR_EXTENSION_NOT_PRESENT</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;Extension specified does not exist&quot;</span>),
-            <span class="prelude-ty">Result</span>::<span class="ident">ERROR_FEATURE_NOT_PRESENT</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Result::ERROR_MEMORY_MAP_FAILED</span> =&gt; <span class="prelude-val">Some</span>(<span class="string">&quot;Mapping of a memory object has failed&quot;</span>),
+            <span class="ident">Result::ERROR_LAYER_NOT_PRESENT</span> =&gt; <span class="prelude-val">Some</span>(<span class="string">&quot;Layer specified does not exist&quot;</span>),
+            <span class="ident">Result::ERROR_EXTENSION_NOT_PRESENT</span> =&gt; <span class="prelude-val">Some</span>(<span class="string">&quot;Extension specified does not exist&quot;</span>),
+            <span class="ident">Result::ERROR_FEATURE_NOT_PRESENT</span> =&gt; {
                 <span class="prelude-val">Some</span>(<span class="string">&quot;Requested feature is not available on this device&quot;</span>)
             }
-            <span class="prelude-ty">Result</span>::<span class="ident">ERROR_INCOMPATIBLE_DRIVER</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;Unable to find a Vulkan driver&quot;</span>),
-            <span class="prelude-ty">Result</span>::<span class="ident">ERROR_TOO_MANY_OBJECTS</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Result::ERROR_INCOMPATIBLE_DRIVER</span> =&gt; <span class="prelude-val">Some</span>(<span class="string">&quot;Unable to find a Vulkan driver&quot;</span>),
+            <span class="ident">Result::ERROR_TOO_MANY_OBJECTS</span> =&gt; {
                 <span class="prelude-val">Some</span>(<span class="string">&quot;Too many objects of the type have already been created&quot;</span>)
             }
-            <span class="prelude-ty">Result</span>::<span class="ident">ERROR_FORMAT_NOT_SUPPORTED</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Result::ERROR_FORMAT_NOT_SUPPORTED</span> =&gt; {
                 <span class="prelude-val">Some</span>(<span class="string">&quot;Requested format is not supported on this device&quot;</span>)
             }
-            <span class="prelude-ty">Result</span>::<span class="ident">ERROR_FRAGMENTED_POOL</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(
+            <span class="ident">Result::ERROR_FRAGMENTED_POOL</span> =&gt; <span class="prelude-val">Some</span>(
                 <span class="string">&quot;A requested pool allocation has failed due to fragmentation of the pool\&#39;s memory&quot;</span>,
             ),
-            <span class="prelude-ty">Result</span>::<span class="ident">ERROR_UNKNOWN</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Result::ERROR_UNKNOWN</span> =&gt; {
                 <span class="prelude-val">Some</span>(<span class="string">&quot;An unknown error has occurred, due to an implementation or application bug&quot;</span>)
             }
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+            <span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
         };
         <span class="ident">name</span>.<span class="ident">unwrap_or</span>(<span class="string">&quot;unknown error&quot;</span>)
     }
 }
-<span class="kw">impl</span> <span class="ident">fmt</span>::<span class="ident">Display</span> <span class="kw">for</span> <span class="prelude-ty">Result</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">fmt</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt</span>::<span class="ident">Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
+<span class="kw">impl</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="prelude-ty">Result</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">fmt</span>: <span class="kw-2">&amp;mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-            <span class="prelude-ty">Result</span>::<span class="ident">SUCCESS</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;Command completed successfully&quot;</span>),
-            <span class="prelude-ty">Result</span>::<span class="ident">NOT_READY</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;A fence or query has not yet completed&quot;</span>),
-            <span class="prelude-ty">Result</span>::<span class="ident">TIMEOUT</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;A wait operation has not completed in the specified time&quot;</span>),
-            <span class="prelude-ty">Result</span>::<span class="ident">EVENT_SET</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;An event is signaled&quot;</span>),
-            <span class="prelude-ty">Result</span>::<span class="ident">EVENT_RESET</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;An event is unsignaled&quot;</span>),
-            <span class="prelude-ty">Result</span>::<span class="ident">INCOMPLETE</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;A return array was too small for the result&quot;</span>),
-            <span class="prelude-ty">Result</span>::<span class="ident">ERROR_OUT_OF_HOST_MEMORY</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;A host memory allocation has failed&quot;</span>),
-            <span class="prelude-ty">Result</span>::<span class="ident">ERROR_OUT_OF_DEVICE_MEMORY</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;A device memory allocation has failed&quot;</span>),
-            <span class="prelude-ty">Result</span>::<span class="ident">ERROR_INITIALIZATION_FAILED</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;Initialization of a object has failed&quot;</span>),
-            <span class="prelude-ty">Result</span>::<span class="ident">ERROR_DEVICE_LOST</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Result::SUCCESS</span> =&gt; <span class="prelude-val">Some</span>(<span class="string">&quot;Command completed successfully&quot;</span>),
+            <span class="ident">Result::NOT_READY</span> =&gt; <span class="prelude-val">Some</span>(<span class="string">&quot;A fence or query has not yet completed&quot;</span>),
+            <span class="ident">Result::TIMEOUT</span> =&gt; <span class="prelude-val">Some</span>(<span class="string">&quot;A wait operation has not completed in the specified time&quot;</span>),
+            <span class="ident">Result::EVENT_SET</span> =&gt; <span class="prelude-val">Some</span>(<span class="string">&quot;An event is signaled&quot;</span>),
+            <span class="ident">Result::EVENT_RESET</span> =&gt; <span class="prelude-val">Some</span>(<span class="string">&quot;An event is unsignaled&quot;</span>),
+            <span class="ident">Result::INCOMPLETE</span> =&gt; <span class="prelude-val">Some</span>(<span class="string">&quot;A return array was too small for the result&quot;</span>),
+            <span class="ident">Result::ERROR_OUT_OF_HOST_MEMORY</span> =&gt; <span class="prelude-val">Some</span>(<span class="string">&quot;A host memory allocation has failed&quot;</span>),
+            <span class="ident">Result::ERROR_OUT_OF_DEVICE_MEMORY</span> =&gt; <span class="prelude-val">Some</span>(<span class="string">&quot;A device memory allocation has failed&quot;</span>),
+            <span class="ident">Result::ERROR_INITIALIZATION_FAILED</span> =&gt; <span class="prelude-val">Some</span>(<span class="string">&quot;Initialization of a object has failed&quot;</span>),
+            <span class="ident">Result::ERROR_DEVICE_LOST</span> =&gt; {
                 <span class="prelude-val">Some</span>(<span class="string">&quot;The logical device has been lost. See &lt;&lt;devsandqueues-lost-device&gt;&gt;&quot;</span>)
             }
-            <span class="prelude-ty">Result</span>::<span class="ident">ERROR_MEMORY_MAP_FAILED</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;Mapping of a memory object has failed&quot;</span>),
-            <span class="prelude-ty">Result</span>::<span class="ident">ERROR_LAYER_NOT_PRESENT</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;Layer specified does not exist&quot;</span>),
-            <span class="prelude-ty">Result</span>::<span class="ident">ERROR_EXTENSION_NOT_PRESENT</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;Extension specified does not exist&quot;</span>),
-            <span class="prelude-ty">Result</span>::<span class="ident">ERROR_FEATURE_NOT_PRESENT</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Result::ERROR_MEMORY_MAP_FAILED</span> =&gt; <span class="prelude-val">Some</span>(<span class="string">&quot;Mapping of a memory object has failed&quot;</span>),
+            <span class="ident">Result::ERROR_LAYER_NOT_PRESENT</span> =&gt; <span class="prelude-val">Some</span>(<span class="string">&quot;Layer specified does not exist&quot;</span>),
+            <span class="ident">Result::ERROR_EXTENSION_NOT_PRESENT</span> =&gt; <span class="prelude-val">Some</span>(<span class="string">&quot;Extension specified does not exist&quot;</span>),
+            <span class="ident">Result::ERROR_FEATURE_NOT_PRESENT</span> =&gt; {
                 <span class="prelude-val">Some</span>(<span class="string">&quot;Requested feature is not available on this device&quot;</span>)
             }
-            <span class="prelude-ty">Result</span>::<span class="ident">ERROR_INCOMPATIBLE_DRIVER</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="string">&quot;Unable to find a Vulkan driver&quot;</span>),
-            <span class="prelude-ty">Result</span>::<span class="ident">ERROR_TOO_MANY_OBJECTS</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Result::ERROR_INCOMPATIBLE_DRIVER</span> =&gt; <span class="prelude-val">Some</span>(<span class="string">&quot;Unable to find a Vulkan driver&quot;</span>),
+            <span class="ident">Result::ERROR_TOO_MANY_OBJECTS</span> =&gt; {
                 <span class="prelude-val">Some</span>(<span class="string">&quot;Too many objects of the type have already been created&quot;</span>)
             }
-            <span class="prelude-ty">Result</span>::<span class="ident">ERROR_FORMAT_NOT_SUPPORTED</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Result::ERROR_FORMAT_NOT_SUPPORTED</span> =&gt; {
                 <span class="prelude-val">Some</span>(<span class="string">&quot;Requested format is not supported on this device&quot;</span>)
             }
-            <span class="prelude-ty">Result</span>::<span class="ident">ERROR_FRAGMENTED_POOL</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(
+            <span class="ident">Result::ERROR_FRAGMENTED_POOL</span> =&gt; <span class="prelude-val">Some</span>(
                 <span class="string">&quot;A requested pool allocation has failed due to fragmentation of the pool\&#39;s memory&quot;</span>,
             ),
-            <span class="prelude-ty">Result</span>::<span class="ident">ERROR_UNKNOWN</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Result::ERROR_UNKNOWN</span> =&gt; {
                 <span class="prelude-val">Some</span>(<span class="string">&quot;An unknown error has occurred, due to an implementation or application bug&quot;</span>)
             }
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+            <span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
         };
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">x</span>) <span class="op">=</span> <span class="ident">name</span> {
             <span class="ident">fmt</span>.<span class="ident">write_str</span>(<span class="ident">x</span>)
@@ -3110,10 +3111,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkDynamicState.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DynamicState</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">DynamicState</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">DynamicState</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3133,10 +3134,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkDescriptorUpdateTemplateType.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DescriptorUpdateTemplateType</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">DescriptorUpdateTemplateType</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">DescriptorUpdateTemplateType</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3149,10 +3150,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkObjectType.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ObjectType</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">ObjectType</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">ObjectType</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3214,10 +3215,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkSemaphoreType.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SemaphoreType</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">SemaphoreType</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">SemaphoreType</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3230,10 +3231,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPresentModeKHR.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">PresentModeKHR</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">PresentModeKHR</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">PresentModeKHR</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3248,10 +3249,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkColorSpaceKHR.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ColorSpaceKHR</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">ColorSpaceKHR</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">ColorSpaceKHR</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3263,10 +3264,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkTimeDomainEXT.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">TimeDomainEXT</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">TimeDomainEXT</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">TimeDomainEXT</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3281,10 +3282,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkDebugReportObjectTypeEXT.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DebugReportObjectTypeEXT</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">DebugReportObjectTypeEXT</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">DebugReportObjectTypeEXT</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3327,10 +3328,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkRasterizationOrderAMD.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">RasterizationOrderAMD</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">RasterizationOrderAMD</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">RasterizationOrderAMD</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3343,10 +3344,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkValidationCheckEXT.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ValidationCheckEXT</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">ValidationCheckEXT</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">ValidationCheckEXT</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3359,10 +3360,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkValidationFeatureEnableEXT.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ValidationFeatureEnableEXT</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">ValidationFeatureEnableEXT</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">ValidationFeatureEnableEXT</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3377,10 +3378,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkValidationFeatureDisableEXT.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ValidationFeatureDisableEXT</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">ValidationFeatureDisableEXT</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">ValidationFeatureDisableEXT</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3398,10 +3399,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkIndirectCommandsTokenTypeNV.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">IndirectCommandsTokenTypeNV</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">IndirectCommandsTokenTypeNV</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">IndirectCommandsTokenTypeNV</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3420,10 +3421,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkDisplayPowerStateEXT.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DisplayPowerStateEXT</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">DisplayPowerStateEXT</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">DisplayPowerStateEXT</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3437,10 +3438,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkDeviceEventTypeEXT.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DeviceEventTypeEXT</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">DeviceEventTypeEXT</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">DeviceEventTypeEXT</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3452,10 +3453,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkDisplayEventTypeEXT.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DisplayEventTypeEXT</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">DisplayEventTypeEXT</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">DisplayEventTypeEXT</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3467,10 +3468,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkViewportCoordinateSwizzleNV.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ViewportCoordinateSwizzleNV</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">ViewportCoordinateSwizzleNV</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">ViewportCoordinateSwizzleNV</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3489,10 +3490,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkDiscardRectangleModeEXT.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DiscardRectangleModeEXT</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">DiscardRectangleModeEXT</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">DiscardRectangleModeEXT</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3505,10 +3506,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPointClippingBehavior.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">PointClippingBehavior</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">PointClippingBehavior</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">PointClippingBehavior</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3521,10 +3522,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkSamplerReductionMode.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SamplerReductionMode</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">SamplerReductionMode</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">SamplerReductionMode</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3538,10 +3539,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkTessellationDomainOrigin.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">TessellationDomainOrigin</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">TessellationDomainOrigin</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">TessellationDomainOrigin</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3554,10 +3555,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkSamplerYcbcrModelConversion.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SamplerYcbcrModelConversion</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">SamplerYcbcrModelConversion</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">SamplerYcbcrModelConversion</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3577,10 +3578,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkSamplerYcbcrRange.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SamplerYcbcrRange</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">SamplerYcbcrRange</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">SamplerYcbcrRange</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3595,10 +3596,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkChromaLocation.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ChromaLocation</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">ChromaLocation</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">ChromaLocation</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3611,10 +3612,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkBlendOverlapEXT.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">BlendOverlapEXT</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">BlendOverlapEXT</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">BlendOverlapEXT</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3628,10 +3629,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkCoverageModulationModeNV.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CoverageModulationModeNV</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">CoverageModulationModeNV</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">CoverageModulationModeNV</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3646,10 +3647,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkCoverageReductionModeNV.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CoverageReductionModeNV</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">CoverageReductionModeNV</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">CoverageReductionModeNV</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3662,10 +3663,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkValidationCacheHeaderVersionEXT.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ValidationCacheHeaderVersionEXT</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">ValidationCacheHeaderVersionEXT</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">ValidationCacheHeaderVersionEXT</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3677,10 +3678,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkShaderInfoTypeAMD.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ShaderInfoTypeAMD</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">ShaderInfoTypeAMD</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">ShaderInfoTypeAMD</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3694,10 +3695,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkQueueGlobalPriorityEXT.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">QueueGlobalPriorityEXT</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">QueueGlobalPriorityEXT</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">QueueGlobalPriorityEXT</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3712,10 +3713,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkConservativeRasterizationModeEXT.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ConservativeRasterizationModeEXT</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">ConservativeRasterizationModeEXT</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">ConservativeRasterizationModeEXT</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3729,10 +3730,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkVendorId.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">VendorId</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">VendorId</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">VendorId</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3751,10 +3752,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkDriverId.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DriverId</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">DriverId</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">DriverId</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3789,10 +3790,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkShadingRatePaletteEntryNV.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ShadingRatePaletteEntryNV</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">ShadingRatePaletteEntryNV</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">ShadingRatePaletteEntryNV</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3815,10 +3816,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkCoarseSampleOrderTypeNV.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CoarseSampleOrderTypeNV</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">CoarseSampleOrderTypeNV</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">CoarseSampleOrderTypeNV</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3833,10 +3834,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkCopyAccelerationStructureModeKHR.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CopyAccelerationStructureModeKHR</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">CopyAccelerationStructureModeKHR</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">CopyAccelerationStructureModeKHR</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3851,10 +3852,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkAccelerationStructureTypeKHR.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">AccelerationStructureTypeKHR</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">AccelerationStructureTypeKHR</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">AccelerationStructureTypeKHR</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3867,10 +3868,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkGeometryTypeKHR.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">GeometryTypeKHR</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">GeometryTypeKHR</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">GeometryTypeKHR</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3883,10 +3884,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkAccelerationStructureMemoryRequirementsTypeKHR.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">AccelerationStructureMemoryRequirementsTypeKHR</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">AccelerationStructureMemoryRequirementsTypeKHR</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">AccelerationStructureMemoryRequirementsTypeKHR</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3900,10 +3901,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkAccelerationStructureBuildTypeKHR.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">AccelerationStructureBuildTypeKHR</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">AccelerationStructureBuildTypeKHR</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">AccelerationStructureBuildTypeKHR</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3917,10 +3918,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkRayTracingShaderGroupTypeKHR.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">RayTracingShaderGroupTypeKHR</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">RayTracingShaderGroupTypeKHR</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">RayTracingShaderGroupTypeKHR</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3934,10 +3935,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkMemoryOverallocationBehaviorAMD.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MemoryOverallocationBehaviorAMD</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">MemoryOverallocationBehaviorAMD</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">MemoryOverallocationBehaviorAMD</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3951,10 +3952,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkScopeNV.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ScopeNV</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">ScopeNV</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">ScopeNV</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3969,10 +3970,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkComponentTypeNV.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ComponentTypeNV</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">ComponentTypeNV</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">ComponentTypeNV</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -3994,10 +3995,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkFullScreenExclusiveEXT.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">FullScreenExclusiveEXT</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">FullScreenExclusiveEXT</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">FullScreenExclusiveEXT</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -4012,10 +4013,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPerformanceCounterScopeKHR.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">PerformanceCounterScopeKHR</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">PerformanceCounterScopeKHR</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">PerformanceCounterScopeKHR</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -4029,10 +4030,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPerformanceCounterUnitKHR.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">PerformanceCounterUnitKHR</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">PerformanceCounterUnitKHR</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">PerformanceCounterUnitKHR</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -4054,10 +4055,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPerformanceCounterStorageKHR.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">PerformanceCounterStorageKHR</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">PerformanceCounterStorageKHR</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">PerformanceCounterStorageKHR</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -4074,10 +4075,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPerformanceConfigurationTypeINTEL.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">PerformanceConfigurationTypeINTEL</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">PerformanceConfigurationTypeINTEL</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">PerformanceConfigurationTypeINTEL</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -4090,10 +4091,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkQueryPoolSamplingModeINTEL.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">QueryPoolSamplingModeINTEL</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">QueryPoolSamplingModeINTEL</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">QueryPoolSamplingModeINTEL</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -4105,10 +4106,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPerformanceOverrideTypeINTEL.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">PerformanceOverrideTypeINTEL</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">PerformanceOverrideTypeINTEL</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">PerformanceOverrideTypeINTEL</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -4121,10 +4122,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPerformanceParameterTypeINTEL.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">PerformanceParameterTypeINTEL</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">PerformanceParameterTypeINTEL</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">PerformanceParameterTypeINTEL</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -4137,10 +4138,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPerformanceValueTypeINTEL.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">PerformanceValueTypeINTEL</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">PerformanceValueTypeINTEL</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">PerformanceValueTypeINTEL</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -4156,10 +4157,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkShaderFloatControlsIndependence.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ShaderFloatControlsIndependence</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">ShaderFloatControlsIndependence</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">ShaderFloatControlsIndependence</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -4173,10 +4174,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPipelineExecutableStatisticFormatKHR.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">PipelineExecutableStatisticFormatKHR</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">PipelineExecutableStatisticFormatKHR</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">PipelineExecutableStatisticFormatKHR</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -4191,10 +4192,10 @@
 <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&lt;https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkLineRasterizationModeEXT.html&gt;&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">LineRasterizationModeEXT</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">i32</span>);
 <span class="kw">impl</span> <span class="ident">LineRasterizationModeEXT</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">x</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">LineRasterizationModeEXT</span>(<span class="ident">x</span>)
     }
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">i32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -4204,5 +4205,6 @@
     <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BRESENHAM</span>: <span class="self">Self</span> <span class="op">=</span> <span class="self">Self</span>(<span class="number">2</span>);
     <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">RECTANGULAR_SMOOTH</span>: <span class="self">Self</span> <span class="op">=</span> <span class="self">Self</span>(<span class="number">3</span>);
 }
-</pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../../";window.currentCrate = "ash";</script><script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script><script defer src="../../../search-index.js"></script></body></html>
+</code></pre></div>
+</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="ash" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.60.0-nightly (88fb06a1f 2022-02-05)" ></div>
+</body></html>

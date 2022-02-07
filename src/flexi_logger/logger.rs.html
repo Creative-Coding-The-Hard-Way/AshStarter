@@ -1,7 +1,9 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `C:\Users\brad\.cargo\registry\src\github.com-1ecc6299db9ec823\flexi_logger-0.17.1\src\logger.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>logger.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
-<link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
-<link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../flexi_logger/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
-                <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">   1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `C:\Users\Bradley\.cargo\registry\src\github.com-1ecc6299db9ec823\flexi_logger-0.17.1\src\logger.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>logger.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../flexi_logger/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"></h2>
+    </nav>
+    <nav class="sidebar"><a class="sidebar-logo" href="../../flexi_logger/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div>
+        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../flexi_logger/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><div class="theme-picker hidden"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="22" height="22" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">   1</span>
 <span id="2">   2</span>
 <span id="3">   3</span>
 <span id="4">   4</span>
@@ -1028,25 +1030,24 @@
 <span id="1025">1025</span>
 <span id="1026">1026</span>
 <span id="1027">1027</span>
-</pre><div class="example-wrap"><pre class="rust ">
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">flexi_logger</span>::<span class="ident">FlexiLogger</span>;
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">formats</span>::<span class="ident">default_format</span>;
+</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::flexi_logger::FlexiLogger</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::formats::default_format</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;atty&quot;</span>)]</span>
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">formats</span>::{<span class="ident">AdaptiveFormat</span>, <span class="ident">Stream</span>};
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">primary_writer</span>::<span class="ident">PrimaryWriter</span>;
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">writers</span>::{<span class="ident">FileLogWriter</span>, <span class="ident">FileLogWriterBuilder</span>, <span class="ident">LogWriter</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::formats</span>::{<span class="ident">AdaptiveFormat</span>, <span class="ident">Stream</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::primary_writer::PrimaryWriter</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::writers</span>::{<span class="ident">FileLogWriter</span>, <span class="ident">FileLogWriterBuilder</span>, <span class="ident">LogWriter</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::{
     <span class="ident">Cleanup</span>, <span class="ident">Criterion</span>, <span class="ident">FlexiLoggerError</span>, <span class="ident">FormatFunction</span>, <span class="ident">LogSpecification</span>, <span class="ident">LoggerHandle</span>, <span class="ident">Naming</span>,
 };
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;specfile&quot;</span>)]</span>
 <span class="kw">use</span> <span class="ident">notify</span>::{<span class="ident">watcher</span>, <span class="ident">DebouncedEvent</span>, <span class="ident">RecursiveMode</span>, <span class="ident">Watcher</span>};
-<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">collections</span>::<span class="ident">HashMap</span>;
+<span class="kw">use</span> <span class="ident">std::collections::HashMap</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;specfile_without_notification&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">Read</span>;
-<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">path</span>::<span class="ident">PathBuf</span>;
-<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">sync</span>::<span class="ident">mpsc</span>::{<span class="ident">channel</span>, <span class="ident">Receiver</span>, <span class="ident">Sender</span>};
-<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">sync</span>::{<span class="ident">Arc</span>, <span class="ident">RwLock</span>};
+<span class="kw">use</span> <span class="ident">std::io::Read</span>;
+<span class="kw">use</span> <span class="ident">std::path::PathBuf</span>;
+<span class="kw">use</span> <span class="ident">std::sync::mpsc</span>::{<span class="ident">channel</span>, <span class="ident">Receiver</span>, <span class="ident">Sender</span>};
+<span class="kw">use</span> <span class="ident">std::sync</span>::{<span class="ident">Arc</span>, <span class="ident">RwLock</span>};
 
 <span class="doccomment">/// The entry-point for using `flexi_logger`.</span>
 <span class="doccomment">///</span>
@@ -1091,7 +1092,7 @@
     <span class="ident">format_for_writer</span>: <span class="ident">FormatFunction</span>,
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;colors&quot;</span>)]</span>
     <span class="ident">o_palette</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
-    <span class="ident">o_flush_wait</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">std</span>::<span class="ident">time</span>::<span class="ident">Duration</span><span class="op">&gt;</span>,
+    <span class="ident">o_flush_wait</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">std::time::Duration</span><span class="op">&gt;</span>,
     <span class="ident">flwb</span>: <span class="ident">FileLogWriterBuilder</span>,
     <span class="ident">other_writers</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">LogWriter</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 }
@@ -1144,64 +1145,64 @@
     <span class="doccomment">/// Creates a Logger that you provide with an explicit `LogSpecification`.</span>
     <span class="doccomment">/// By default, logs are written with `default_format` to `stderr`.</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with</span>(<span class="ident">logspec</span>: <span class="ident">LogSpecification</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span>::<span class="ident">from_spec_and_errs</span>(<span class="ident">logspec</span>, <span class="prelude-val">None</span>)
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with</span>(<span class="ident">logspec</span>: <span class="ident">LogSpecification</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::from_spec_and_errs</span>(<span class="ident">logspec</span>, <span class="prelude-val">None</span>)
     }
 
     <span class="doccomment">/// Creates a Logger that reads the `LogSpecification` from a String or &amp;str.</span>
     <span class="doccomment">/// [See `LogSpecification`](crate::LogSpecification) for the syntax.</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_str</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">s</span>: <span class="ident">S</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span>::<span class="ident">from_result</span>(<span class="ident">LogSpecification</span>::<span class="ident">parse</span>(<span class="ident">s</span>.<span class="ident">as_ref</span>()))
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_str</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">s</span>: <span class="ident">S</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::from_result</span>(<span class="ident">LogSpecification::parse</span>(<span class="ident">s</span>.<span class="ident">as_ref</span>()))
     }
 
     <span class="doccomment">/// Creates a Logger that reads the `LogSpecification` from the environment variable `RUST_LOG`.</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_env</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span>::<span class="ident">from_result</span>(<span class="ident">LogSpecification</span>::<span class="ident">env</span>())
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_env</span>() -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::from_result</span>(<span class="ident">LogSpecification::env</span>())
     }
 
     <span class="doccomment">/// Creates a Logger that reads the `LogSpecification` from the environment variable `RUST_LOG`,</span>
     <span class="doccomment">/// or derives it from the given String, if `RUST_LOG` is not set.</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_env_or_str</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">s</span>: <span class="ident">S</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span>::<span class="ident">from_result</span>(<span class="ident">LogSpecification</span>::<span class="ident">env_or_parse</span>(<span class="ident">s</span>))
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_env_or_str</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">s</span>: <span class="ident">S</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::from_result</span>(<span class="ident">LogSpecification::env_or_parse</span>(<span class="ident">s</span>))
     }
 
-    <span class="kw">fn</span> <span class="ident">from_result</span>(<span class="ident">result</span>: <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">LogSpecification</span>, <span class="ident">FlexiLoggerError</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">from_result</span>(<span class="ident">result</span>: <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">LogSpecification</span>, <span class="ident">FlexiLoggerError</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
         <span class="kw">match</span> <span class="ident">result</span> {
-            <span class="prelude-val">Ok</span>(<span class="ident">logspec</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">Self</span>::<span class="ident">from_spec_and_errs</span>(<span class="ident">logspec</span>, <span class="prelude-val">None</span>),
-            <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">e</span> {
-                <span class="ident">FlexiLoggerError</span>::<span class="ident">Parse</span>(<span class="ident">parse_errs</span>, <span class="ident">logspec</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                    <span class="self">Self</span>::<span class="ident">from_spec_and_errs</span>(<span class="ident">logspec</span>, <span class="prelude-val">Some</span>(<span class="ident">parse_errs</span>))
+            <span class="prelude-val">Ok</span>(<span class="ident">logspec</span>) =&gt; <span class="ident"><span class="self">Self</span>::from_spec_and_errs</span>(<span class="ident">logspec</span>, <span class="prelude-val">None</span>),
+            <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="kw">match</span> <span class="ident">e</span> {
+                <span class="ident">FlexiLoggerError::Parse</span>(<span class="ident">parse_errs</span>, <span class="ident">logspec</span>) =&gt; {
+                    <span class="ident"><span class="self">Self</span>::from_spec_and_errs</span>(<span class="ident">logspec</span>, <span class="prelude-val">Some</span>(<span class="ident">parse_errs</span>))
                 }
-                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">Self</span>::<span class="ident">from_spec_and_errs</span>(<span class="ident">LogSpecification</span>::<span class="ident">off</span>(), <span class="prelude-val">None</span>),
+                <span class="kw">_</span> =&gt; <span class="ident"><span class="self">Self</span>::from_spec_and_errs</span>(<span class="ident">LogSpecification::off</span>(), <span class="prelude-val">None</span>),
             },
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">from_spec_and_errs</span>(<span class="ident">spec</span>: <span class="ident">LogSpecification</span>, <span class="ident">parse_errs</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">from_spec_and_errs</span>(<span class="ident">spec</span>: <span class="ident">LogSpecification</span>, <span class="ident">parse_errs</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;colors&quot;</span>)]</span>
         {
             <span class="comment">// Enable ASCII escape sequence support on Windows consoles,</span>
             <span class="comment">// but disable coloring on unsupported Windows consoles</span>
-            <span class="kw">if</span> <span class="macro">cfg</span><span class="macro">!</span>(<span class="ident">windows</span>) <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="ident">yansi</span>::<span class="ident">Paint</span>::<span class="ident">enable_windows_ascii</span>() {
-                <span class="ident">yansi</span>::<span class="ident">Paint</span>::<span class="ident">disable</span>();
+            <span class="kw">if</span> <span class="macro">cfg!</span>(<span class="ident">windows</span>) <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="ident">yansi::Paint::enable_windows_ascii</span>() {
+                <span class="ident">yansi::Paint::disable</span>();
             }
         }
 
         <span class="self">Self</span> {
             <span class="ident">spec</span>,
             <span class="ident">parse_errs</span>,
-            <span class="ident">log_target</span>: <span class="ident">LogTarget</span>::<span class="ident">StdErr</span>,
-            <span class="ident">duplicate_err</span>: <span class="ident">Duplicate</span>::<span class="prelude-val">None</span>,
-            <span class="ident">duplicate_out</span>: <span class="ident">Duplicate</span>::<span class="prelude-val">None</span>,
+            <span class="ident">log_target</span>: <span class="ident">LogTarget::StdErr</span>,
+            <span class="ident">duplicate_err</span>: <span class="ident">Duplicate::None</span>,
+            <span class="ident">duplicate_out</span>: <span class="ident">Duplicate::None</span>,
             <span class="ident">format_for_file</span>: <span class="ident">default_format</span>,
 
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;colors&quot;</span>)]</span>
-            <span class="ident">format_for_stdout</span>: <span class="ident">AdaptiveFormat</span>::<span class="ident">Default</span>.<span class="ident">format_function</span>(<span class="ident">Stream</span>::<span class="ident">StdOut</span>),
+            <span class="ident">format_for_stdout</span>: <span class="ident">AdaptiveFormat::Default</span>.<span class="ident">format_function</span>(<span class="ident">Stream::StdOut</span>),
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;colors&quot;</span>)]</span>
-            <span class="ident">format_for_stderr</span>: <span class="ident">AdaptiveFormat</span>::<span class="ident">Default</span>.<span class="ident">format_function</span>(<span class="ident">Stream</span>::<span class="ident">StdErr</span>),
+            <span class="ident">format_for_stderr</span>: <span class="ident">AdaptiveFormat::Default</span>.<span class="ident">format_function</span>(<span class="ident">Stream::StdErr</span>),
 
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;colors&quot;</span>))]</span>
             <span class="ident">format_for_stdout</span>: <span class="ident">default_format</span>,
@@ -1212,8 +1213,8 @@
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;colors&quot;</span>)]</span>
             <span class="ident">o_palette</span>: <span class="prelude-val">None</span>,
             <span class="ident">o_flush_wait</span>: <span class="prelude-val">None</span>,
-            <span class="ident">flwb</span>: <span class="ident">FileLogWriter</span>::<span class="ident">builder</span>(),
-            <span class="ident">other_writers</span>: <span class="ident">HashMap</span>::<span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">LogWriter</span><span class="op">&gt;</span><span class="op">&gt;</span>::<span class="ident">new</span>(),
+            <span class="ident">flwb</span>: <span class="ident">FileLogWriter::builder</span>(),
+            <span class="ident">other_writers</span>: <span class="ident">HashMap</span>::<span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">LogWriter</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::new</span>(),
         }
     }
 }
@@ -1245,18 +1246,18 @@
     <span class="doccomment">/// # Errors</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// `FlexiLoggerError::Parse` if the input for the log specification is malformed.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">check_parser_error</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">FlexiLoggerError</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">check_parser_error</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">FlexiLoggerError</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">parse_errs</span> {
-            <span class="prelude-val">Some</span>(<span class="ident">parse_errs</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">FlexiLoggerError</span>::<span class="ident">Parse</span>(<span class="ident">parse_errs</span>, <span class="self">self</span>.<span class="ident">spec</span>)),
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="self">self</span>),
+            <span class="prelude-val">Some</span>(<span class="ident">parse_errs</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">FlexiLoggerError::Parse</span>(<span class="ident">parse_errs</span>, <span class="self">self</span>.<span class="ident">spec</span>)),
+            <span class="prelude-val">None</span> =&gt; <span class="prelude-val">Ok</span>(<span class="self">self</span>),
         }
     }
 
     <span class="doccomment">/// Is equivalent to</span>
     <span class="doccomment">/// [`log_target`](crate::Logger::log_target)`(`[`LogTarget::File`](crate::LogTarget::File)`)`.</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">log_to_file</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">log_target</span>(<span class="ident">LogTarget</span>::<span class="ident">File</span>)
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">log_to_file</span>(<span class="self">self</span>) -&gt; <span class="self">Self</span> {
+        <span class="self">self</span>.<span class="ident">log_target</span>(<span class="ident">LogTarget::File</span>)
     }
 
     <span class="doccomment">/// Write the main log output to the specified target.</span>
@@ -1264,7 +1265,7 @@
     <span class="doccomment">/// By default, i.e. if this method is not called,</span>
     <span class="doccomment">/// the log target [`LogTarget::StdErr`](crate::LogTarget::StdErr) is used.</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">log_target</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">log_target</span>: <span class="ident">LogTarget</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">log_target</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">log_target</span>: <span class="ident">LogTarget</span>) -&gt; <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">log_target</span> <span class="op">=</span> <span class="ident">log_target</span>;
         <span class="self">self</span>
     }
@@ -1272,7 +1273,7 @@
     <span class="doccomment">/// Makes the logger print an info message to stdout with the name of the logfile</span>
     <span class="doccomment">/// when a logfile is opened for writing.</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">print_message</span>(<span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">print_message</span>(<span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">flwb</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">flwb</span>.<span class="ident">print_message</span>();
         <span class="self">self</span>
     }
@@ -1281,7 +1282,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// Works with all log targets except `StdErr` and `StdOut`.</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">duplicate_to_stderr</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">dup</span>: <span class="ident">Duplicate</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">duplicate_to_stderr</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">dup</span>: <span class="ident">Duplicate</span>) -&gt; <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">duplicate_err</span> <span class="op">=</span> <span class="ident">dup</span>;
         <span class="self">self</span>
     }
@@ -1290,7 +1291,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// Works with all log targets except `StdErr` and `StdOut`.</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">duplicate_to_stdout</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">dup</span>: <span class="ident">Duplicate</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">duplicate_to_stdout</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">dup</span>: <span class="ident">Duplicate</span>) -&gt; <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">duplicate_out</span> <span class="op">=</span> <span class="ident">dup</span>;
         <span class="self">self</span>
     }
@@ -1315,7 +1316,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// If the feature `colors` is switched off,</span>
     <span class="doccomment">/// `default_format()` is used for all outputs.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">format</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">format</span>: <span class="ident">FormatFunction</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">format</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">format</span>: <span class="ident">FormatFunction</span>) -&gt; <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">format_for_file</span> <span class="op">=</span> <span class="ident">format</span>;
         <span class="self">self</span>.<span class="ident">format_for_stderr</span> <span class="op">=</span> <span class="ident">format</span>;
         <span class="self">self</span>.<span class="ident">format_for_stdout</span> <span class="op">=</span> <span class="ident">format</span>;
@@ -1327,7 +1328,7 @@
     <span class="doccomment">/// that are written to files.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Regarding the default, see [`Logger::format`](crate::Logger::format).</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">format_for_files</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">format</span>: <span class="ident">FormatFunction</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">format_for_files</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">format</span>: <span class="ident">FormatFunction</span>) -&gt; <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">format_for_file</span> <span class="op">=</span> <span class="ident">format</span>;
         <span class="self">self</span>
     }
@@ -1340,8 +1341,8 @@
     <span class="doccomment">/// Only available with feature `colors`.</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;atty&quot;</span>)]</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">adaptive_format_for_stderr</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">adaptive_format</span>: <span class="ident">AdaptiveFormat</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">format_for_stderr</span> <span class="op">=</span> <span class="ident">adaptive_format</span>.<span class="ident">format_function</span>(<span class="ident">Stream</span>::<span class="ident">StdErr</span>);
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">adaptive_format_for_stderr</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">adaptive_format</span>: <span class="ident">AdaptiveFormat</span>) -&gt; <span class="self">Self</span> {
+        <span class="self">self</span>.<span class="ident">format_for_stderr</span> <span class="op">=</span> <span class="ident">adaptive_format</span>.<span class="ident">format_function</span>(<span class="ident">Stream::StdErr</span>);
         <span class="self">self</span>
     }
 
@@ -1353,8 +1354,8 @@
     <span class="doccomment">/// Only available with feature `colors`.</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;atty&quot;</span>)]</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">adaptive_format_for_stdout</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">adaptive_format</span>: <span class="ident">AdaptiveFormat</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">format_for_stdout</span> <span class="op">=</span> <span class="ident">adaptive_format</span>.<span class="ident">format_function</span>(<span class="ident">Stream</span>::<span class="ident">StdOut</span>);
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">adaptive_format_for_stdout</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">adaptive_format</span>: <span class="ident">AdaptiveFormat</span>) -&gt; <span class="self">Self</span> {
+        <span class="self">self</span>.<span class="ident">format_for_stdout</span> <span class="op">=</span> <span class="ident">adaptive_format</span>.<span class="ident">format_function</span>(<span class="ident">Stream::StdOut</span>);
         <span class="self">self</span>
     }
 
@@ -1362,7 +1363,7 @@
     <span class="doccomment">/// that are written to stderr.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Regarding the default, see [`Logger::format`](crate::Logger::format).</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">format_for_stderr</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">format</span>: <span class="ident">FormatFunction</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">format_for_stderr</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">format</span>: <span class="ident">FormatFunction</span>) -&gt; <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">format_for_stderr</span> <span class="op">=</span> <span class="ident">format</span>;
         <span class="self">self</span>
     }
@@ -1371,7 +1372,7 @@
     <span class="doccomment">/// that are written to stdout.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Regarding the default, see [`Logger::format`](crate::Logger::format).</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">format_for_stdout</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">format</span>: <span class="ident">FormatFunction</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">format_for_stdout</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">format</span>: <span class="ident">FormatFunction</span>) -&gt; <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">format_for_stdout</span> <span class="op">=</span> <span class="ident">format</span>;
         <span class="self">self</span>
     }
@@ -1381,7 +1382,7 @@
     <span class="doccomment">/// whether it evaluates this setting or not.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Regarding the default, see [`Logger::format`](crate::Logger::format).</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">format_for_writer</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">format</span>: <span class="ident">FormatFunction</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">format_for_writer</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">format</span>: <span class="ident">FormatFunction</span>) -&gt; <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">format_for_writer</span> <span class="op">=</span> <span class="ident">format</span>;
         <span class="self">self</span>
     }
@@ -1410,7 +1411,7 @@
     <span class="doccomment">/// Only available with feature `colors`.</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;colors&quot;</span>)]</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_palette</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">palette</span>: <span class="ident">String</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_palette</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">palette</span>: <span class="ident">String</span>) -&gt; <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">o_palette</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">palette</span>);
         <span class="self">self</span>
     }
@@ -1420,7 +1421,7 @@
     <span class="doccomment">/// This parameter only has an effect if `log_to_file()` is used, too.</span>
     <span class="doccomment">/// The specified folder will be created if it does not exist.</span>
     <span class="doccomment">/// By default, the log files are created in the folder where the program was started.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">directory</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">directory</span>: <span class="ident">S</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">directory</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">directory</span>: <span class="ident">S</span>) -&gt; <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">flwb</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">flwb</span>.<span class="ident">directory</span>(<span class="ident">directory</span>);
         <span class="self">self</span>
     }
@@ -1428,7 +1429,7 @@
     <span class="doccomment">/// Specifies a suffix for the log files.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// This parameter only has an effect if `log_to_file()` is used, too.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">suffix</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">suffix</span>: <span class="ident">S</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">suffix</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">suffix</span>: <span class="ident">S</span>) -&gt; <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">flwb</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">flwb</span>.<span class="ident">suffix</span>(<span class="ident">suffix</span>);
         <span class="self">self</span>
     }
@@ -1438,7 +1439,7 @@
     <span class="doccomment">/// This option only has an effect if `log_to_file()` is used, too,</span>
     <span class="doccomment">/// and is ignored if rotation is used.</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">suppress_timestamp</span>(<span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">suppress_timestamp</span>(<span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">flwb</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">flwb</span>.<span class="ident">suppress_timestamp</span>();
         <span class="self">self</span>
     }
@@ -1456,7 +1457,7 @@
     <span class="doccomment">/// `use_background_thread = false`,</span>
     <span class="doccomment">/// the cleanup is done in the thread that is currently causing a file rotation.</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">cleanup_in_background_thread</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">use_background_thread</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">cleanup_in_background_thread</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">use_background_thread</span>: <span class="ident">bool</span>) -&gt; <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">flwb</span> <span class="op">=</span> <span class="self">self</span>
             .<span class="ident">flwb</span>
             .<span class="ident">cleanup_in_background_thread</span>(<span class="ident">use_background_thread</span>);
@@ -1498,7 +1499,7 @@
     <span class="doccomment">/// `cleanup` defines the strategy for dealing with older files.</span>
     <span class="doccomment">/// See [Cleanup](crate::Cleanup) for details.</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">rotate</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">criterion</span>: <span class="ident">Criterion</span>, <span class="ident">naming</span>: <span class="ident">Naming</span>, <span class="ident">cleanup</span>: <span class="ident">Cleanup</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">rotate</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">criterion</span>: <span class="ident">Criterion</span>, <span class="ident">naming</span>: <span class="ident">Naming</span>, <span class="ident">cleanup</span>: <span class="ident">Cleanup</span>) -&gt; <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">flwb</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">flwb</span>.<span class="ident">rotate</span>(<span class="ident">criterion</span>, <span class="ident">naming</span>, <span class="ident">cleanup</span>);
         <span class="self">self</span>
     }
@@ -1509,7 +1510,7 @@
     <span class="doccomment">/// This option only has an effect if `log_to_file()` is used, too.</span>
     <span class="doccomment">/// This option will hardly make an effect if `suppress_timestamp()` is not used.</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">append</span>(<span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">append</span>(<span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">flwb</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">flwb</span>.<span class="ident">append</span>();
         <span class="self">self</span>
     }
@@ -1517,7 +1518,7 @@
     <span class="doccomment">/// The specified String is added to the log file name after the program name.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// This option only has an effect if `log_to_file()` is used, too.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">discriminant</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">discriminant</span>: <span class="ident">S</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">discriminant</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">discriminant</span>: <span class="ident">S</span>) -&gt; <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">flwb</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">flwb</span>.<span class="ident">discriminant</span>(<span class="ident">discriminant</span>);
         <span class="self">self</span>
     }
@@ -1526,7 +1527,7 @@
     <span class="doccomment">/// instead of the program name.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// This option only has an effect if `log_to_file()` is used, too.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">basename</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">basename</span>: <span class="ident">S</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">basename</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">basename</span>: <span class="ident">S</span>) -&gt; <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">flwb</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">flwb</span>.<span class="ident">basename</span>(<span class="ident">basename</span>);
         <span class="self">self</span>
     }
@@ -1548,7 +1549,7 @@
     <span class="doccomment">/// tail --follow=name --max-unchanged-stats=1 --retry link_to_log_file</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">///</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_symlink</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">symlink</span>: <span class="ident">P</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_symlink</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">symlink</span>: <span class="ident">P</span>) -&gt; <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">flwb</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">flwb</span>.<span class="ident">create_symlink</span>(<span class="ident">symlink</span>);
         <span class="self">self</span>
     }
@@ -1562,7 +1563,7 @@
         <span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">target_name</span>: <span class="ident">S</span>,
         <span class="ident">writer</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">LogWriter</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    ) -&gt; <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">other_writers</span>.<span class="ident">insert</span>(<span class="ident">target_name</span>.<span class="ident">into</span>(), <span class="ident">writer</span>);
         <span class="self">self</span>
     }
@@ -1581,7 +1582,7 @@
     <span class="doccomment">/// and call [`shutdown`](crate::LoggerHandle::shutdown) at the very end of your program</span>
     <span class="doccomment">/// to ensure that all buffered log lines are flushed before the program terminates.</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">use_buffering</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">buffer</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">use_buffering</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">buffer</span>: <span class="ident">bool</span>) -&gt; <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">flwb</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">flwb</span>.<span class="ident">use_buffering</span>(<span class="ident">buffer</span>);
         <span class="self">self</span>
     }
@@ -1591,11 +1592,11 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// Note that flushing uses an extra thread (with minimal stack).</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">buffer_and_flush</span>(<span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">buffer_and_flush</span>(<span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">flwb</span> <span class="op">=</span> <span class="self">self</span>
             .<span class="ident">flwb</span>
-            .<span class="ident">buffer_with_capacity</span>(<span class="kw">crate</span>::<span class="ident">DEFAULT_BUFFER_CAPACITY</span>);
-        <span class="self">self</span>.<span class="ident">o_flush_wait</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="kw">crate</span>::<span class="ident">DEFAULT_FLUSH_WAIT_TIME</span>);
+            .<span class="ident">buffer_with_capacity</span>(<span class="ident"><span class="kw">crate</span>::DEFAULT_BUFFER_CAPACITY</span>);
+        <span class="self">self</span>.<span class="ident">o_flush_wait</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident"><span class="kw">crate</span>::DEFAULT_FLUSH_WAIT_TIME</span>);
         <span class="self">self</span>
     }
 
@@ -1604,7 +1605,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// Note that flushing uses an extra thread (with minimal stack).</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">buffer_and_flush_with</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">capacity</span>: <span class="ident">usize</span>, <span class="ident">wait</span>: <span class="ident">std</span>::<span class="ident">time</span>::<span class="ident">Duration</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">buffer_and_flush_with</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">capacity</span>: <span class="ident">usize</span>, <span class="ident">wait</span>: <span class="ident">std::time::Duration</span>) -&gt; <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">flwb</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">flwb</span>.<span class="ident">buffer_with_capacity</span>(<span class="ident">capacity</span>);
         <span class="self">self</span>.<span class="ident">o_flush_wait</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">wait</span>);
         <span class="self">self</span>
@@ -1612,7 +1613,7 @@
 
     <span class="doccomment">/// Use Windows line endings, rather than just `\n`.</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">use_windows_line_ending</span>(<span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">use_windows_line_ending</span>(<span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">flwb</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">flwb</span>.<span class="ident">use_windows_line_ending</span>();
         <span class="self">self</span>
     }
@@ -1625,7 +1626,7 @@
     <span class="doccomment">/// With true, makes the logger print an info message to stdout, each time</span>
     <span class="doccomment">/// when a new file is used for log-output.</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">o_print_message</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">print_message</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">o_print_message</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">print_message</span>: <span class="ident">bool</span>) -&gt; <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">flwb</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">flwb</span>.<span class="ident">o_print_message</span>(<span class="ident">print_message</span>);
         <span class="self">self</span>
     }
@@ -1635,7 +1636,7 @@
     <span class="doccomment">/// This parameter only has an effect if `log_to_file` is set to true.</span>
     <span class="doccomment">/// If the specified folder does not exist, the initialization will fail.</span>
     <span class="doccomment">/// With None, the log files are created in the folder where the program was started.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">o_directory</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">directory</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">o_directory</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">directory</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">flwb</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">flwb</span>.<span class="ident">o_directory</span>(<span class="ident">directory</span>);
         <span class="self">self</span>
     }
@@ -1651,7 +1652,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// The cleanup strategy allows delimiting the used space on disk.</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">o_rotate</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">rotate_config</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">Criterion</span>, <span class="ident">Naming</span>, <span class="ident">Cleanup</span>)<span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">o_rotate</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">rotate_config</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">Criterion</span>, <span class="ident">Naming</span>, <span class="ident">Cleanup</span>)<span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">flwb</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">flwb</span>.<span class="ident">o_rotate</span>(<span class="ident">rotate_config</span>);
         <span class="self">self</span>
     }
@@ -1662,7 +1663,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// This parameter only has an effect if `log_to_file` is set to true.</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">o_timestamp</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">timestamp</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">o_timestamp</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">timestamp</span>: <span class="ident">bool</span>) -&gt; <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">flwb</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">flwb</span>.<span class="ident">o_timestamp</span>(<span class="ident">timestamp</span>);
         <span class="self">self</span>
     }
@@ -1674,7 +1675,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// This option will hardly make an effect if `suppress_timestamp()` is not used.</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">o_append</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">append</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">o_append</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">append</span>: <span class="ident">bool</span>) -&gt; <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">flwb</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">flwb</span>.<span class="ident">o_append</span>(<span class="ident">append</span>);
         <span class="self">self</span>
     }
@@ -1682,7 +1683,7 @@
     <span class="doccomment">/// This option only has an effect if `log_to_file` is set to true.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// The specified String is added to the log file name.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">o_discriminant</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">discriminant</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">o_discriminant</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">discriminant</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">flwb</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">flwb</span>.<span class="ident">o_discriminant</span>(<span class="ident">discriminant</span>);
         <span class="self">self</span>
     }
@@ -1691,7 +1692,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// The specified String is used as the basename of the log file,</span>
     <span class="doccomment">/// instead of the program name, which is used when `None` is given.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">o_basename</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">basename</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">o_basename</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">basename</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">flwb</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">flwb</span>.<span class="ident">o_basename</span>(<span class="ident">basename</span>);
         <span class="self">self</span>
     }
@@ -1700,7 +1701,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// If a String is specified, it will be used on linux systems to create in the current folder</span>
     <span class="doccomment">/// a symbolic link with this name to the current log file.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">o_create_symlink</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">symlink</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">o_create_symlink</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">symlink</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">flwb</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">flwb</span>.<span class="ident">o_create_symlink</span>(<span class="ident">symlink</span>);
         <span class="self">self</span>
     }
@@ -1717,9 +1718,9 @@
     <span class="doccomment">/// # Errors</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Several variants of `FlexiLoggerError` can occur.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">start</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">LoggerHandle</span>, <span class="ident">FlexiLoggerError</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">start</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">LoggerHandle</span>, <span class="ident">FlexiLoggerError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> (<span class="ident">boxed_logger</span>, <span class="ident">handle</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">build</span>()<span class="question-mark">?</span>;
-        <span class="ident">log</span>::<span class="ident">set_boxed_logger</span>(<span class="ident">boxed_logger</span>)<span class="question-mark">?</span>;
+        <span class="ident">log::set_boxed_logger</span>(<span class="ident">boxed_logger</span>)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="ident">handle</span>)
     }
 
@@ -1736,53 +1737,53 @@
     <span class="doccomment">/// # Errors</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Several variants of `FlexiLoggerError` can occur.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">build</span>(<span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">log</span>::<span class="ident">Log</span><span class="op">&gt;</span>, <span class="ident">LoggerHandle</span>), <span class="ident">FlexiLoggerError</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">build</span>(<span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">log::Log</span><span class="op">&gt;</span>, <span class="ident">LoggerHandle</span>), <span class="ident">FlexiLoggerError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">max_level</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">spec</span>.<span class="ident">max_level</span>();
-        <span class="kw">let</span> <span class="ident">spec</span> <span class="op">=</span> <span class="ident">Arc</span>::<span class="ident">new</span>(<span class="ident">RwLock</span>::<span class="ident">new</span>(<span class="self">self</span>.<span class="ident">spec</span>));
-        <span class="kw">let</span> <span class="ident">other_writers</span> <span class="op">=</span> <span class="ident">Arc</span>::<span class="ident">new</span>(<span class="self">self</span>.<span class="ident">other_writers</span>);
+        <span class="kw">let</span> <span class="ident">spec</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">RwLock::new</span>(<span class="self">self</span>.<span class="ident">spec</span>));
+        <span class="kw">let</span> <span class="ident">other_writers</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="self">self</span>.<span class="ident">other_writers</span>);
 
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;colors&quot;</span>)]</span>
-        <span class="kw">crate</span>::<span class="ident">formats</span>::<span class="ident">set_palette</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">o_palette</span>)<span class="question-mark">?</span>;
+        <span class="ident"><span class="kw">crate</span>::formats::set_palette</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">o_palette</span>)<span class="question-mark">?</span>;
 
-        <span class="kw">let</span> <span class="ident">primary_writer</span> <span class="op">=</span> <span class="ident">Arc</span>::<span class="ident">new</span>(<span class="kw">match</span> <span class="self">self</span>.<span class="ident">log_target</span> {
-            <span class="ident">LogTarget</span>::<span class="ident">File</span> <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">primary_writer</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="kw">match</span> <span class="self">self</span>.<span class="ident">log_target</span> {
+            <span class="ident">LogTarget::File</span> =&gt; {
                 <span class="self">self</span>.<span class="ident">flwb</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">flwb</span>.<span class="ident">format</span>(<span class="self">self</span>.<span class="ident">format_for_file</span>);
-                <span class="ident">PrimaryWriter</span>::<span class="ident">multi</span>(
+                <span class="ident">PrimaryWriter::multi</span>(
                     <span class="self">self</span>.<span class="ident">duplicate_err</span>,
                     <span class="self">self</span>.<span class="ident">duplicate_out</span>,
                     <span class="self">self</span>.<span class="ident">format_for_stderr</span>,
                     <span class="self">self</span>.<span class="ident">format_for_stdout</span>,
-                    <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">Box</span>::<span class="ident">new</span>(<span class="self">self</span>.<span class="ident">flwb</span>.<span class="ident">try_build</span>()<span class="question-mark">?</span>)],
+                    <span class="macro">vec!</span>[<span class="ident">Box::new</span>(<span class="self">self</span>.<span class="ident">flwb</span>.<span class="ident">try_build</span>()<span class="question-mark">?</span>)],
                 )
             }
-            <span class="ident">LogTarget</span>::<span class="ident">Writer</span>(<span class="kw-2">mut</span> <span class="ident">w</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">LogTarget::Writer</span>(<span class="kw-2">mut</span> <span class="ident">w</span>) =&gt; {
                 <span class="ident">w</span>.<span class="ident">format</span>(<span class="self">self</span>.<span class="ident">format_for_writer</span>);
-                <span class="ident">PrimaryWriter</span>::<span class="ident">multi</span>(
+                <span class="ident">PrimaryWriter::multi</span>(
                     <span class="self">self</span>.<span class="ident">duplicate_err</span>,
                     <span class="self">self</span>.<span class="ident">duplicate_out</span>,
                     <span class="self">self</span>.<span class="ident">format_for_stderr</span>,
                     <span class="self">self</span>.<span class="ident">format_for_stdout</span>,
-                    <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">w</span>],
+                    <span class="macro">vec!</span>[<span class="ident">w</span>],
                 )
             }
-            <span class="ident">LogTarget</span>::<span class="ident">FileAndWriter</span>(<span class="kw-2">mut</span> <span class="ident">w</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">LogTarget::FileAndWriter</span>(<span class="kw-2">mut</span> <span class="ident">w</span>) =&gt; {
                 <span class="self">self</span>.<span class="ident">flwb</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">flwb</span>.<span class="ident">format</span>(<span class="self">self</span>.<span class="ident">format_for_file</span>);
                 <span class="ident">w</span>.<span class="ident">format</span>(<span class="self">self</span>.<span class="ident">format_for_writer</span>);
-                <span class="ident">PrimaryWriter</span>::<span class="ident">multi</span>(
+                <span class="ident">PrimaryWriter::multi</span>(
                     <span class="self">self</span>.<span class="ident">duplicate_err</span>,
                     <span class="self">self</span>.<span class="ident">duplicate_out</span>,
                     <span class="self">self</span>.<span class="ident">format_for_stderr</span>,
                     <span class="self">self</span>.<span class="ident">format_for_stdout</span>,
-                    <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">Box</span>::<span class="ident">new</span>(<span class="self">self</span>.<span class="ident">flwb</span>.<span class="ident">try_build</span>()<span class="question-mark">?</span>), <span class="ident">w</span>],
+                    <span class="macro">vec!</span>[<span class="ident">Box::new</span>(<span class="self">self</span>.<span class="ident">flwb</span>.<span class="ident">try_build</span>()<span class="question-mark">?</span>), <span class="ident">w</span>],
                 )
             }
-            <span class="ident">LogTarget</span>::<span class="ident">StdOut</span> <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="ident">PrimaryWriter</span>::<span class="ident">stdout</span>(<span class="self">self</span>.<span class="ident">format_for_stdout</span>, <span class="self">self</span>.<span class="ident">flwb</span>.<span class="ident">buffersize</span>())
+            <span class="ident">LogTarget::StdOut</span> =&gt; {
+                <span class="ident">PrimaryWriter::stdout</span>(<span class="self">self</span>.<span class="ident">format_for_stdout</span>, <span class="self">self</span>.<span class="ident">flwb</span>.<span class="ident">buffersize</span>())
             }
-            <span class="ident">LogTarget</span>::<span class="ident">StdErr</span> <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="ident">PrimaryWriter</span>::<span class="ident">stderr</span>(<span class="self">self</span>.<span class="ident">format_for_stderr</span>, <span class="self">self</span>.<span class="ident">flwb</span>.<span class="ident">buffersize</span>())
+            <span class="ident">LogTarget::StdErr</span> =&gt; {
+                <span class="ident">PrimaryWriter::stderr</span>(<span class="self">self</span>.<span class="ident">format_for_stderr</span>, <span class="self">self</span>.<span class="ident">flwb</span>.<span class="ident">buffersize</span>())
             }
-            <span class="ident">LogTarget</span>::<span class="ident">DevNull</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">PrimaryWriter</span>::<span class="ident">black_hole</span>(
+            <span class="ident">LogTarget::DevNull</span> =&gt; <span class="ident">PrimaryWriter::black_hole</span>(
                 <span class="self">self</span>.<span class="ident">duplicate_err</span>,
                 <span class="self">self</span>.<span class="ident">duplicate_out</span>,
                 <span class="self">self</span>.<span class="ident">format_for_stderr</span>,
@@ -1790,16 +1791,16 @@
             ),
         });
 
-        <span class="kw">let</span> <span class="ident">flexi_logger</span> <span class="op">=</span> <span class="ident">FlexiLogger</span>::<span class="ident">new</span>(
-            <span class="ident">Arc</span>::<span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="ident">spec</span>),
-            <span class="ident">Arc</span>::<span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="ident">primary_writer</span>),
-            <span class="ident">Arc</span>::<span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="ident">other_writers</span>),
+        <span class="kw">let</span> <span class="ident">flexi_logger</span> <span class="op">=</span> <span class="ident">FlexiLogger::new</span>(
+            <span class="ident">Arc::clone</span>(<span class="kw-2">&amp;</span><span class="ident">spec</span>),
+            <span class="ident">Arc::clone</span>(<span class="kw-2">&amp;</span><span class="ident">primary_writer</span>),
+            <span class="ident">Arc::clone</span>(<span class="kw-2">&amp;</span><span class="ident">other_writers</span>),
         );
 
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">wait_time</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">o_flush_wait</span> {
-            <span class="kw">let</span> <span class="ident">pw</span> <span class="op">=</span> <span class="ident">Arc</span>::<span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="ident">primary_writer</span>);
-            <span class="kw">let</span> <span class="ident">ows</span> <span class="op">=</span> <span class="ident">Arc</span>::<span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="ident">other_writers</span>);
-            <span class="ident">std</span>::<span class="ident">thread</span>::<span class="ident">Builder</span>::<span class="ident">new</span>()
+            <span class="kw">let</span> <span class="ident">pw</span> <span class="op">=</span> <span class="ident">Arc::clone</span>(<span class="kw-2">&amp;</span><span class="ident">primary_writer</span>);
+            <span class="kw">let</span> <span class="ident">ows</span> <span class="op">=</span> <span class="ident">Arc::clone</span>(<span class="kw-2">&amp;</span><span class="ident">other_writers</span>);
+            <span class="ident">std::thread::Builder::new</span>()
                 .<span class="ident">name</span>(<span class="string">&quot;flexi_logger-flusher&quot;</span>.<span class="ident">to_string</span>())
                 .<span class="ident">stack_size</span>(<span class="number">128</span>)
                 .<span class="ident">spawn</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
@@ -1814,9 +1815,9 @@
                 })<span class="question-mark">?</span>;
         }
 
-        <span class="kw">let</span> <span class="ident">handle</span> <span class="op">=</span> <span class="ident">LoggerHandle</span>::<span class="ident">new</span>(<span class="ident">spec</span>, <span class="ident">primary_writer</span>, <span class="ident">other_writers</span>);
+        <span class="kw">let</span> <span class="ident">handle</span> <span class="op">=</span> <span class="ident">LoggerHandle::new</span>(<span class="ident">spec</span>, <span class="ident">primary_writer</span>, <span class="ident">other_writers</span>);
         <span class="ident">handle</span>.<span class="ident">reconfigure</span>(<span class="ident">max_level</span>);
-        <span class="prelude-val">Ok</span>((<span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">flexi_logger</span>), <span class="ident">handle</span>))
+        <span class="prelude-val">Ok</span>((<span class="ident">Box::new</span>(<span class="ident">flexi_logger</span>), <span class="ident">handle</span>))
     }
 
     <span class="doccomment">/// Consumes the Logger object and initializes `flexi_logger` in a way that</span>
@@ -1882,13 +1883,13 @@
     <span class="doccomment">/// A `LoggerHandle` is returned, predominantly to allow using its</span>
     <span class="doccomment">/// [`shutdown`](crate::LoggerHandle::shutdown) method.</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;specfile_without_notification&quot;</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">start_with_specfile</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">std</span>::<span class="ident">path</span>::<span class="ident">Path</span><span class="op">&gt;</span><span class="op">&gt;</span>(
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">start_with_specfile</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">std::path::Path</span><span class="op">&gt;</span><span class="op">&gt;</span>(
         <span class="self">self</span>,
         <span class="ident">specfile</span>: <span class="ident">P</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">LoggerHandle</span>, <span class="ident">FlexiLoggerError</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">LoggerHandle</span>, <span class="ident">FlexiLoggerError</span><span class="op">&gt;</span> {
         <span class="comment">// Make logging work, before caring for the specfile</span>
         <span class="kw">let</span> (<span class="ident">boxed_logger</span>, <span class="ident">handle</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">build</span>()<span class="question-mark">?</span>;
-        <span class="ident">log</span>::<span class="ident">set_boxed_logger</span>(<span class="ident">boxed_logger</span>)<span class="question-mark">?</span>;
+        <span class="ident">log::set_boxed_logger</span>(<span class="ident">boxed_logger</span>)<span class="question-mark">?</span>;
         <span class="ident">setup_specfile</span>(<span class="ident">specfile</span>, <span class="ident">handle</span>.<span class="ident">clone</span>())<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="ident">handle</span>)
     }
@@ -1912,10 +1913,10 @@
     <span class="doccomment">/// A `LoggerHandle` is returned, predominantly to allow using its</span>
     <span class="doccomment">/// [`shutdown`](crate::LoggerHandle::shutdown) method.</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;specfile_without_notification&quot;</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">build_with_specfile</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">std</span>::<span class="ident">path</span>::<span class="ident">Path</span><span class="op">&gt;</span><span class="op">&gt;</span>(
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">build_with_specfile</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">std::path::Path</span><span class="op">&gt;</span><span class="op">&gt;</span>(
         <span class="self">self</span>,
         <span class="ident">specfile</span>: <span class="ident">P</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">log</span>::<span class="ident">Log</span><span class="op">&gt;</span>, <span class="ident">LoggerHandle</span>), <span class="ident">FlexiLoggerError</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">log::Log</span><span class="op">&gt;</span>, <span class="ident">LoggerHandle</span>), <span class="ident">FlexiLoggerError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> (<span class="ident">boxed_log</span>, <span class="ident">handle</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">build</span>()<span class="question-mark">?</span>;
         <span class="ident">setup_specfile</span>(<span class="ident">specfile</span>, <span class="ident">handle</span>.<span class="ident">clone</span>())<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>((<span class="ident">boxed_log</span>, <span class="ident">handle</span>))
@@ -1923,46 +1924,46 @@
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;specfile_without_notification&quot;</span>)]</span>
-<span class="kw">fn</span> <span class="ident">setup_specfile</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">std</span>::<span class="ident">path</span>::<span class="ident">Path</span><span class="op">&gt;</span><span class="op">&gt;</span>(
+<span class="kw">fn</span> <span class="ident">setup_specfile</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">std::path::Path</span><span class="op">&gt;</span><span class="op">&gt;</span>(
     <span class="ident">specfile</span>: <span class="ident">P</span>,
     <span class="kw-2">mut</span> <span class="ident">handle</span>: <span class="ident">LoggerHandle</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">FlexiLoggerError</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">FlexiLoggerError</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">specfile</span> <span class="op">=</span> <span class="ident">specfile</span>.<span class="ident">as_ref</span>().<span class="ident">to_owned</span>();
-    <span class="ident">synchronize_handle_with_specfile</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">handle</span>, <span class="kw-2">&amp;</span><span class="ident">specfile</span>)<span class="question-mark">?</span>;
+    <span class="ident">synchronize_handle_with_specfile</span>(<span class="kw-2">&amp;mut</span> <span class="ident">handle</span>, <span class="kw-2">&amp;</span><span class="ident">specfile</span>)<span class="question-mark">?</span>;
 
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;specfile&quot;</span>)]</span>
     {
         <span class="comment">// Now that the file exists, we can canonicalize the path</span>
         <span class="kw">let</span> <span class="ident">specfile</span> <span class="op">=</span> <span class="ident">specfile</span>
             .<span class="ident">canonicalize</span>()
-            .<span class="ident">map_err</span>(<span class="ident">FlexiLoggerError</span>::<span class="ident">SpecfileIo</span>)<span class="question-mark">?</span>;
+            .<span class="ident">map_err</span>(<span class="ident">FlexiLoggerError::SpecfileIo</span>)<span class="question-mark">?</span>;
 
         <span class="comment">// Watch the parent folder of the specfile, using debounced events</span>
-        <span class="kw">let</span> (<span class="ident">tx</span>, <span class="ident">rx</span>) <span class="op">=</span> <span class="ident">std</span>::<span class="ident">sync</span>::<span class="ident">mpsc</span>::<span class="ident">channel</span>();
-        <span class="kw">let</span> <span class="ident">debouncing_delay</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">time</span>::<span class="ident">Duration</span>::<span class="ident">from_millis</span>(<span class="number">1000</span>);
+        <span class="kw">let</span> (<span class="ident">tx</span>, <span class="ident">rx</span>) <span class="op">=</span> <span class="ident">std::sync::mpsc::channel</span>();
+        <span class="kw">let</span> <span class="ident">debouncing_delay</span> <span class="op">=</span> <span class="ident">std::time::Duration::from_millis</span>(<span class="number">1000</span>);
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">watcher</span> <span class="op">=</span> <span class="ident">watcher</span>(<span class="ident">tx</span>, <span class="ident">debouncing_delay</span>)<span class="question-mark">?</span>;
-        <span class="ident">watcher</span>.<span class="ident">watch</span>(<span class="kw-2">&amp;</span><span class="ident">specfile</span>.<span class="ident">parent</span>().<span class="ident">unwrap</span>(), <span class="ident">RecursiveMode</span>::<span class="ident">NonRecursive</span>)<span class="question-mark">?</span>;
+        <span class="ident">watcher</span>.<span class="ident">watch</span>(<span class="kw-2">&amp;</span><span class="ident">specfile</span>.<span class="ident">parent</span>().<span class="ident">unwrap</span>(), <span class="ident">RecursiveMode::NonRecursive</span>)<span class="question-mark">?</span>;
 
         <span class="comment">// in a separate thread, reread the specfile when it was updated</span>
-        <span class="ident">std</span>::<span class="ident">thread</span>::<span class="ident">Builder</span>::<span class="ident">new</span>()
+        <span class="ident">std::thread::Builder::new</span>()
             .<span class="ident">name</span>(<span class="string">&quot;flexi_logger-specfile-watcher&quot;</span>.<span class="ident">to_string</span>())
             .<span class="ident">stack_size</span>(<span class="number">128</span> <span class="op">*</span> <span class="number">1024</span>)
             .<span class="ident">spawn</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
                 <span class="kw">let</span> <span class="ident">_anchor_for_watcher</span> <span class="op">=</span> <span class="ident">watcher</span>; <span class="comment">// keep it alive!</span>
                 <span class="kw">loop</span> {
                     <span class="kw">match</span> <span class="ident">rx</span>.<span class="ident">recv</span>() {
-                        <span class="prelude-val">Ok</span>(<span class="ident">debounced_event</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                        <span class="prelude-val">Ok</span>(<span class="ident">debounced_event</span>) =&gt; {
                             <span class="comment">// println!(&quot;got debounced event {:?}&quot;, debounced_event);</span>
                             <span class="kw">match</span> <span class="ident">debounced_event</span> {
-                                <span class="ident">DebouncedEvent</span>::<span class="ident">Create</span>(<span class="kw-2">ref</span> <span class="ident">path</span>)
-                                <span class="op">|</span> <span class="ident">DebouncedEvent</span>::<span class="ident">Write</span>(<span class="kw-2">ref</span> <span class="ident">path</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                                    <span class="kw">if</span> <span class="ident">path</span>.<span class="ident">canonicalize</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span> <span class="op">=</span><span class="op">=</span> <span class="ident">specfile</span>).<span class="ident">unwrap_or</span>(<span class="bool-val">false</span>) {
+                                <span class="ident">DebouncedEvent::Create</span>(<span class="kw-2">ref</span> <span class="ident">path</span>)
+                                <span class="op">|</span> <span class="ident">DebouncedEvent::Write</span>(<span class="kw-2">ref</span> <span class="ident">path</span>) =&gt; {
+                                    <span class="kw">if</span> <span class="ident">path</span>.<span class="ident">canonicalize</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span> <span class="op">==</span> <span class="ident">specfile</span>).<span class="ident">unwrap_or</span>(<span class="bool-val">false</span>) {
                                         <span class="kw">match</span> <span class="ident">log_spec_string_from_file</span>(<span class="kw-2">&amp;</span><span class="ident">specfile</span>)
-                                            .<span class="ident">map_err</span>(<span class="ident">FlexiLoggerError</span>::<span class="ident">SpecfileIo</span>)
-                                            .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">LogSpecification</span>::<span class="ident">from_toml</span>(<span class="kw-2">&amp;</span><span class="ident">s</span>))
+                                            .<span class="ident">map_err</span>(<span class="ident">FlexiLoggerError::SpecfileIo</span>)
+                                            .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">LogSpecification::from_toml</span>(<span class="kw-2">&amp;</span><span class="ident">s</span>))
                                         {
-                                            <span class="prelude-val">Ok</span>(<span class="ident">spec</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">handle</span>.<span class="ident">set_new_spec</span>(<span class="ident">spec</span>),
-                                            <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">eprintln</span><span class="macro">!</span>(
+                                            <span class="prelude-val">Ok</span>(<span class="ident">spec</span>) =&gt; <span class="ident">handle</span>.<span class="ident">set_new_spec</span>(<span class="ident">spec</span>),
+                                            <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="macro">eprintln!</span>(
                                             <span class="string">&quot;[flexi_logger] rereading the log specification file \
                                          failed with {:?}, \
                                          continuing with previous log specification&quot;</span>,
@@ -1971,11 +1972,11 @@
                                         }
                                     }
                                 }
-                                <span class="ident">_event</span> <span class="op">=</span><span class="op">&gt;</span> {}
+                                <span class="ident">_event</span> =&gt; {}
                             }
                         }
-                        <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                            <span class="macro">eprintln</span><span class="macro">!</span>(<span class="string">&quot;[flexi_logger] error while watching the specfile: {:?}&quot;</span>, <span class="ident">e</span>)
+                        <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
+                            <span class="macro">eprintln!</span>(<span class="string">&quot;[flexi_logger] error while watching the specfile: {:?}&quot;</span>, <span class="ident">e</span>)
                         }
                     }
                 }
@@ -1988,53 +1989,53 @@
 <span class="comment">// otherwise try to create the file, with the current spec as content, under the specified name.</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;specfile_without_notification&quot;</span>)]</span>
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">synchronize_handle_with_specfile</span>(
-    <span class="ident">handle</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">LoggerHandle</span>,
-    <span class="ident">specfile</span>: <span class="kw-2">&amp;</span><span class="ident">std</span>::<span class="ident">path</span>::<span class="ident">PathBuf</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">FlexiLoggerError</span><span class="op">&gt;</span> {
+    <span class="ident">handle</span>: <span class="kw-2">&amp;mut</span> <span class="ident">LoggerHandle</span>,
+    <span class="ident">specfile</span>: <span class="kw-2">&amp;</span><span class="ident">std::path::PathBuf</span>,
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">FlexiLoggerError</span><span class="op">&gt;</span> {
     <span class="kw">if</span> <span class="ident">specfile</span>
         .<span class="ident">extension</span>()
-        .<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">std</span>::<span class="ident">ffi</span>::<span class="ident">OsStr</span>::<span class="ident">new</span>(<span class="string">&quot;&quot;</span>))
+        .<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">std::ffi::OsStr::new</span>(<span class="string">&quot;&quot;</span>))
         .<span class="ident">to_str</span>()
         .<span class="ident">unwrap_or</span>(<span class="string">&quot;&quot;</span>)
         <span class="op">!</span><span class="op">=</span> <span class="string">&quot;toml&quot;</span>
     {
-        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">FlexiLoggerError</span>::<span class="ident">SpecfileExtension</span>(
+        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">FlexiLoggerError::SpecfileExtension</span>(
             <span class="string">&quot;only spec files with extension toml are supported&quot;</span>,
         ));
     }
 
-    <span class="kw">if</span> <span class="ident">std</span>::<span class="ident">path</span>::<span class="ident">Path</span>::<span class="ident">is_file</span>(<span class="ident">specfile</span>) {
-        <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">log_spec_string_from_file</span>(<span class="ident">specfile</span>).<span class="ident">map_err</span>(<span class="ident">FlexiLoggerError</span>::<span class="ident">SpecfileIo</span>)<span class="question-mark">?</span>;
-        <span class="ident">handle</span>.<span class="ident">set_new_spec</span>(<span class="ident">LogSpecification</span>::<span class="ident">from_toml</span>(<span class="kw-2">&amp;</span><span class="ident">s</span>)<span class="question-mark">?</span>);
+    <span class="kw">if</span> <span class="ident">std::path::Path::is_file</span>(<span class="ident">specfile</span>) {
+        <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">log_spec_string_from_file</span>(<span class="ident">specfile</span>).<span class="ident">map_err</span>(<span class="ident">FlexiLoggerError::SpecfileIo</span>)<span class="question-mark">?</span>;
+        <span class="ident">handle</span>.<span class="ident">set_new_spec</span>(<span class="ident">LogSpecification::from_toml</span>(<span class="kw-2">&amp;</span><span class="ident">s</span>)<span class="question-mark">?</span>);
     } <span class="kw">else</span> {
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">specfolder</span>) <span class="op">=</span> <span class="ident">specfile</span>.<span class="ident">parent</span>() {
-            <span class="ident">std</span>::<span class="ident">fs</span>::<span class="ident">DirBuilder</span>::<span class="ident">new</span>()
+            <span class="ident">std::fs::DirBuilder::new</span>()
                 .<span class="ident">recursive</span>(<span class="bool-val">true</span>)
                 .<span class="ident">create</span>(<span class="ident">specfolder</span>)
-                .<span class="ident">map_err</span>(<span class="ident">FlexiLoggerError</span>::<span class="ident">SpecfileIo</span>)<span class="question-mark">?</span>;
+                .<span class="ident">map_err</span>(<span class="ident">FlexiLoggerError::SpecfileIo</span>)<span class="question-mark">?</span>;
         }
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">fs</span>::<span class="ident">OpenOptions</span>::<span class="ident">new</span>()
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="ident">std::fs::OpenOptions::new</span>()
             .<span class="ident">write</span>(<span class="bool-val">true</span>)
             .<span class="ident">create_new</span>(<span class="bool-val">true</span>)
             .<span class="ident">open</span>(<span class="ident">specfile</span>)
-            .<span class="ident">map_err</span>(<span class="ident">FlexiLoggerError</span>::<span class="ident">SpecfileIo</span>)<span class="question-mark">?</span>;
+            .<span class="ident">map_err</span>(<span class="ident">FlexiLoggerError::SpecfileIo</span>)<span class="question-mark">?</span>;
 
         <span class="ident">handle</span>
             .<span class="ident">current_spec</span>()
             .<span class="ident">read</span>()
-            .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">_e</span><span class="op">|</span> <span class="ident">FlexiLoggerError</span>::<span class="ident">Poison</span>)<span class="question-mark">?</span>
-            .<span class="ident">to_toml</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">file</span>)<span class="question-mark">?</span>;
+            .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">_e</span><span class="op">|</span> <span class="ident">FlexiLoggerError::Poison</span>)<span class="question-mark">?</span>
+            .<span class="ident">to_toml</span>(<span class="kw-2">&amp;mut</span> <span class="ident">file</span>)<span class="question-mark">?</span>;
     }
     <span class="prelude-val">Ok</span>(())
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;specfile_without_notification&quot;</span>)]</span>
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">log_spec_string_from_file</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">std</span>::<span class="ident">path</span>::<span class="ident">Path</span><span class="op">&gt;</span><span class="op">&gt;</span>(
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">log_spec_string_from_file</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">std::path::Path</span><span class="op">&gt;</span><span class="op">&gt;</span>(
     <span class="ident">specfile</span>: <span class="ident">P</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> <span class="ident">String</span>::<span class="ident">new</span>();
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">fs</span>::<span class="ident">File</span>::<span class="ident">open</span>(<span class="ident">specfile</span>)<span class="question-mark">?</span>;
-    <span class="ident">file</span>.<span class="ident">read_to_string</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf</span>)<span class="question-mark">?</span>;
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">std::io::Error</span><span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> <span class="ident">String::new</span>();
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="ident">std::fs::File::open</span>(<span class="ident">specfile</span>)<span class="question-mark">?</span>;
+    <span class="ident">file</span>.<span class="ident">read_to_string</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buf</span>)<span class="question-mark">?</span>;
     <span class="prelude-val">Ok</span>(<span class="ident">buf</span>)
 }
 
@@ -2056,5 +2057,6 @@
     <span class="doccomment">/// All messages are duplicated.</span>
     <span class="ident">All</span>,
 }
-</pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "flexi_logger";</script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>
+</code></pre></div>
+</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="flexi_logger" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.60.0-nightly (88fb06a1f 2022-02-05)" ></div>
+</body></html>

@@ -1,7 +1,9 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `C:\Users\brad\.cargo\registry\src\github.com-1ecc6299db9ec823\libloading-0.6.7\src\os\windows\mod.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>mod.rs - source</title><link rel="stylesheet" type="text/css" href="../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../../ayu.css" disabled ><script id="default-settings"></script><script src="../../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../../../favicon.svg">
-<link rel="alternate icon" type="image/png" href="../../../../favicon-16x16.png">
-<link rel="alternate icon" type="image/png" href="../../../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../../libloading/index.html'><div class='logo-container rust-logo'><img src='../../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
-                <a id="settings-menu" href="../../../../settings.html"><img src="../../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `C:\Users\Bradley\.cargo\registry\src\github.com-1ecc6299db9ec823\libloading-0.6.7\src\os\windows\mod.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../../storage.js"></script><script src="../../../../crates.js"></script><script defer src="../../../../main.js"></script><script defer src="../../../../source-script.js"></script><script defer src="../../../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../../libloading/index.html"><div class="logo-container"><img class="rust-logo" src="../../../../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"></h2>
+    </nav>
+    <nav class="sidebar"><a class="sidebar-logo" href="../../../../libloading/index.html"><div class="logo-container"><img class="rust-logo" src="../../../../rust-logo.svg" alt="logo"></div>
+        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../../libloading/index.html"><img class="rust-logo" src="../../../../rust-logo.svg" alt="logo"></a><nav class="sub"><div class="theme-picker hidden"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="22" height="22" alt="Pick another theme!" src="../../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -548,8 +550,7 @@
 <span id="545">545</span>
 <span id="546">546</span>
 <span id="547">547</span>
-</pre><div class="example-wrap"><pre class="rust ">
-<span class="comment">// A hack for docs.rs to build documentation that has both windows and linux documentation in the</span>
+</pre><pre class="rust"><code><span class="comment">// A hack for docs.rs to build documentation that has both windows and linux documentation in the</span>
 <span class="comment">// same rustdoc build visible.</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">docsrs</span>, <span class="ident">not</span>(<span class="ident">windows</span>)))]</span>
 <span class="kw">mod</span> <span class="ident">windows_imports</span> {
@@ -559,7 +560,7 @@
     <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">enum</span> <span class="ident">FARPROC</span> {}
 
     <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">mod</span> <span class="ident">consts</span> {
-        <span class="kw">use</span> <span class="kw">super</span>::<span class="ident">DWORD</span>;
+        <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::DWORD</span>;
         <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const</span> <span class="ident">LOAD_IGNORE_CODE_AUTHZ_LEVEL</span>: <span class="ident">DWORD</span> <span class="op">=</span> <span class="ident">DWORD</span>;
         <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const</span> <span class="ident">LOAD_LIBRARY_AS_DATAFILE</span>: <span class="ident">DWORD</span> <span class="op">=</span> <span class="ident">DWORD</span>;
         <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const</span> <span class="ident">LOAD_LIBRARY_AS_DATAFILE_EXCLUSIVE</span>: <span class="ident">DWORD</span> <span class="op">=</span> <span class="ident">DWORD</span>;
@@ -577,15 +578,15 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">not</span>(<span class="ident">docsrs</span>), <span class="ident">windows</span>))]</span>
 <span class="kw">mod</span> <span class="ident">windows_imports</span> {
     <span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">winapi</span>;
-    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">use</span> <span class="self">self</span>::<span class="ident">winapi</span>::<span class="ident">shared</span>::<span class="ident">minwindef</span>::{<span class="ident">WORD</span>, <span class="ident">DWORD</span>, <span class="ident">HMODULE</span>, <span class="ident">FARPROC</span>};
-    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">use</span> <span class="self">self</span>::<span class="ident">winapi</span>::<span class="ident">shared</span>::<span class="ident">ntdef</span>::<span class="ident">WCHAR</span>;
-    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">use</span> <span class="self">self</span>::<span class="ident">winapi</span>::<span class="ident">shared</span>::<span class="ident">winerror</span>;
-    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">use</span> <span class="self">self</span>::<span class="ident">winapi</span>::<span class="ident">um</span>::{<span class="ident">errhandlingapi</span>, <span class="ident">libloaderapi</span>};
-    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">os</span>::<span class="ident">windows</span>::<span class="ident">ffi</span>::{<span class="ident">OsStrExt</span>, <span class="ident">OsStringExt</span>};
+    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">use</span> <span class="ident"><span class="self">self</span>::winapi::shared::minwindef</span>::{<span class="ident">WORD</span>, <span class="ident">DWORD</span>, <span class="ident">HMODULE</span>, <span class="ident">FARPROC</span>};
+    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">use</span> <span class="ident"><span class="self">self</span>::winapi::shared::ntdef::WCHAR</span>;
+    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">use</span> <span class="ident"><span class="self">self</span>::winapi::shared::winerror</span>;
+    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">use</span> <span class="ident"><span class="self">self</span>::winapi::um</span>::{<span class="ident">errhandlingapi</span>, <span class="ident">libloaderapi</span>};
+    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">use</span> <span class="ident">std::os::windows::ffi</span>::{<span class="ident">OsStrExt</span>, <span class="ident">OsStringExt</span>};
     <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">const</span> <span class="ident">SEM_FAILCE</span>: <span class="ident">DWORD</span> <span class="op">=</span> <span class="number">1</span>;
 
     <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">mod</span> <span class="ident">consts</span> {
-        <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use</span> <span class="kw">super</span>::<span class="ident">winapi</span>::<span class="ident">um</span>::<span class="ident">libloaderapi</span>::{
+        <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::winapi::um::libloaderapi</span>::{
             <span class="ident">LOAD_IGNORE_CODE_AUTHZ_LEVEL</span>,
             <span class="ident">LOAD_LIBRARY_AS_DATAFILE</span>,
             <span class="ident">LOAD_LIBRARY_AS_DATAFILE_EXCLUSIVE</span>,
@@ -602,11 +603,11 @@
     }
 }
 
-<span class="kw">use</span> <span class="self">self</span>::<span class="ident">windows_imports</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident"><span class="self">self</span>::windows_imports</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">util</span>::{<span class="ident">ensure_compatible_types</span>, <span class="ident">cstr_cow_from_bytes</span>};
-<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">ffi</span>::{<span class="ident">OsStr</span>, <span class="ident">OsString</span>};
+<span class="kw">use</span> <span class="ident">std::ffi</span>::{<span class="ident">OsStr</span>, <span class="ident">OsString</span>};
 <span class="kw">use</span> <span class="ident">std</span>::{<span class="ident">fmt</span>, <span class="ident">io</span>, <span class="ident">marker</span>, <span class="ident">mem</span>, <span class="ident">ptr</span>};
-<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">sync</span>::<span class="ident">atomic</span>::{<span class="ident">AtomicBool</span>, <span class="ident">Ordering</span>};
+<span class="kw">use</span> <span class="ident">std::sync::atomic</span>::{<span class="ident">AtomicBool</span>, <span class="ident">Ordering</span>};
 
 <span class="doccomment">/// A platform-specific counterpart of the cross-platform [`Library`](crate::Library).</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Library</span>(<span class="ident">HMODULE</span>);
@@ -643,8 +644,8 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// [msdn]: https://docs.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-loadlibraryw#remarks</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">OsStr</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">filename</span>: <span class="ident">P</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Library</span>, <span class="kw">crate</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="ident">Library</span>::<span class="ident">load_with_flags</span>(<span class="ident">filename</span>, <span class="number">0</span>)
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">OsStr</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">filename</span>: <span class="ident">P</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Library</span>, <span class="ident"><span class="kw">crate</span>::Error</span><span class="op">&gt;</span> {
+        <span class="ident">Library::load_with_flags</span>(<span class="ident">filename</span>, <span class="number">0</span>)
     }
 
     <span class="doccomment">/// Load the `Library` representing the original program executable.</span>
@@ -656,17 +657,17 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// [`os::unix::Library::this`]: crate::os::unix::Library::this</span>
     <span class="doccomment">/// [MSDN]: https://docs.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-getmodulehandleexw</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">this</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Library</span>, <span class="kw">crate</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">this</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Library</span>, <span class="ident"><span class="kw">crate</span>::Error</span><span class="op">&gt;</span> {
         <span class="kw">unsafe</span> {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">handle</span>: <span class="ident">HMODULE</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">ptr</span>::<span class="ident">null_mut</span>();
-            <span class="ident">with_get_last_error</span>(<span class="op">|</span><span class="ident">source</span><span class="op">|</span> <span class="kw">crate</span>::<span class="ident">Error</span>::<span class="ident">GetModuleHandleExW</span> { <span class="ident">source</span> }, <span class="op">|</span><span class="op">|</span> {
-                <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">libloaderapi</span>::<span class="ident">GetModuleHandleExW</span>(<span class="number">0</span>, <span class="ident">std</span>::<span class="ident">ptr</span>::<span class="ident">null_mut</span>(), <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">handle</span>);
-                <span class="kw">if</span> <span class="ident">result</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">handle</span>: <span class="ident">HMODULE</span> <span class="op">=</span> <span class="ident">std::ptr::null_mut</span>();
+            <span class="ident">with_get_last_error</span>(<span class="op">|</span><span class="ident">source</span><span class="op">|</span> <span class="ident"><span class="kw">crate</span>::Error::GetModuleHandleExW</span> { <span class="ident">source</span> }, <span class="op">|</span><span class="op">|</span> {
+                <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">libloaderapi::GetModuleHandleExW</span>(<span class="number">0</span>, <span class="ident">std::ptr::null_mut</span>(), <span class="kw-2">&amp;mut</span> <span class="ident">handle</span>);
+                <span class="kw">if</span> <span class="ident">result</span> <span class="op">==</span> <span class="number">0</span> {
                     <span class="prelude-val">None</span>
                 } <span class="kw">else</span> {
                     <span class="prelude-val">Some</span>(<span class="ident">Library</span>(<span class="ident">handle</span>))
                 }
-            }).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">unwrap_or</span>(<span class="kw">crate</span>::<span class="ident">Error</span>::<span class="ident">GetModuleHandleExWUnknown</span>))
+            }).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">unwrap_or</span>(<span class="ident"><span class="kw">crate</span>::Error::GetModuleHandleExWUnknown</span>))
         }
     }
 
@@ -687,21 +688,21 @@
     <span class="doccomment">/// This is equivalent to `GetModuleHandleExW(0, filename, _)`.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// [MSDN]: https://docs.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-getmodulehandleexw</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">open_already_loaded</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">OsStr</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">filename</span>: <span class="ident">P</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Library</span>, <span class="kw">crate</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">open_already_loaded</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">OsStr</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">filename</span>: <span class="ident">P</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Library</span>, <span class="ident"><span class="kw">crate</span>::Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">wide_filename</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u16</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">filename</span>.<span class="ident">as_ref</span>().<span class="ident">encode_wide</span>().<span class="ident">chain</span>(<span class="prelude-val">Some</span>(<span class="number">0</span>)).<span class="ident">collect</span>();
 
         <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="kw">unsafe</span> {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">handle</span>: <span class="ident">HMODULE</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">ptr</span>::<span class="ident">null_mut</span>();
-            <span class="ident">with_get_last_error</span>(<span class="op">|</span><span class="ident">source</span><span class="op">|</span> <span class="kw">crate</span>::<span class="ident">Error</span>::<span class="ident">GetModuleHandleExW</span> { <span class="ident">source</span> }, <span class="op">|</span><span class="op">|</span> {
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">handle</span>: <span class="ident">HMODULE</span> <span class="op">=</span> <span class="ident">std::ptr::null_mut</span>();
+            <span class="ident">with_get_last_error</span>(<span class="op">|</span><span class="ident">source</span><span class="op">|</span> <span class="ident"><span class="kw">crate</span>::Error::GetModuleHandleExW</span> { <span class="ident">source</span> }, <span class="op">|</span><span class="op">|</span> {
                 <span class="comment">// Make sure no winapi calls as a result of drop happen inside this closure, because</span>
                 <span class="comment">// otherwise that might change the return value of the GetLastError.</span>
-                <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">libloaderapi</span>::<span class="ident">GetModuleHandleExW</span>(<span class="number">0</span>, <span class="ident">wide_filename</span>.<span class="ident">as_ptr</span>(), <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">handle</span>);
-                <span class="kw">if</span> <span class="ident">result</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+                <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">libloaderapi::GetModuleHandleExW</span>(<span class="number">0</span>, <span class="ident">wide_filename</span>.<span class="ident">as_ptr</span>(), <span class="kw-2">&amp;mut</span> <span class="ident">handle</span>);
+                <span class="kw">if</span> <span class="ident">result</span> <span class="op">==</span> <span class="number">0</span> {
                     <span class="prelude-val">None</span>
                 } <span class="kw">else</span> {
                     <span class="prelude-val">Some</span>(<span class="ident">Library</span>(<span class="ident">handle</span>))
                 }
-            }).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">unwrap_or</span>(<span class="kw">crate</span>::<span class="ident">Error</span>::<span class="ident">GetModuleHandleExWUnknown</span>))
+            }).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">unwrap_or</span>(<span class="ident"><span class="kw">crate</span>::Error::GetModuleHandleExWUnknown</span>))
         };
 
         <span class="ident">drop</span>(<span class="ident">wide_filename</span>); <span class="comment">// Drop wide_filename here to ensure it doesn’t get moved and dropped</span>
@@ -717,22 +718,22 @@
     <span class="doccomment">/// Corresponds to `LoadLibraryExW(filename, reserved: NULL, flags)`.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// [flags]: https://docs.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-loadlibraryexw#parameters</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">load_with_flags</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">OsStr</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">filename</span>: <span class="ident">P</span>, <span class="ident">flags</span>: <span class="ident">DWORD</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Library</span>, <span class="kw">crate</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">load_with_flags</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">OsStr</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">filename</span>: <span class="ident">P</span>, <span class="ident">flags</span>: <span class="ident">DWORD</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Library</span>, <span class="ident"><span class="kw">crate</span>::Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">wide_filename</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u16</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">filename</span>.<span class="ident">as_ref</span>().<span class="ident">encode_wide</span>().<span class="ident">chain</span>(<span class="prelude-val">Some</span>(<span class="number">0</span>)).<span class="ident">collect</span>();
-        <span class="kw">let</span> <span class="ident">_guard</span> <span class="op">=</span> <span class="ident">ErrorModeGuard</span>::<span class="ident">new</span>();
+        <span class="kw">let</span> <span class="ident">_guard</span> <span class="op">=</span> <span class="ident">ErrorModeGuard::new</span>();
 
-        <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="ident">with_get_last_error</span>(<span class="op">|</span><span class="ident">source</span><span class="op">|</span> <span class="kw">crate</span>::<span class="ident">Error</span>::<span class="ident">LoadLibraryW</span> { <span class="ident">source</span> }, <span class="op">|</span><span class="op">|</span> {
+        <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="ident">with_get_last_error</span>(<span class="op">|</span><span class="ident">source</span><span class="op">|</span> <span class="ident"><span class="kw">crate</span>::Error::LoadLibraryW</span> { <span class="ident">source</span> }, <span class="op">|</span><span class="op">|</span> {
             <span class="comment">// Make sure no winapi calls as a result of drop happen inside this closure, because</span>
             <span class="comment">// otherwise that might change the return value of the GetLastError.</span>
             <span class="kw">let</span> <span class="ident">handle</span> <span class="op">=</span> <span class="kw">unsafe</span> {
-                <span class="ident">libloaderapi</span>::<span class="ident">LoadLibraryExW</span>(<span class="ident">wide_filename</span>.<span class="ident">as_ptr</span>(), <span class="ident">std</span>::<span class="ident">ptr</span>::<span class="ident">null_mut</span>(), <span class="ident">flags</span>)
+                <span class="ident">libloaderapi::LoadLibraryExW</span>(<span class="ident">wide_filename</span>.<span class="ident">as_ptr</span>(), <span class="ident">std::ptr::null_mut</span>(), <span class="ident">flags</span>)
             };
             <span class="kw">if</span> <span class="ident">handle</span>.<span class="ident">is_null</span>()  {
                 <span class="prelude-val">None</span>
             } <span class="kw">else</span> {
                 <span class="prelude-val">Some</span>(<span class="ident">Library</span>(<span class="ident">handle</span>))
             }
-        }).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">unwrap_or</span>(<span class="kw">crate</span>::<span class="ident">Error</span>::<span class="ident">LoadLibraryWUnknown</span>));
+        }).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">unwrap_or</span>(<span class="ident"><span class="kw">crate</span>::Error::LoadLibraryWUnknown</span>));
         <span class="ident">drop</span>(<span class="ident">wide_filename</span>); <span class="comment">// Drop wide_filename here to ensure it doesn’t get moved and dropped</span>
                              <span class="comment">// inside the closure by mistake. See comment inside the closure.</span>
         <span class="ident">ret</span>
@@ -751,20 +752,20 @@
     <span class="doccomment">/// This function does not validate the type `T`. It is up to the user of this function to</span>
     <span class="doccomment">/// ensure that the loaded symbol is in fact a `T`. Using a value with a wrong type has no</span>
     <span class="doccomment">/// definied behaviour.</span>
-    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">get</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">symbol</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Symbol</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="kw">crate</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">get</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">symbol</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Symbol</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident"><span class="kw">crate</span>::Error</span><span class="op">&gt;</span> {
         <span class="ident">ensure_compatible_types</span>::<span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">FARPROC</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">symbol</span> <span class="op">=</span> <span class="ident">cstr_cow_from_bytes</span>(<span class="ident">symbol</span>)<span class="question-mark">?</span>;
-        <span class="ident">with_get_last_error</span>(<span class="op">|</span><span class="ident">source</span><span class="op">|</span> <span class="kw">crate</span>::<span class="ident">Error</span>::<span class="ident">GetProcAddress</span> { <span class="ident">source</span> }, <span class="op">|</span><span class="op">|</span> {
-            <span class="kw">let</span> <span class="ident">symbol</span> <span class="op">=</span> <span class="ident">libloaderapi</span>::<span class="ident">GetProcAddress</span>(<span class="self">self</span>.<span class="number">0</span>, <span class="ident">symbol</span>.<span class="ident">as_ptr</span>());
+        <span class="ident">with_get_last_error</span>(<span class="op">|</span><span class="ident">source</span><span class="op">|</span> <span class="ident"><span class="kw">crate</span>::Error::GetProcAddress</span> { <span class="ident">source</span> }, <span class="op">|</span><span class="op">|</span> {
+            <span class="kw">let</span> <span class="ident">symbol</span> <span class="op">=</span> <span class="ident">libloaderapi::GetProcAddress</span>(<span class="self">self</span>.<span class="number">0</span>, <span class="ident">symbol</span>.<span class="ident">as_ptr</span>());
             <span class="kw">if</span> <span class="ident">symbol</span>.<span class="ident">is_null</span>() {
                 <span class="prelude-val">None</span>
             } <span class="kw">else</span> {
                 <span class="prelude-val">Some</span>(<span class="ident">Symbol</span> {
                     <span class="ident">pointer</span>: <span class="ident">symbol</span>,
-                    <span class="ident">pd</span>: <span class="ident">marker</span>::<span class="ident">PhantomData</span>
+                    <span class="ident">pd</span>: <span class="ident">marker::PhantomData</span>
                 })
             }
-        }).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">unwrap_or</span>(<span class="kw">crate</span>::<span class="ident">Error</span>::<span class="ident">GetProcAddressUnknown</span>))
+        }).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">unwrap_or</span>(<span class="ident"><span class="kw">crate</span>::Error::GetProcAddressUnknown</span>))
     }
 
     <span class="doccomment">/// Get a pointer to function or static variable by ordinal number.</span>
@@ -773,26 +774,26 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// Pointer to a value of arbitrary type is returned. Using a value with wrong type is</span>
     <span class="doccomment">/// undefined.</span>
-    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">get_ordinal</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ordinal</span>: <span class="ident">WORD</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Symbol</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="kw">crate</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">get_ordinal</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ordinal</span>: <span class="ident">WORD</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Symbol</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident"><span class="kw">crate</span>::Error</span><span class="op">&gt;</span> {
         <span class="ident">ensure_compatible_types</span>::<span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">FARPROC</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
-        <span class="ident">with_get_last_error</span>(<span class="op">|</span><span class="ident">source</span><span class="op">|</span> <span class="kw">crate</span>::<span class="ident">Error</span>::<span class="ident">GetProcAddress</span> { <span class="ident">source</span> }, <span class="op">|</span><span class="op">|</span> {
-            <span class="kw">let</span> <span class="ident">ordinal</span> <span class="op">=</span> <span class="ident">ordinal</span> <span class="kw">as</span> <span class="ident">usize</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="kw">_</span>;
-            <span class="kw">let</span> <span class="ident">symbol</span> <span class="op">=</span> <span class="ident">libloaderapi</span>::<span class="ident">GetProcAddress</span>(<span class="self">self</span>.<span class="number">0</span>, <span class="ident">ordinal</span>);
+        <span class="ident">with_get_last_error</span>(<span class="op">|</span><span class="ident">source</span><span class="op">|</span> <span class="ident"><span class="kw">crate</span>::Error::GetProcAddress</span> { <span class="ident">source</span> }, <span class="op">|</span><span class="op">|</span> {
+            <span class="kw">let</span> <span class="ident">ordinal</span> <span class="op">=</span> <span class="ident">ordinal</span> <span class="kw">as</span> <span class="ident">usize</span> <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="kw">_</span>;
+            <span class="kw">let</span> <span class="ident">symbol</span> <span class="op">=</span> <span class="ident">libloaderapi::GetProcAddress</span>(<span class="self">self</span>.<span class="number">0</span>, <span class="ident">ordinal</span>);
             <span class="kw">if</span> <span class="ident">symbol</span>.<span class="ident">is_null</span>() {
                 <span class="prelude-val">None</span>
             } <span class="kw">else</span> {
                 <span class="prelude-val">Some</span>(<span class="ident">Symbol</span> {
                     <span class="ident">pointer</span>: <span class="ident">symbol</span>,
-                    <span class="ident">pd</span>: <span class="ident">marker</span>::<span class="ident">PhantomData</span>
+                    <span class="ident">pd</span>: <span class="ident">marker::PhantomData</span>
                 })
             }
-        }).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">unwrap_or</span>(<span class="kw">crate</span>::<span class="ident">Error</span>::<span class="ident">GetProcAddressUnknown</span>))
+        }).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">unwrap_or</span>(<span class="ident"><span class="kw">crate</span>::Error::GetProcAddressUnknown</span>))
     }
 
     <span class="doccomment">/// Convert the `Library` to a raw handle.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">HMODULE</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">HMODULE</span> {
         <span class="kw">let</span> <span class="ident">handle</span> <span class="op">=</span> <span class="self">self</span>.<span class="number">0</span>;
-        <span class="ident">mem</span>::<span class="ident">forget</span>(<span class="self">self</span>);
+        <span class="ident">mem::forget</span>(<span class="self">self</span>);
         <span class="ident">handle</span>
     }
 
@@ -802,7 +803,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// The handle shall be a result of a successful call of `LoadLibraryW` or a</span>
     <span class="doccomment">/// handle previously returned by the `Library::into_raw` call.</span>
-    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">handle</span>: <span class="ident">HMODULE</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Library</span> {
+    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">handle</span>: <span class="ident">HMODULE</span>) -&gt; <span class="ident">Library</span> {
         <span class="ident">Library</span>(<span class="ident">handle</span>)
     }
 
@@ -812,44 +813,44 @@
     <span class="doccomment">/// library is unloaded. Otherwise this will be done when `Library` is dropped.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// The underlying data structures may still get leaked if an error does occur.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">close</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw">crate</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">with_get_last_error</span>(<span class="op">|</span><span class="ident">source</span><span class="op">|</span> <span class="kw">crate</span>::<span class="ident">Error</span>::<span class="ident">FreeLibrary</span> { <span class="ident">source</span> }, <span class="op">|</span><span class="op">|</span> {
-            <span class="kw">if</span> <span class="kw">unsafe</span> { <span class="ident">libloaderapi</span>::<span class="ident">FreeLibrary</span>(<span class="self">self</span>.<span class="number">0</span>) <span class="op">=</span><span class="op">=</span> <span class="number">0</span> } {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">close</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="kw">crate</span>::Error</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">with_get_last_error</span>(<span class="op">|</span><span class="ident">source</span><span class="op">|</span> <span class="ident"><span class="kw">crate</span>::Error::FreeLibrary</span> { <span class="ident">source</span> }, <span class="op">|</span><span class="op">|</span> {
+            <span class="kw">if</span> <span class="kw">unsafe</span> { <span class="ident">libloaderapi::FreeLibrary</span>(<span class="self">self</span>.<span class="number">0</span>) <span class="op">==</span> <span class="number">0</span> } {
                 <span class="prelude-val">None</span>
             } <span class="kw">else</span> {
                 <span class="prelude-val">Some</span>(())
             }
-        }).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">unwrap_or</span>(<span class="kw">crate</span>::<span class="ident">Error</span>::<span class="ident">FreeLibraryUnknown</span>));
+        }).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">unwrap_or</span>(<span class="ident"><span class="kw">crate</span>::Error::FreeLibraryUnknown</span>));
         <span class="comment">// While the library is not free&#39;d yet in case of an error, there is no reason to try</span>
         <span class="comment">// dropping it again, because all that will do is try calling `FreeLibrary` again. only</span>
         <span class="comment">// this time it would ignore the return result, which we already seen failing…</span>
-        <span class="ident">std</span>::<span class="ident">mem</span>::<span class="ident">forget</span>(<span class="self">self</span>);
+        <span class="ident">std::mem::forget</span>(<span class="self">self</span>);
         <span class="ident">result</span>
     }
 }
 
 <span class="kw">impl</span> <span class="ident">Drop</span> <span class="kw">for</span> <span class="ident">Library</span> {
-    <span class="kw">fn</span> <span class="ident">drop</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
-        <span class="kw">unsafe</span> { <span class="ident">libloaderapi</span>::<span class="ident">FreeLibrary</span>(<span class="self">self</span>.<span class="number">0</span>); }
+    <span class="kw">fn</span> <span class="ident">drop</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
+        <span class="kw">unsafe</span> { <span class="ident">libloaderapi::FreeLibrary</span>(<span class="self">self</span>.<span class="number">0</span>); }
     }
 }
 
-<span class="kw">impl</span> <span class="ident">fmt</span>::<span class="ident">Debug</span> <span class="kw">for</span> <span class="ident">Library</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt</span>::<span class="ident">Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
+<span class="kw">impl</span> <span class="ident">fmt::Debug</span> <span class="kw">for</span> <span class="ident">Library</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="kw">unsafe</span> {
             <span class="comment">// FIXME: use Maybeuninit::uninit_array when stable</span>
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span>
-                <span class="ident">mem</span>::<span class="ident">MaybeUninit</span>::<span class="op">&lt;</span>[<span class="ident">mem</span>::<span class="ident">MaybeUninit</span>::<span class="op">&lt;</span><span class="ident">WCHAR</span><span class="op">&gt;</span>; <span class="number">1024</span>]<span class="op">&gt;</span>::<span class="ident">uninit</span>().<span class="ident">assume_init</span>();
-            <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">libloaderapi</span>::<span class="ident">GetModuleFileNameW</span>(<span class="self">self</span>.<span class="number">0</span>,
-                (<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf</span>[..]).<span class="ident">as_mut_ptr</span>().<span class="ident">cast</span>(), <span class="number">1024</span>) <span class="kw">as</span> <span class="ident">usize</span>;
-            <span class="kw">if</span> <span class="ident">len</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
-                <span class="ident">f</span>.<span class="ident">write_str</span>(<span class="kw-2">&amp;</span><span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;Library@{:p}&quot;</span>, <span class="self">self</span>.<span class="number">0</span>))
+                <span class="ident">mem::MaybeUninit</span>::<span class="op">&lt;</span>[<span class="ident">mem::MaybeUninit</span>::<span class="op">&lt;</span><span class="ident">WCHAR</span><span class="op">&gt;</span>; <span class="number">1024</span>]<span class="op">&gt;</span><span class="ident">::uninit</span>().<span class="ident">assume_init</span>();
+            <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">libloaderapi::GetModuleFileNameW</span>(<span class="self">self</span>.<span class="number">0</span>,
+                (<span class="kw-2">&amp;mut</span> <span class="ident">buf</span>[..]).<span class="ident">as_mut_ptr</span>().<span class="ident">cast</span>(), <span class="number">1024</span>) <span class="kw">as</span> <span class="ident">usize</span>;
+            <span class="kw">if</span> <span class="ident">len</span> <span class="op">==</span> <span class="number">0</span> {
+                <span class="ident">f</span>.<span class="ident">write_str</span>(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;Library@{:p}&quot;</span>, <span class="self">self</span>.<span class="number">0</span>))
             } <span class="kw">else</span> {
-                <span class="kw">let</span> <span class="ident">string</span>: <span class="ident">OsString</span> <span class="op">=</span> <span class="ident">OsString</span>::<span class="ident">from_wide</span>(
+                <span class="kw">let</span> <span class="ident">string</span>: <span class="ident">OsString</span> <span class="op">=</span> <span class="ident">OsString::from_wide</span>(
                     <span class="comment">// FIXME: use Maybeuninit::slice_get_ref when stable</span>
-                    <span class="kw-2">&amp;</span><span class="kw-2">*</span>(<span class="kw-2">&amp;</span><span class="ident">buf</span>[..<span class="ident">len</span>] <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> [<span class="kw">_</span>] <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> [<span class="ident">WCHAR</span>])
+                    <span class="kw-2">&amp;</span><span class="kw-2">*</span>(<span class="kw-2">&amp;</span><span class="ident">buf</span>[..<span class="ident">len</span>] <span class="kw">as</span> <span class="kw-2">*const</span> [<span class="kw">_</span>] <span class="kw">as</span> <span class="kw-2">*const</span> [<span class="ident">WCHAR</span>])
                 );
-                <span class="ident">f</span>.<span class="ident">write_str</span>(<span class="kw-2">&amp;</span><span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;Library@{:p} from {:?}&quot;</span>, <span class="self">self</span>.<span class="number">0</span>, <span class="ident">string</span>))
+                <span class="ident">f</span>.<span class="ident">write_str</span>(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;Library@{:p} from {:?}&quot;</span>, <span class="self">self</span>.<span class="number">0</span>, <span class="ident">string</span>))
             }
         }
     }
@@ -861,27 +862,27 @@
 <span class="doccomment">/// `Symbol` does not outlive `Library` it comes from.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Symbol</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
     <span class="ident">pointer</span>: <span class="ident">FARPROC</span>,
-    <span class="ident">pd</span>: <span class="ident">marker</span>::<span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
+    <span class="ident">pd</span>: <span class="ident">marker::PhantomData</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Symbol</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Convert the loaded Symbol into a handle.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">FARPROC</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_raw</span>(<span class="self">self</span>) -&gt; <span class="ident">FARPROC</span> {
         <span class="kw">let</span> <span class="ident">pointer</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">pointer</span>;
-        <span class="ident">mem</span>::<span class="ident">forget</span>(<span class="self">self</span>);
+        <span class="ident">mem::forget</span>(<span class="self">self</span>);
         <span class="ident">pointer</span>
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Symbol</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Lift Option out of the symbol.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">lift_option</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Symbol</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">lift_option</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Symbol</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">pointer</span>.<span class="ident">is_null</span>() {
             <span class="prelude-val">None</span>
         } <span class="kw">else</span> {
             <span class="prelude-val">Some</span>(<span class="ident">Symbol</span> {
                 <span class="ident">pointer</span>: <span class="self">self</span>.<span class="ident">pointer</span>,
-                <span class="ident">pd</span>: <span class="ident">marker</span>::<span class="ident">PhantomData</span>,
+                <span class="ident">pd</span>: <span class="ident">marker::PhantomData</span>,
             })
         }
     }
@@ -891,39 +892,39 @@
 <span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Sync</span><span class="op">&gt;</span> <span class="ident">Sync</span> <span class="kw">for</span> <span class="ident">Symbol</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {}
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Clone</span> <span class="kw">for</span> <span class="ident">Symbol</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Symbol</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Symbol</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
         <span class="ident">Symbol</span> { ..<span class="kw-2">*</span><span class="self">self</span> }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> ::<span class="ident">std</span>::<span class="ident">ops</span>::<span class="ident">Deref</span> <span class="kw">for</span> <span class="ident">Symbol</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">::std::ops::Deref</span> <span class="kw">for</span> <span class="ident">Symbol</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
     <span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> <span class="ident">T</span>;
-    <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">T</span> {
+    <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">T</span> {
         <span class="kw">unsafe</span> {
             <span class="comment">// Additional reference level for a dereference on `deref` return value.</span>
-            <span class="kw-2">&amp;</span><span class="kw-2">*</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">pointer</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="kw">_</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">T</span>)
+            <span class="kw-2">&amp;</span><span class="kw-2">*</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">pointer</span> <span class="kw">as</span> <span class="kw-2">*const</span> <span class="kw-2">*mut</span> <span class="kw">_</span> <span class="kw">as</span> <span class="kw-2">*const</span> <span class="ident">T</span>)
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="ident">Debug</span> <span class="kw">for</span> <span class="ident">Symbol</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt</span>::<span class="ident">Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
-        <span class="ident">f</span>.<span class="ident">write_str</span>(<span class="kw-2">&amp;</span><span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;Symbol@{:p}&quot;</span>, <span class="self">self</span>.<span class="ident">pointer</span>))
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">fmt::Debug</span> <span class="kw">for</span> <span class="ident">Symbol</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
+        <span class="ident">f</span>.<span class="ident">write_str</span>(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;Symbol@{:p}&quot;</span>, <span class="self">self</span>.<span class="ident">pointer</span>))
     }
 }
 
-<span class="kw">static</span> <span class="ident">USE_ERRORMODE</span>: <span class="ident">AtomicBool</span> <span class="op">=</span> <span class="ident">AtomicBool</span>::<span class="ident">new</span>(<span class="bool-val">false</span>);
+<span class="kw">static</span> <span class="ident">USE_ERRORMODE</span>: <span class="ident">AtomicBool</span> <span class="op">=</span> <span class="ident">AtomicBool::new</span>(<span class="bool-val">false</span>);
 <span class="kw">struct</span> <span class="ident">ErrorModeGuard</span>(<span class="ident">DWORD</span>);
 
 <span class="kw">impl</span> <span class="ident">ErrorModeGuard</span> {
-    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy</span>::<span class="ident">if_same_then_else</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ErrorModeGuard</span><span class="op">&gt;</span> {
+    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::if_same_then_else</span>)]</span>
+    <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ErrorModeGuard</span><span class="op">&gt;</span> {
         <span class="kw">unsafe</span> {
-            <span class="kw">if</span> <span class="op">!</span><span class="ident">USE_ERRORMODE</span>.<span class="ident">load</span>(<span class="ident">Ordering</span>::<span class="ident">Acquire</span>) {
+            <span class="kw">if</span> <span class="op">!</span><span class="ident">USE_ERRORMODE</span>.<span class="ident">load</span>(<span class="ident">Ordering::Acquire</span>) {
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">previous_mode</span> <span class="op">=</span> <span class="number">0</span>;
-                <span class="kw">let</span> <span class="ident">success</span> <span class="op">=</span> <span class="ident">errhandlingapi</span>::<span class="ident">SetThreadErrorMode</span>(<span class="ident">SEM_FAILCE</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">previous_mode</span>) <span class="op">!</span><span class="op">=</span> <span class="number">0</span>;
-                <span class="kw">if</span> <span class="op">!</span><span class="ident">success</span> <span class="op">&amp;&amp;</span> <span class="ident">errhandlingapi</span>::<span class="ident">GetLastError</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">winerror</span>::<span class="ident">ERROR_CALL_NOT_IMPLEMENTED</span> {
-                    <span class="ident">USE_ERRORMODE</span>.<span class="ident">store</span>(<span class="bool-val">true</span>, <span class="ident">Ordering</span>::<span class="ident">Release</span>);
+                <span class="kw">let</span> <span class="ident">success</span> <span class="op">=</span> <span class="ident">errhandlingapi::SetThreadErrorMode</span>(<span class="ident">SEM_FAILCE</span>, <span class="kw-2">&amp;mut</span> <span class="ident">previous_mode</span>) <span class="op">!</span><span class="op">=</span> <span class="number">0</span>;
+                <span class="kw">if</span> <span class="op">!</span><span class="ident">success</span> <span class="op">&amp;&amp;</span> <span class="ident">errhandlingapi::GetLastError</span>() <span class="op">==</span> <span class="ident">winerror::ERROR_CALL_NOT_IMPLEMENTED</span> {
+                    <span class="ident">USE_ERRORMODE</span>.<span class="ident">store</span>(<span class="bool-val">true</span>, <span class="ident">Ordering::Release</span>);
                 } <span class="kw">else</span> <span class="kw">if</span> <span class="op">!</span><span class="ident">success</span> {
                     <span class="comment">// SetThreadErrorMode failed with some other error? How in the world is it</span>
                     <span class="comment">// possible for what is essentially a simple variable swap to fail?</span>
@@ -931,14 +932,14 @@
                     <span class="comment">// the previous mode staying on and user seeing a dialog error on older Windows</span>
                     <span class="comment">// machines.</span>
                     <span class="kw">return</span> <span class="prelude-val">None</span>;
-                } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">previous_mode</span> <span class="op">=</span><span class="op">=</span> <span class="ident">SEM_FAILCE</span> {
+                } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">previous_mode</span> <span class="op">==</span> <span class="ident">SEM_FAILCE</span> {
                     <span class="kw">return</span> <span class="prelude-val">None</span>;
                 } <span class="kw">else</span> {
                     <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">ErrorModeGuard</span>(<span class="ident">previous_mode</span>));
                 }
             }
-            <span class="kw">match</span> <span class="ident">errhandlingapi</span>::<span class="ident">SetErrorMode</span>(<span class="ident">SEM_FAILCE</span>) {
-                <span class="ident">SEM_FAILCE</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="kw">match</span> <span class="ident">errhandlingapi::SetErrorMode</span>(<span class="ident">SEM_FAILCE</span>) {
+                <span class="ident">SEM_FAILCE</span> =&gt; {
                     <span class="comment">// This is important to reduce racy-ness when this library is used on multiple</span>
                     <span class="comment">// threads. In particular this helps with following race condition:</span>
                     <span class="comment">//</span>
@@ -954,33 +955,33 @@
                     <span class="comment">// Also, SetErrorMode itself is probably not an atomic operation.</span>
                     <span class="prelude-val">None</span>
                 }
-                <span class="ident">a</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">ErrorModeGuard</span>(<span class="ident">a</span>))
+                <span class="ident">a</span> =&gt; <span class="prelude-val">Some</span>(<span class="ident">ErrorModeGuard</span>(<span class="ident">a</span>))
             }
         }
     }
 }
 
 <span class="kw">impl</span> <span class="ident">Drop</span> <span class="kw">for</span> <span class="ident">ErrorModeGuard</span> {
-    <span class="kw">fn</span> <span class="ident">drop</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+    <span class="kw">fn</span> <span class="ident">drop</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
         <span class="kw">unsafe</span> {
-            <span class="kw">if</span> <span class="op">!</span><span class="ident">USE_ERRORMODE</span>.<span class="ident">load</span>(<span class="ident">Ordering</span>::<span class="ident">Relaxed</span>) {
-                <span class="ident">errhandlingapi</span>::<span class="ident">SetThreadErrorMode</span>(<span class="self">self</span>.<span class="number">0</span>, <span class="ident">ptr</span>::<span class="ident">null_mut</span>());
+            <span class="kw">if</span> <span class="op">!</span><span class="ident">USE_ERRORMODE</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>) {
+                <span class="ident">errhandlingapi::SetThreadErrorMode</span>(<span class="self">self</span>.<span class="number">0</span>, <span class="ident">ptr::null_mut</span>());
             } <span class="kw">else</span> {
-                <span class="ident">errhandlingapi</span>::<span class="ident">SetErrorMode</span>(<span class="self">self</span>.<span class="number">0</span>);
+                <span class="ident">errhandlingapi::SetErrorMode</span>(<span class="self">self</span>.<span class="number">0</span>);
             }
         }
     }
 }
 
-<span class="kw">fn</span> <span class="ident">with_get_last_error</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">F</span><span class="op">&gt;</span>(<span class="ident">wrap</span>: <span class="kw">fn</span>(<span class="kw">crate</span>::<span class="ident">error</span>::<span class="ident">WindowsError</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">crate</span>::<span class="ident">Error</span>, <span class="ident">closure</span>: <span class="ident">F</span>)
-<span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw">crate</span>::<span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span>
-<span class="kw">where</span> <span class="ident">F</span>: <span class="ident">FnOnce</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">with_get_last_error</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">F</span><span class="op">&gt;</span>(<span class="ident">wrap</span>: <span class="kw">fn</span>(<span class="ident"><span class="kw">crate</span>::error::WindowsError</span>) -&gt; <span class="ident"><span class="kw">crate</span>::Error</span>, <span class="ident">closure</span>: <span class="ident">F</span>)
+-&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::Error</span><span class="op">&gt;</span><span class="op">&gt;</span>
+<span class="kw">where</span> <span class="ident">F</span>: <span class="ident">FnOnce</span>() -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
     <span class="ident">closure</span>().<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> {
-        <span class="kw">let</span> <span class="ident">error</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">errhandlingapi</span>::<span class="ident">GetLastError</span>() };
-        <span class="kw">if</span> <span class="ident">error</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+        <span class="kw">let</span> <span class="ident">error</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">errhandlingapi::GetLastError</span>() };
+        <span class="kw">if</span> <span class="ident">error</span> <span class="op">==</span> <span class="number">0</span> {
             <span class="prelude-val">None</span>
         } <span class="kw">else</span> {
-            <span class="prelude-val">Some</span>(<span class="ident">wrap</span>(<span class="kw">crate</span>::<span class="ident">error</span>::<span class="ident">WindowsError</span>(<span class="ident">io</span>::<span class="ident">Error</span>::<span class="ident">from_raw_os_error</span>(<span class="ident">error</span> <span class="kw">as</span> <span class="ident">i32</span>))))
+            <span class="prelude-val">Some</span>(<span class="ident">wrap</span>(<span class="ident"><span class="kw">crate</span>::error::WindowsError</span>(<span class="ident">io::Error::from_raw_os_error</span>(<span class="ident">error</span> <span class="kw">as</span> <span class="ident">i32</span>))))
         }
     })
 }
@@ -991,7 +992,7 @@
 <span class="doccomment">/// recommended for use in setup programs that must run extracted DLLs during installation.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// See [flag documentation on MSDN](https://docs.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-loadlibraryexw#parameters).</span>
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LOAD_IGNORE_CODE_AUTHZ_LEVEL</span>: <span class="ident">DWORD</span> <span class="op">=</span> <span class="ident">consts</span>::<span class="ident">LOAD_IGNORE_CODE_AUTHZ_LEVEL</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LOAD_IGNORE_CODE_AUTHZ_LEVEL</span>: <span class="ident">DWORD</span> <span class="op">=</span> <span class="ident">consts::LOAD_IGNORE_CODE_AUTHZ_LEVEL</span>;
 
 <span class="doccomment">/// Map the file into the calling process’ virtual address space as if it were a data file.</span>
 <span class="doccomment">///</span>
@@ -1001,7 +1002,7 @@
 <span class="doccomment">/// messages or resources from it.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// See [flag documentation on MSDN](https://docs.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-loadlibraryexw#parameters).</span>
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LOAD_LIBRARY_AS_DATAFILE</span>: <span class="ident">DWORD</span> <span class="op">=</span> <span class="ident">consts</span>::<span class="ident">LOAD_LIBRARY_AS_DATAFILE</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LOAD_LIBRARY_AS_DATAFILE</span>: <span class="ident">DWORD</span> <span class="op">=</span> <span class="ident">consts::LOAD_LIBRARY_AS_DATAFILE</span>;
 
 <span class="doccomment">/// Map the file into the calling process’ virtual address space as if it were a data file.</span>
 <span class="doccomment">///</span>
@@ -1010,7 +1011,7 @@
 <span class="doccomment">/// while it is in use. However, the DLL can still be opened by other processes.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// See [flag documentation on MSDN](https://docs.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-loadlibraryexw#parameters).</span>
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LOAD_LIBRARY_AS_DATAFILE_EXCLUSIVE</span>: <span class="ident">DWORD</span> <span class="op">=</span> <span class="ident">consts</span>::<span class="ident">LOAD_LIBRARY_AS_DATAFILE_EXCLUSIVE</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LOAD_LIBRARY_AS_DATAFILE_EXCLUSIVE</span>: <span class="ident">DWORD</span> <span class="op">=</span> <span class="ident">consts::LOAD_LIBRARY_AS_DATAFILE_EXCLUSIVE</span>;
 
 <span class="doccomment">/// Map the file into the process’ virtual address space as an image file.</span>
 <span class="doccomment">///</span>
@@ -1022,7 +1023,7 @@
 <span class="doccomment">/// [`LOAD_LIBRARY_AS_DATAFILE`].</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// See [flag documentation on MSDN](https://docs.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-loadlibraryexw#parameters).</span>
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LOAD_LIBRARY_AS_IMAGE_RESOURCE</span>: <span class="ident">DWORD</span> <span class="op">=</span> <span class="ident">consts</span>::<span class="ident">LOAD_LIBRARY_AS_IMAGE_RESOURCE</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LOAD_LIBRARY_AS_IMAGE_RESOURCE</span>: <span class="ident">DWORD</span> <span class="op">=</span> <span class="ident">consts::LOAD_LIBRARY_AS_IMAGE_RESOURCE</span>;
 
 <span class="doccomment">/// Search application&#39;s installation directory for the DLL and its dependencies.</span>
 <span class="doccomment">///</span>
@@ -1030,7 +1031,7 @@
 <span class="doccomment">/// [`LOAD_WITH_ALTERED_SEARCH_PATH`].</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// See [flag documentation on MSDN](https://docs.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-loadlibraryexw#parameters).</span>
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LOAD_LIBRARY_SEARCH_APPLICATION_DIR</span>: <span class="ident">DWORD</span> <span class="op">=</span> <span class="ident">consts</span>::<span class="ident">LOAD_LIBRARY_SEARCH_APPLICATION_DIR</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LOAD_LIBRARY_SEARCH_APPLICATION_DIR</span>: <span class="ident">DWORD</span> <span class="op">=</span> <span class="ident">consts::LOAD_LIBRARY_SEARCH_APPLICATION_DIR</span>;
 
 <span class="doccomment">/// Search default directories when looking for the DLL and its dependencies.</span>
 <span class="doccomment">///</span>
@@ -1040,7 +1041,7 @@
 <span class="doccomment">/// [`LOAD_WITH_ALTERED_SEARCH_PATH`].</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// See [flag documentation on MSDN](https://docs.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-loadlibraryexw#parameters).</span>
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LOAD_LIBRARY_SEARCH_DEFAULT_DIRS</span>: <span class="ident">DWORD</span> <span class="op">=</span> <span class="ident">consts</span>::<span class="ident">LOAD_LIBRARY_SEARCH_DEFAULT_DIRS</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LOAD_LIBRARY_SEARCH_DEFAULT_DIRS</span>: <span class="ident">DWORD</span> <span class="op">=</span> <span class="ident">consts::LOAD_LIBRARY_SEARCH_DEFAULT_DIRS</span>;
 
 <span class="doccomment">/// Directory that contains the DLL is temporarily added to the beginning of the list of</span>
 <span class="doccomment">/// directories that are searched for the DLL’s dependencies.</span>
@@ -1051,7 +1052,7 @@
 <span class="doccomment">/// with [`LOAD_WITH_ALTERED_SEARCH_PATH`].</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// See [flag documentation on MSDN](https://docs.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-loadlibraryexw#parameters).</span>
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR</span>: <span class="ident">DWORD</span> <span class="op">=</span> <span class="ident">consts</span>::<span class="ident">LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR</span>: <span class="ident">DWORD</span> <span class="op">=</span> <span class="ident">consts::LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR</span>;
 
 <span class="doccomment">/// Search `%windows%\system32` for the DLL and its dependencies.</span>
 <span class="doccomment">///</span>
@@ -1059,7 +1060,7 @@
 <span class="doccomment">/// [`LOAD_WITH_ALTERED_SEARCH_PATH`].</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// See [flag documentation on MSDN](https://docs.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-loadlibraryexw#parameters).</span>
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LOAD_LIBRARY_SEARCH_SYSTEM32</span>: <span class="ident">DWORD</span> <span class="op">=</span> <span class="ident">consts</span>::<span class="ident">LOAD_LIBRARY_SEARCH_SYSTEM32</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LOAD_LIBRARY_SEARCH_SYSTEM32</span>: <span class="ident">DWORD</span> <span class="op">=</span> <span class="ident">consts::LOAD_LIBRARY_SEARCH_SYSTEM32</span>;
 
 <span class="doccomment">///  Directories added using the `AddDllDirectory` or the `SetDllDirectory` function are searched</span>
 <span class="doccomment">///  for the DLL and its dependencies.</span>
@@ -1069,7 +1070,7 @@
 <span class="doccomment">///  combined with [`LOAD_WITH_ALTERED_SEARCH_PATH`].</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// See [flag documentation on MSDN](https://docs.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-loadlibraryexw#parameters).</span>
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LOAD_LIBRARY_SEARCH_USER_DIRS</span>: <span class="ident">DWORD</span> <span class="op">=</span> <span class="ident">consts</span>::<span class="ident">LOAD_LIBRARY_SEARCH_USER_DIRS</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LOAD_LIBRARY_SEARCH_USER_DIRS</span>: <span class="ident">DWORD</span> <span class="op">=</span> <span class="ident">consts::LOAD_LIBRARY_SEARCH_USER_DIRS</span>;
 
 <span class="doccomment">/// If `filename specifies an absolute path, the system uses the alternate file search strategy</span>
 <span class="doccomment">/// discussed in the [Remarks section] to find associated executable modules that the specified</span>
@@ -1084,17 +1085,18 @@
 <span class="doccomment">/// See [flag documentation on MSDN](https://docs.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-loadlibraryexw#parameters).</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// [Remarks]: https://docs.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-loadlibraryexw#remarks</span>
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LOAD_WITH_ALTERED_SEARCH_PATH</span>: <span class="ident">DWORD</span> <span class="op">=</span> <span class="ident">consts</span>::<span class="ident">LOAD_WITH_ALTERED_SEARCH_PATH</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LOAD_WITH_ALTERED_SEARCH_PATH</span>: <span class="ident">DWORD</span> <span class="op">=</span> <span class="ident">consts::LOAD_WITH_ALTERED_SEARCH_PATH</span>;
 
 <span class="doccomment">/// Specifies that the digital signature of the binary image must be checked at load time.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// See [flag documentation on MSDN](https://docs.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-loadlibraryexw#parameters).</span>
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LOAD_LIBRARY_REQUIRE_SIGNED_TARGET</span>: <span class="ident">DWORD</span> <span class="op">=</span> <span class="ident">consts</span>::<span class="ident">LOAD_LIBRARY_REQUIRE_SIGNED_TARGET</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LOAD_LIBRARY_REQUIRE_SIGNED_TARGET</span>: <span class="ident">DWORD</span> <span class="op">=</span> <span class="ident">consts::LOAD_LIBRARY_REQUIRE_SIGNED_TARGET</span>;
 
 <span class="doccomment">/// Allow loading a DLL for execution from the current directory only if it is under a directory in</span>
 <span class="doccomment">/// the Safe load list.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// See [flag documentation on MSDN](https://docs.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-loadlibraryexw#parameters).</span>
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LOAD_LIBRARY_SAFE_CURRENT_DIRS</span>: <span class="ident">DWORD</span> <span class="op">=</span> <span class="ident">consts</span>::<span class="ident">LOAD_LIBRARY_SAFE_CURRENT_DIRS</span>;
-</pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../../../";window.currentCrate = "libloading";</script><script src="../../../../main.js"></script><script src="../../../../source-script.js"></script><script src="../../../../source-files.js"></script><script defer src="../../../../search-index.js"></script></body></html>
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LOAD_LIBRARY_SAFE_CURRENT_DIRS</span>: <span class="ident">DWORD</span> <span class="op">=</span> <span class="ident">consts::LOAD_LIBRARY_SAFE_CURRENT_DIRS</span>;
+</code></pre></div>
+</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../../../" data-current-crate="libloading" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.60.0-nightly (88fb06a1f 2022-02-05)" ></div>
+</body></html>
