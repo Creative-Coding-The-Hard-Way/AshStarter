@@ -17,10 +17,11 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Vulkan SDK Install
-      run: wget -qO - http://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
-      run: sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-focal.list http://packages.lunarg.com/vulkan/lunarg-vulkan-focal.list
-      run: sudo apt update
-      run: sudo apt install vulkan-sdk
+      run: |
+        wget -qO - http://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
+        sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-focal.list http://packages.lunarg.com/vulkan/lunarg-vulkan-focal.list
+        sudo apt update
+        sudo apt install vulkan-sdk
     - name: System-Libs
       run: sudo apt-get install -y libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libvulkan1 mesa-vulkan-drivers vulkan-utils
     - name: Build
