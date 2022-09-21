@@ -128,16 +128,16 @@ impl GlfwWindow {
 
     /// Create the Vulkan instance and surface for the current window.
     pub fn create_vulkan_device(&self) -> Result<RenderDevice, WindowError> {
-        let mut required_extensions = self
+        let required_extensions = self
             .glfw
             .get_required_instance_extensions()
             .ok_or(WindowError::RequiredExtensionsUnavailable)?;
-        required_extensions.push(
-            ash::extensions::khr::DynamicRendering::name()
-                .to_str()
-                .unwrap()
-                .to_owned(),
-        );
+        //required_extensions.push(
+        //    ash::extensions::khr::DynamicRendering::name()
+        //        .to_str()
+        //        .unwrap()
+        //        .to_owned(),
+        //);
         let instance = Instance::new(&required_extensions)?;
 
         let mut surface_handle: u64 = 0;
