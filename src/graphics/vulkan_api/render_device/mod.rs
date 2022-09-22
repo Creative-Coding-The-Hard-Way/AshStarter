@@ -12,6 +12,13 @@ use self::{
 };
 use crate::graphics::vulkan_api::{Instance, VulkanError};
 
+/// Types which implement this trait can name their Vulkan resources so they
+/// have a friendly name in Vulkan debug logs.
+pub trait VulkanDebug {
+    /// Set the name which appears in Vulkan debug logs for this object.
+    fn set_debug_name(&self, debug_name: impl Into<String>);
+}
+
 /// The Vulkan Logical Device and related resources which are needed for
 /// presenting graphics to the screen.
 ///
@@ -60,18 +67,18 @@ impl RenderDevice {
 
         if graphics_queue.is_same(&present_queue) {
             render_device.name_vulkan_object(
-                "Graphics+Present Queue",
+                "graphics+present queue",
                 vk::ObjectType::QUEUE,
                 graphics_queue.raw_queue(),
             );
         } else {
             render_device.name_vulkan_object(
-                "Graphics Queue",
+                "graphics queue",
                 vk::ObjectType::QUEUE,
                 graphics_queue.raw_queue(),
             );
             render_device.name_vulkan_object(
-                "Present Queue",
+                "present queue",
                 vk::ObjectType::QUEUE,
                 present_queue.raw_queue(),
             );
@@ -151,6 +158,12 @@ impl RenderDevice {
     /// Create an ash extension loader for a KHR Swapchain.
     pub fn create_swapchain_loader(&self) -> ash::extensions::khr::Swapchain {
         self.instance.create_swapchain_loader(&self.logical_device)
+    }
+
+    /// Return the Vulkan queue which can be used for presenting swapchain
+    /// images.
+    pub fn present_queue(&self) -> vk::Queue {
+        self.present_queue.raw_queue()
     }
 }
 

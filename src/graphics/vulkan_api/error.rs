@@ -57,4 +57,25 @@ pub enum VulkanError {
 
     #[error("Unable to create a Vulkan ImageView {:?}", .0)]
     UnableToCreateImageView(#[source] vk::Result),
+
+    #[error("Unable to create a Vulkan Fence {:?}", .0)]
+    UnableToCreateFence(#[source] vk::Result),
+
+    #[error("Unexpected error while waiting for a Vulkan fence {:?}", .0)]
+    UnexpectedFenceWaitError(#[source] vk::Result),
+
+    #[error("Unexpected error while resetting Vulkan fences {:?}", .0)]
+    UnexpectedFenceResetError(#[source] vk::Result),
+
+    #[error("Unable to create a Vulkan semaphore {:?}", .0)]
+    UnableToCreateSemaphore(#[source] vk::Result),
+
+    #[error("Unable to acquire Swapchain image {:?}", .0)]
+    UnableToAcquireSwapchainImage(#[source] vk::Result),
+
+    #[error("Unable to present Swapchain image {:?}", .0)]
+    UnableToPresentSwapchainImage(#[source] vk::Result),
+
+    #[error("Error while waiting for the Vulkan device to idle {:?}", .0)]
+    UnableToWaitForDeviceToIdle(#[source] vk::Result),
 }
