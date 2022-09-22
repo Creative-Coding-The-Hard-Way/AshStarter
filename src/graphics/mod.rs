@@ -1,1 +1,1 @@
-mod vulkan_api;
+pub mod vulkan_api;

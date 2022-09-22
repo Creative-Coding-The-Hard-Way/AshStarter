@@ -1,6 +1,6 @@
 use std::sync::mpsc::Receiver;
 
-use crate::application::ApplicationError;
+use crate::{application::ApplicationError, graphics::vulkan_api::Instance};
 
 use anyhow::Result;
 use glfw::{ClientApiHint, WindowEvent, WindowHint, WindowMode};
@@ -101,5 +101,14 @@ impl GlfwWindow {
             )?;
         }
         Ok(())
+    }
+
+    pub fn create_vulkan_instance(&self) -> Result<Instance, ApplicationError> {
+        let required_extensions = self
+            .glfw
+            .get_required_instance_extensions()
+            .ok_or(ApplicationError::UnableToGetGLFWInstanceExtensions)?;
+        let instance = Instance::new(&required_extensions)?;
+        Ok(instance)
     }
 }

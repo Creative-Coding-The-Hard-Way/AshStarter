@@ -1,3 +1,7 @@
+mod pretty_list;
+
+pub use self::pretty_list::PrettyList;
+
 use std::fmt::Write as FmtWrite;
 
 use anyhow::Result;
