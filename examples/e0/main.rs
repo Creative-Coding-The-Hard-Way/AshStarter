@@ -1,18 +1,18 @@
 use anyhow::Result;
 use ccthw::{
     application::{Application, GlfwWindow, State},
-    graphics::vulkan_api::Instance,
+    graphics::vulkan_api::{Instance, RenderDevice},
     logging,
 };
 
 struct VulkanState {
-    instance: Instance,
+    render_device: RenderDevice,
 }
 
 impl State for VulkanState {
     fn new(window: &mut GlfwWindow) -> Result<Self> {
-        let instance = window.create_vulkan_instance()?;
-        Ok(Self { instance })
+        let render_device = window.create_render_device()?;
+        Ok(Self { render_device })
     }
 
     fn handle_event(

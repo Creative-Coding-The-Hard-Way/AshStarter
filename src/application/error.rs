@@ -26,4 +26,7 @@ pub enum ApplicationError {
 
     #[error("Unable to get the required Vulkan extensions using GLFW")]
     UnableToGetGLFWInstanceExtensions,
+
+    #[error("Unable to create a Vulkan KHR Surface {:?}", .0)]
+    UnableToCreateSurface(#[source] ash::vk::Result),
 }

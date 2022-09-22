@@ -1,8 +1,12 @@
 use std::sync::mpsc::Receiver;
 
-use crate::{application::ApplicationError, graphics::vulkan_api::Instance};
+use crate::{
+    application::ApplicationError,
+    graphics::vulkan_api::{Instance, RenderDevice},
+};
 
 use anyhow::Result;
+use ash::vk::{self, Handle};
 use glfw::{ClientApiHint, WindowEvent, WindowHint, WindowMode};
 
 /// All resources required for running a single-windowed GLFW application which
@@ -103,7 +107,31 @@ impl GlfwWindow {
         Ok(())
     }
 
-    pub fn create_vulkan_instance(&self) -> Result<Instance, ApplicationError> {
+    pub fn create_render_device(
+        &self,
+    ) -> Result<RenderDevice, ApplicationError> {
+        let instance = self.create_vulkan_instance()?;
+
+        let mut surface_handle: u64 = 0;
+        let result =
+            vk::Result::from_raw(self.window_handle.create_window_surface(
+                unsafe { instance.vulkan_instance_handle().as_raw() as usize },
+                std::ptr::null(),
+                &mut surface_handle,
+            ) as i32);
+        if result != vk::Result::SUCCESS {
+            return Err(ApplicationError::UnableToCreateSurface(result));
+        }
+
+        let render_device = RenderDevice::new(
+            instance,
+            vk::SurfaceKHR::from_raw(surface_handle),
+        )?;
+
+        Ok(render_device)
+    }
+
+    fn create_vulkan_instance(&self) -> Result<Instance, ApplicationError> {
         let required_extensions = self
             .glfw
             .get_required_instance_extensions()

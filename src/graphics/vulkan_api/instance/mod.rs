@@ -1,3 +1,5 @@
+use std::ffi::c_void;
+
 use crate::{
     graphics::vulkan_api::{ffi::to_os_ptrs, VulkanError},
     logging::PrettyList,
@@ -5,15 +7,17 @@ use crate::{
 
 use ash::{extensions::ext::DebugUtils, vk};
 
+mod api;
 mod debug_callback;
 mod extensions;
 mod layers;
 
 /// The Vulkan library instance.
 pub struct Instance {
+    layers: Vec<String>,
     debug_messenger: vk::DebugUtilsMessengerEXT,
     debug: DebugUtils,
-    _entry: ash::Entry,
+    entry: ash::Entry,
     ash: ash::Instance,
 }
 
@@ -23,11 +27,99 @@ impl Instance {
         let (debug, debug_messenger) =
             debug_callback::create_debug_logger(&entry, &ash)?;
         Ok(Self {
+            layers: debug_layers(),
             debug_messenger,
             debug,
-            _entry: entry,
+            entry,
             ash,
         })
+    }
+
+    /// Get the raw Vulkan instance handle.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because ownership is *not* transferred. It is up to the caller
+    /// to make sure that however the handle is used, it does not outlive this
+    /// struct.
+    pub unsafe fn vulkan_instance_handle(&self) -> vk::Instance {
+        self.ash.handle()
+    }
+
+    /// Create the ash extension loader for a KHR Surface.
+    pub fn create_surface_loader(&self) -> ash::extensions::khr::Surface {
+        ash::extensions::khr::Surface::new(&self.entry, &self.ash)
+    }
+
+    /// Create the logical device with the requested queues.
+    pub fn create_logical_device(
+        &self,
+        physical_device: &vk::PhysicalDevice,
+        physical_device_extensions: &[String],
+        queue_create_infos: &[vk::DeviceQueueCreateInfo],
+    ) -> Result<ash::Device, VulkanError> {
+        let (_c_layer_names, layer_name_ptrs) =
+            unsafe { to_os_ptrs(&self.layers) };
+        let (_c_ext_names, ext_name_ptrs) =
+            unsafe { to_os_ptrs(physical_device_extensions) };
+
+        let mut indexing_features =
+            vk::PhysicalDeviceDescriptorIndexingFeatures {
+                shader_sampled_image_array_non_uniform_indexing: vk::TRUE,
+                runtime_descriptor_array: vk::TRUE,
+                descriptor_binding_variable_descriptor_count: vk::TRUE,
+                ..Default::default()
+            };
+        let physical_device_features = vk::PhysicalDeviceFeatures2 {
+            p_next: &mut indexing_features
+                as *mut vk::PhysicalDeviceDescriptorIndexingFeatures
+                as *mut c_void,
+            features: vk::PhysicalDeviceFeatures {
+                ..Default::default()
+            },
+            ..Default::default()
+        };
+
+        let create_info = vk::DeviceCreateInfo {
+            p_next: &physical_device_features
+                as *const vk::PhysicalDeviceFeatures2
+                as *const c_void,
+            queue_create_info_count: queue_create_infos.len() as u32,
+            p_queue_create_infos: queue_create_infos.as_ptr(),
+            p_enabled_features: std::ptr::null(),
+            pp_enabled_layer_names: layer_name_ptrs.as_ptr(),
+            enabled_layer_count: layer_name_ptrs.len() as u32,
+            pp_enabled_extension_names: ext_name_ptrs.as_ptr(),
+            enabled_extension_count: ext_name_ptrs.len() as u32,
+            ..Default::default()
+        };
+
+        unsafe {
+            self.ash
+                .create_device(*physical_device, &create_info, None)
+                .map_err(VulkanError::UnableToCreateLogicalDevice)
+        }
+    }
+
+    /// Set the debug name for an object owned by the provided logical device.
+    ///
+    /// Logs a warning if the name cannot be set for any reason.
+    pub fn debug_utils_set_object_name(
+        &self,
+        logical_device: &ash::Device,
+        name_info: &vk::DebugUtilsObjectNameInfoEXT,
+    ) {
+        let result = unsafe {
+            self.debug
+                .debug_utils_set_object_name(logical_device.handle(), name_info)
+        };
+        if result.is_err() {
+            log::warn!(
+                "Unable to set debug name for device! {:#?} {:#?}",
+                name_info,
+                result.err().unwrap()
+            );
+        }
     }
 }
 
@@ -41,6 +133,7 @@ impl Drop for Instance {
     }
 }
 
+/// The set of all debug layers used by this application.
 fn debug_layers() -> Vec<String> {
     vec![
         "VK_LAYER_KHRONOS_validation".to_owned(),

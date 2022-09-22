@@ -1,0 +1,27 @@
+{
+    "rdocCaptureSettings": 1,
+    "settings": {
+        "autoStart": true,
+        "commandLine": "",
+        "environment": [
+        ],
+        "executable": "C:\\Users\\Bradley\\Documents\\AshStarter\\target\\debug\\examples\\e0.exe",
+        "inject": false,
+        "numQueuedFrames": 1,
+        "options": {
+            "allowFullscreen": true,
+            "allowVSync": true,
+            "apiValidation": true,
+            "captureAllCmdLists": true,
+            "captureCallstacks": true,
+            "captureCallstacksOnlyDraws": true,
+            "debugOutputMute": true,
+            "delayForDebugger": 0,
+            "hookIntoChildren": true,
+            "refAllResources": true,
+            "verifyBufferAccess": true
+        },
+        "queuedFrameCap": 0,
+        "workingDir": "C:/Users/Bradley/Documents/AshStarter"
+    }
+}

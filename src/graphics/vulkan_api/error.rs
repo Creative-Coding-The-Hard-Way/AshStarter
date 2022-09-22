@@ -25,4 +25,24 @@ pub enum VulkanError {
 
     #[error("Unable to create the Vulkan debug messenger {:?}", .0)]
     UnableToCreateDebugMessenger(#[source] vk::Result),
+
+    #[error("Unable to enumerate physical devices {:?}", .0)]
+    UnableToEnumeratePhysicalDevices(#[source] vk::Result),
+
+    #[error("No suitable physical device found")]
+    NoSuitableDeviceFound,
+
+    #[error("Unable to the queue family for physical device support {:?}", .0)]
+    UnableToCheckPhysicalDeviceSupport(#[source] vk::Result),
+
+    #[error("Unable to find a queue family for submitting graphics commands")]
+    UnableToFindGraphicsQueue,
+
+    #[error(
+        "Unable to find a queue family for submitting presentation commands"
+    )]
+    UnableToFindPresentQueue,
+
+    #[error("Unable to create the Vulkan logical device {:?}", .0)]
+    UnableToCreateLogicalDevice(#[source] vk::Result),
 }
