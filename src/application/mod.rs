@@ -4,8 +4,9 @@ use glfw::WindowEvent;
 mod error;
 mod glfw_window;
 
-pub use self::glfw_window::GlfwWindow;
 pub use error::ApplicationError;
+
+pub use self::glfw_window::GlfwWindow;
 
 /// Applications can have state.
 pub trait State {

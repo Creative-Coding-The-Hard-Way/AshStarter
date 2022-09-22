@@ -1,12 +1,12 @@
 mod pretty_list;
 
-pub use self::pretty_list::PrettyList;
-
 use std::fmt::Write as FmtWrite;
 
 use anyhow::Result;
 use flexi_logger::{DeferredNow, Logger, Record};
 use textwrap::{termwidth, Options};
+
+pub use self::pretty_list::PrettyList;
 
 /// Setup console logging for this application.
 pub fn setup() -> Result<(), anyhow::Error> {

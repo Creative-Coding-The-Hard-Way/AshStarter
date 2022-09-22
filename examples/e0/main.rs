@@ -1,18 +1,26 @@
+use std::sync::Arc;
+
 use anyhow::Result;
 use ccthw::{
     application::{Application, GlfwWindow, State},
-    graphics::vulkan_api::{Instance, RenderDevice},
+    graphics::vulkan_api::Swapchain,
     logging,
 };
 
 struct VulkanState {
-    render_device: RenderDevice,
+    _swapchain: Swapchain,
 }
 
 impl State for VulkanState {
     fn new(window: &mut GlfwWindow) -> Result<Self> {
-        let render_device = window.create_render_device()?;
-        Ok(Self { render_device })
+        let (w, h) = window.window_handle.get_framebuffer_size();
+        let render_device = Arc::new(window.create_render_device()?);
+        let swapchain =
+            Swapchain::new(render_device, (w as u32, h as u32), None)?;
+
+        Ok(Self {
+            _swapchain: swapchain,
+        })
     }
 
     fn handle_event(

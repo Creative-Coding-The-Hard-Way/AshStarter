@@ -1,3 +1,4 @@
+mod api;
 mod device_queue;
 mod physical_device;
 mod queue_families;
@@ -9,14 +10,17 @@ use self::{
     device_queue::DeviceQueue, queue_families::QueueFamilies,
     window_surface::WindowSurface,
 };
-
 use crate::graphics::vulkan_api::{Instance, VulkanError};
 
 /// The Vulkan Logical Device and related resources which are needed for
 /// presenting graphics to the screen.
+///
+/// All operations whiche require the logical device are performed using this
+/// object.
 pub struct RenderDevice {
     graphics_queue: DeviceQueue,
     present_queue: DeviceQueue,
+    physical_device: vk::PhysicalDevice,
     logical_device: ash::Device,
     window_surface: WindowSurface,
     instance: Instance,
@@ -45,13 +49,35 @@ impl RenderDevice {
         )?;
         let (graphics_queue, present_queue) =
             queue_families.get_queues(&logical_device);
-        Ok(Self {
+        let render_device = Self {
             graphics_queue,
             present_queue,
+            physical_device,
             logical_device,
             window_surface,
             instance,
-        })
+        };
+
+        if graphics_queue.is_same(&present_queue) {
+            render_device.name_vulkan_object(
+                "Graphics+Present Queue",
+                vk::ObjectType::QUEUE,
+                graphics_queue.raw_queue(),
+            );
+        } else {
+            render_device.name_vulkan_object(
+                "Graphics Queue",
+                vk::ObjectType::QUEUE,
+                graphics_queue.raw_queue(),
+            );
+            render_device.name_vulkan_object(
+                "Present Queue",
+                vk::ObjectType::QUEUE,
+                present_queue.raw_queue(),
+            );
+        }
+
+        Ok(render_device)
     }
 
     /// Give a debug name for the Vulkan object owned by this device. The name
@@ -75,6 +101,56 @@ impl RenderDevice {
         };
         self.instance
             .debug_utils_set_object_name(&self.logical_device, &name_info);
+    }
+
+    /// List all queue families which need access to swapchain images.
+    pub fn swapchain_queue_family_indices(&self) -> Vec<u32> {
+        let graphics_family_index = self.graphics_queue.family_index();
+        let present_family_index = self.present_queue.family_index();
+        if graphics_family_index == present_family_index {
+            vec![graphics_family_index]
+        } else {
+            vec![graphics_family_index, present_family_index]
+        }
+    }
+
+    /// List all surface formats supported by this render device.
+    pub fn supported_surface_formats(&self) -> Vec<vk::SurfaceFormatKHR> {
+        unsafe { self.window_surface.supported_formats(&self.physical_device) }
+    }
+
+    /// List all presentation modes supported by this render device.
+    pub fn supported_presentation_modes(&self) -> Vec<vk::PresentModeKHR> {
+        unsafe {
+            self.window_surface
+                .supported_presentation_modes(&self.physical_device)
+        }
+    }
+
+    /// Get the surface capabilities for this render device.
+    pub fn surface_capabilities(
+        &self,
+    ) -> Result<vk::SurfaceCapabilitiesKHR, VulkanError> {
+        unsafe {
+            self.window_surface
+                .surface_capabilities(&self.physical_device)
+        }
+    }
+
+    /// Get the underlying KHR surface handle for this render device.
+    ///
+    /// # Safety
+    ///
+    /// Ownership of the surface is retained by the RenderDevice. It is the
+    /// responsibility of the caller to ensure any usage of the underyling
+    /// resource completes before the RenderDevice is destroyed.
+    pub unsafe fn surface_khr(&self) -> vk::SurfaceKHR {
+        self.window_surface.surface_khr
+    }
+
+    /// Create an ash extension loader for a KHR Swapchain.
+    pub fn create_swapchain_loader(&self) -> ash::extensions::khr::Swapchain {
+        self.instance.create_swapchain_loader(&self.logical_device)
     }
 }
 

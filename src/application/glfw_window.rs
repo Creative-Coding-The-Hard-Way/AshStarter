@@ -1,13 +1,13 @@
 use std::sync::mpsc::Receiver;
 
+use anyhow::Result;
+use ash::vk::{self, Handle};
+use glfw::{ClientApiHint, WindowEvent, WindowHint, WindowMode};
+
 use crate::{
     application::ApplicationError,
     graphics::vulkan_api::{Instance, RenderDevice},
 };
-
-use anyhow::Result;
-use ash::vk::{self, Handle};
-use glfw::{ClientApiHint, WindowEvent, WindowHint, WindowMode};
 
 /// All resources required for running a single-windowed GLFW application which
 /// renders graphics using Vulkan.

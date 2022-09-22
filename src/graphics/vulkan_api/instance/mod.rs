@@ -1,11 +1,11 @@
 use std::ffi::c_void;
 
+use ash::{extensions::ext::DebugUtils, vk};
+
 use crate::{
     graphics::vulkan_api::{ffi::to_os_ptrs, VulkanError},
     logging::PrettyList,
 };
-
-use ash::{extensions::ext::DebugUtils, vk};
 
 mod api;
 mod debug_callback;
@@ -49,6 +49,14 @@ impl Instance {
     /// Create the ash extension loader for a KHR Surface.
     pub fn create_surface_loader(&self) -> ash::extensions::khr::Surface {
         ash::extensions::khr::Surface::new(&self.entry, &self.ash)
+    }
+
+    /// Create the ash extension loader for a KHR Swapchain.
+    pub fn create_swapchain_loader(
+        &self,
+        logical_device: &ash::Device,
+    ) -> ash::extensions::khr::Swapchain {
+        ash::extensions::khr::Swapchain::new(&self.ash, logical_device)
     }
 
     /// Create the logical device with the requested queues.

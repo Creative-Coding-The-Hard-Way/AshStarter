@@ -45,4 +45,16 @@ pub enum VulkanError {
 
     #[error("Unable to create the Vulkan logical device {:?}", .0)]
     UnableToCreateLogicalDevice(#[source] vk::Result),
+
+    #[error("Unable to get surface capabilities for the physical device {:?}", .0)]
+    UnableToGetPhysicalDeviceSurfaceCapabilities(#[source] vk::Result),
+
+    #[error("Unable to create swapchain {:?}", .0)]
+    UnableToCreateSwapchain(#[source] vk::Result),
+
+    #[error("Unable to get swapchain images {:?}", .0)]
+    UnableToGetSwapchainImages(#[source] vk::Result),
+
+    #[error("Unable to create a Vulkan ImageView {:?}", .0)]
+    UnableToCreateImageView(#[source] vk::Result),
 }

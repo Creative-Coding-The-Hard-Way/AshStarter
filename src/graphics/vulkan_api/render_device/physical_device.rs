@@ -90,8 +90,7 @@ fn any_missing_extensions(
                 extension.extension_name.iter().map(|c| *c as u8).collect(),
             )
         })
-        .filter(|item| item.is_ok()) // only take valid utf8 extension names
-        .map(|item| item.unwrap())
+        .filter_map(|item| item.ok())
         .collect();
 
     log::trace!(

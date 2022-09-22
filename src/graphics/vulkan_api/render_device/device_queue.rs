@@ -32,4 +32,13 @@ impl DeviceQueue {
         self.family_index == device_queue.family_index
             && self.queue_index == device_queue.queue_index
     }
+
+    /// Returns the raw Vulkan queue handle.
+    pub fn raw_queue(&self) -> vk::Queue {
+        self.queue
+    }
+
+    pub fn family_index(&self) -> u32 {
+        self.family_index
+    }
 }

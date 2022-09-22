@@ -1,7 +1,6 @@
 use ash::vk;
 
 use super::Instance;
-
 use crate::graphics::vulkan_api::VulkanError;
 
 impl Instance {

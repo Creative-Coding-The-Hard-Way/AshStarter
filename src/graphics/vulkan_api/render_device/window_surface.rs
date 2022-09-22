@@ -1,10 +1,11 @@
-use crate::graphics::vulkan_api::{Instance, VulkanError};
 use ash::{extensions::khr, vk};
+
+use crate::graphics::vulkan_api::{Instance, VulkanError};
 
 /// The KHR Surface and Loader used by this application. These resources must
 /// be dropped before the instance.
 pub struct WindowSurface {
-    surface_khr: vk::SurfaceKHR,
+    pub surface_khr: vk::SurfaceKHR,
     loader: khr::Surface,
 }
 
@@ -73,6 +74,24 @@ impl WindowSurface {
                 self.surface_khr,
             )
             .unwrap_or_else(|_| vec![])
+    }
+
+    /// Get surface capabilities for the given physical device.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because the device's supported extensions must be checked prior
+    /// to calling this function.
+    pub unsafe fn surface_capabilities(
+        &self,
+        physical_device: &vk::PhysicalDevice,
+    ) -> Result<vk::SurfaceCapabilitiesKHR, VulkanError> {
+        self.loader
+            .get_physical_device_surface_capabilities(
+                *physical_device,
+                self.surface_khr,
+            )
+            .map_err(VulkanError::UnableToGetPhysicalDeviceSurfaceCapabilities)
     }
 }
 
