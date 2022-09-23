@@ -1,9 +1,8 @@
-# Example 2 - Multi-Frame Rendering
+# Example 3 - SwapchainFrames
 
-This example shows how to use separate semaphores and fences for each frame so
-that multiple swapchain frames can render at the same time, rather than waiting
-for the previous frame to finish rasterizing before starting on the next.
+This example shows how to use the SwapchainFrames type to manage the 
+swapchain and per-frame synchronization primitives.
 
 ## Commands
 
-From the project root: `cargo run --example e2`
+From the project root: `cargo run --example e3`
