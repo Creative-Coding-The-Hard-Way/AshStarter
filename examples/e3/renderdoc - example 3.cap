@@ -5,7 +5,7 @@
         "commandLine": "",
         "environment": [
         ],
-        "executable": "C:\\Users\\brad\\Documents\\projects\\AshStarter\\target\\debug\\examples\\e6.exe",
+        "executable": "C:\\Users\\Bradley\\Documents\\AshStarter\\target\\debug\\examples\\e3.exe",
         "inject": false,
         "numQueuedFrames": 1,
         "options": {
@@ -14,14 +14,14 @@
             "apiValidation": true,
             "captureAllCmdLists": true,
             "captureCallstacks": true,
-            "captureCallstacksOnlyDraws": false,
+            "captureCallstacksOnlyDraws": true,
             "debugOutputMute": true,
             "delayForDebugger": 0,
-            "hookIntoChildren": false,
+            "hookIntoChildren": true,
             "refAllResources": true,
             "verifyBufferAccess": true
         },
         "queuedFrameCap": 0,
-        "workingDir": "C:/Users/brad/Documents/projects/AshStarter"
+        "workingDir": "C:/Users/Bradley/Documents/AshStarter"
     }
 }

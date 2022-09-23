@@ -12,14 +12,14 @@ use ccthw::{
 
 /// This example uses SwapchainFrames type to manage the swapchain and
 /// per-frame synchronization.
-struct Example2MultipleFrames {
+struct Example3SwapchainFrames {
     swapchain_frames: SwapchainFrames,
     framebuffers: Vec<Framebuffer>,
     render_pass: Option<RenderPass>,
     render_device: Arc<RenderDevice>,
 }
 
-impl Example2MultipleFrames {
+impl Example3SwapchainFrames {
     fn build_swapchain_resources(
         &mut self,
         framebuffer_size: (i32, i32),
@@ -48,7 +48,7 @@ impl Example2MultipleFrames {
     }
 }
 
-impl State for Example2MultipleFrames {
+impl State for Example3SwapchainFrames {
     fn new(window: &mut GlfwWindow) -> Result<Self> {
         window.window_handle.set_key_polling(true);
 
@@ -113,7 +113,7 @@ impl State for Example2MultipleFrames {
     }
 }
 
-impl Drop for Example2MultipleFrames {
+impl Drop for Example3SwapchainFrames {
     fn drop(&mut self) {
         self.render_device
             .wait_idle()
@@ -123,6 +123,6 @@ impl Drop for Example2MultipleFrames {
 
 fn main() -> Result<()> {
     logging::setup()?;
-    Application::<Example2MultipleFrames>::new("Example 1 - Clear Screen")?
+    Application::<Example3SwapchainFrames>::new("Example 1 - Clear Screen")?
         .run()
 }

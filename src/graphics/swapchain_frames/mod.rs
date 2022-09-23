@@ -6,7 +6,7 @@ pub use self::frame::Frame;
 use crate::graphics::{
     vulkan_api::{
         ImageView, RenderDevice, SemaphorePool, Swapchain, SwapchainStatus,
-        VulkanError,
+        VulkanDebug, VulkanError,
     },
     GraphicsError,
 };
@@ -187,12 +187,14 @@ impl SwapchainFrames {
         let image_count =
             self.swapchain.as_ref().unwrap().swapchain_image_count();
         for index in 0..image_count {
-            self.frames.push(Some(Frame::new(
+            let frame = Frame::new(
                 &self.render_device,
                 &mut self.semaphore_pool,
                 index as usize,
                 self.swapchain.as_ref().unwrap().clone(),
-            )?));
+            )?;
+            frame.set_debug_name(format!("[Frame {}]", index));
+            self.frames.push(Some(frame));
         }
 
         self.swapchain_needs_rebuild = false;

@@ -4,7 +4,7 @@ use ash::vk;
 
 use crate::graphics::vulkan_api::{
     CommandBuffer, CommandPool, Fence, ImageView, RenderDevice, Semaphore,
-    SemaphorePool, Swapchain, VulkanError,
+    SemaphorePool, Swapchain, VulkanDebug, VulkanError,
 };
 
 /// All of the per-frame resources required to synchronize graphics command
@@ -138,6 +138,22 @@ impl Frame {
     /// this frame's graphics commands.
     pub(super) fn release_semaphore(&self) -> &Semaphore {
         &self.release_semaphore
+    }
+}
+
+impl VulkanDebug for Frame {
+    fn set_debug_name(&self, debug_name: impl Into<String>) {
+        let name = debug_name.into();
+        self.command_buffer
+            .set_debug_name(format!("{} command buffer", name));
+        self.command_pool
+            .set_debug_name(format!("{} command pool", name));
+        self.release_semaphore
+            .set_debug_name(format!("{} release semaphore", name,));
+        self.queue_submit_fence
+            .set_debug_name(format!("{} queue submit fence", name,));
+        self.swapchain_image_view
+            .set_debug_name(format!("{} swapchain image view", name,));
     }
 }
 
