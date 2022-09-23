@@ -15,8 +15,8 @@ mod layers;
 /// The Vulkan library instance.
 pub struct Instance {
     layers: Vec<String>,
-    debug_messenger: vk::DebugUtilsMessengerEXT,
-    debug: DebugUtils,
+    debug_messenger: Option<vk::DebugUtilsMessengerEXT>,
+    debug: Option<DebugUtils>,
     entry: ash::Entry,
     ash: ash::Instance,
 }
@@ -24,8 +24,17 @@ pub struct Instance {
 impl Instance {
     pub fn new(required_extensions: &[String]) -> Result<Self, VulkanError> {
         let (ash, entry) = create_instance(required_extensions)?;
-        let (debug, debug_messenger) =
-            debug_callback::create_debug_logger(&entry, &ash)?;
+
+        let (debug, debug_messenger) = {
+            if cfg!(debug_assertions) {
+                let (debug, debug_messenger) =
+                    debug_callback::create_debug_logger(&entry, &ash)?;
+                (Some(debug), Some(debug_messenger))
+            } else {
+                (None, None)
+            }
+        };
+
         Ok(Self {
             layers: debug_layers(),
             debug_messenger,
@@ -109,6 +118,7 @@ impl Instance {
         }
     }
 
+    #[cfg(debug_assertions)]
     /// Set the debug name for an object owned by the provided logical device.
     ///
     /// Logs a warning if the name cannot be set for any reason.
@@ -119,6 +129,8 @@ impl Instance {
     ) {
         let result = unsafe {
             self.debug
+                .as_ref()
+                .unwrap()
                 .debug_utils_set_object_name(logical_device.handle(), name_info)
         };
         if result.is_err() {
@@ -129,13 +141,26 @@ impl Instance {
             );
         }
     }
+
+    #[cfg(not(debug_assertions))]
+    pub fn debug_utils_set_object_name(
+        &self,
+        _logical_device: &ash::Device,
+        _name_info: &vk::DebugUtilsObjectNameInfoEXT,
+    ) {
+        // no-op
+    }
 }
 
 impl Drop for Instance {
     fn drop(&mut self) {
         unsafe {
-            self.debug
-                .destroy_debug_utils_messenger(self.debug_messenger, None);
+            if cfg!(debug_assertions) {
+                self.debug.take().unwrap().destroy_debug_utils_messenger(
+                    self.debug_messenger.take().unwrap(),
+                    None,
+                )
+            }
             self.ash.destroy_instance(None);
         }
     }
@@ -143,10 +168,14 @@ impl Drop for Instance {
 
 /// The set of all debug layers used by this application.
 fn debug_layers() -> Vec<String> {
-    vec![
-        "VK_LAYER_KHRONOS_validation".to_owned(),
-        "VK_LAYER_LUNARG_monitor".to_owned(),
-    ]
+    if cfg!(debug_assertions) {
+        vec![
+            "VK_LAYER_KHRONOS_validation".to_owned(),
+            "VK_LAYER_LUNARG_monitor".to_owned(),
+        ]
+    } else {
+        vec![]
+    }
 }
 
 fn create_instance(
@@ -158,12 +187,14 @@ fn create_instance(
 
     let mut required_with_debug = Vec::new();
     required_with_debug.extend_from_slice(required_extensions);
-    required_with_debug.push(
-        DebugUtils::name()
-            .to_str()
-            .map_err(VulkanError::InvalidDebugLayerName)?
-            .to_owned(),
-    );
+    if cfg!(debug_assertions) {
+        required_with_debug.push(
+            DebugUtils::name()
+                .to_str()
+                .map_err(VulkanError::InvalidDebugLayerName)?
+                .to_owned(),
+        );
+    }
 
     extensions::check_extensions(&entry, &required_with_debug)?;
     layers::check_layers(&entry, &debug_layers())?;
