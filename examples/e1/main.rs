@@ -87,22 +87,30 @@ impl Frame {
 struct Example1ClearScreen {
     frames: Vec<Frame>,
 
-    render_pass: RenderPass,
+    render_pass: Option<RenderPass>,
     semaphore_pool: SemaphorePool,
 
+    swapchain_needs_rebuild: bool,
     swapchain: Option<Arc<Swapchain>>,
     render_device: Arc<RenderDevice>,
 }
 
 impl Example1ClearScreen {
-    fn rebuild_swapchain(
+    fn rebuild_swapchain_resources(
         &mut self,
         framebuffer_size: (i32, i32),
     ) -> Result<()> {
-        let (w, h) = framebuffer_size;
+        // Stall the gpu so we can be sure no operations still depend on these
+        // resources.
         self.render_device.wait_idle()?;
+
+        // Drop all per-frame resources. The number of swapchain images and
+        // format could change which will require these to be rebuilt anyways.
         self.frames.clear();
 
+        // Try to get exclusive ownership of the old swapchain if it exists.
+        // If ownership cannot be taken it means some resource stil has an Arc
+        // and we forgot to drop something. (this means a bug in the app logic)
         let old_swap = if let Some(swap_arc) = self.swapchain.take() {
             let swap_result = Arc::try_unwrap(swap_arc);
             if swap_result.is_err() {
@@ -112,22 +120,28 @@ impl Example1ClearScreen {
         } else {
             None
         };
+
+        // create a new swapchain
+        let (w, h) = framebuffer_size;
         self.swapchain = Some(Arc::new(Swapchain::new(
             self.render_device.clone(),
             (w as u32, h as u32),
             old_swap,
         )?));
-        self.render_pass = RenderPass::single_sampled(
+
+        // create a render pass which can target swapchain images
+        self.render_pass = Some(RenderPass::single_sampled(
             self.render_device.clone(),
             self.swapchain.as_ref().unwrap().format(),
-        )?;
+        )?);
 
+        // build per-frame resources for each swapchain image
         let image_count =
             self.swapchain.as_ref().unwrap().swapchain_image_count();
         for index in 0..image_count {
             self.frames.push(Frame::new(
                 &self.render_device,
-                &self.render_pass,
+                self.render_pass.as_ref().unwrap(),
                 &mut self.semaphore_pool,
                 self.swapchain.as_ref().unwrap(),
                 index as usize,
@@ -142,34 +156,15 @@ impl State for Example1ClearScreen {
     fn new(window: &mut GlfwWindow) -> Result<Self> {
         window.window_handle.set_key_polling(true);
 
-        let (w, h) = window.window_handle.get_framebuffer_size();
         let render_device = Arc::new(window.create_render_device()?);
-        let mut semaphore_pool = SemaphorePool::new(render_device.clone());
-        let swapchain = Arc::new(Swapchain::new(
-            render_device.clone(),
-            (w as u32, h as u32),
-            None,
-        )?);
-        let render_pass = RenderPass::single_sampled(
-            render_device.clone(),
-            swapchain.format(),
-        )?;
-        let mut frames = vec![];
-        for index in 0..swapchain.swapchain_image_count() {
-            frames.push(Frame::new(
-                &render_device,
-                &render_pass,
-                &mut semaphore_pool,
-                &swapchain,
-                index as usize,
-            )?);
-        }
+        let semaphore_pool = SemaphorePool::new(render_device.clone());
 
         Ok(Self {
-            frames,
-            render_pass,
+            frames: vec![],
+            render_pass: None,
             semaphore_pool,
-            swapchain: Some(swapchain),
+            swapchain_needs_rebuild: true,
+            swapchain: None,
             render_device,
         })
     }
@@ -187,8 +182,9 @@ impl State for Example1ClearScreen {
             WindowEvent::Key(Key::Escape, _, Action::Release, _) => {
                 glfw_window.window_handle.set_should_close(true);
             }
-            WindowEvent::FramebufferSize(w, h) => {
-                self.rebuild_swapchain((w, h))?;
+            WindowEvent::FramebufferSize(_, _) => {
+                self.swapchain_needs_rebuild = true;
+                //self.rebuild_swapchain((w, h))?;
             }
             _ => (),
         }
@@ -196,6 +192,13 @@ impl State for Example1ClearScreen {
     }
 
     fn update(&mut self, glfw_window: &mut GlfwWindow) -> Result<()> {
+        if self.swapchain_needs_rebuild {
+            self.swapchain_needs_rebuild = false;
+            return self.rebuild_swapchain_resources(
+                glfw_window.window_handle.get_framebuffer_size(),
+            );
+        }
+
         // Get Swapchain index
         // -------------------
         let acquire_semaphore = self.semaphore_pool.get_semaphore()?;
@@ -207,7 +210,7 @@ impl State for Example1ClearScreen {
 
         let index = match result {
             SwapchainStatus::NeedsRebuild => {
-                return self.rebuild_swapchain(
+                return self.rebuild_swapchain_resources(
                     glfw_window.window_handle.get_framebuffer_size(),
                 );
             }
@@ -222,6 +225,9 @@ impl State for Example1ClearScreen {
             }
         };
 
+        // Ideally this doesn't make the program stall for very long because
+        // other frames have been rendered between now and when this image
+        // was last used.
         self.frames[index].queue_submit_fence.wait_and_reset()?;
 
         // safe because the queue submit fence ensures that the command buffer
@@ -238,7 +244,7 @@ impl State for Example1ClearScreen {
         // command buffer
         unsafe {
             self.frames[index].command_buffer.begin_render_pass_inline(
-                &self.render_pass,
+                self.render_pass.as_ref().unwrap(),
                 &self.frames[index].framebuffer,
                 self.swapchain.as_ref().unwrap().extent(),
                 [0.0, 0.0, 1.0, 1.0],
