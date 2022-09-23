@@ -121,6 +121,11 @@ impl RenderDevice {
         }
     }
 
+    /// The family index for the graphics queue.
+    pub fn graphics_queue_family_index(&self) -> u32 {
+        self.graphics_queue.family_index()
+    }
+
     /// List all surface formats supported by this render device.
     pub fn supported_surface_formats(&self) -> Vec<vk::SurfaceFormatKHR> {
         unsafe { self.window_surface.supported_formats(&self.physical_device) }
@@ -148,9 +153,10 @@ impl RenderDevice {
     ///
     /// # Safety
     ///
-    /// Ownership of the surface is retained by the RenderDevice. It is the
-    /// responsibility of the caller to ensure any usage of the underyling
-    /// resource completes before the RenderDevice is destroyed.
+    /// Ownership of the surface is retained by the RenderDevice. It is
+    /// the responsibility of the caller to ensure any usage of the
+    /// underyling resource completes before the RenderDevice is
+    /// destroyed.
     pub unsafe fn surface_khr(&self) -> vk::SurfaceKHR {
         self.window_surface.surface_khr
     }
@@ -160,8 +166,8 @@ impl RenderDevice {
         self.instance.create_swapchain_loader(&self.logical_device)
     }
 
-    /// Return the Vulkan queue which can be used for presenting swapchain
-    /// images.
+    /// Return the Vulkan queue which can be used for presenting
+    /// swapchain images.
     pub fn present_queue(&self) -> vk::Queue {
         self.present_queue.raw_queue()
     }

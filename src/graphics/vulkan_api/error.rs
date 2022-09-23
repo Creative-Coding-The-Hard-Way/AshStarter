@@ -78,4 +78,28 @@ pub enum VulkanError {
 
     #[error("Error while waiting for the Vulkan device to idle {:?}", .0)]
     UnableToWaitForDeviceToIdle(#[source] vk::Result),
+
+    #[error("Unable to create Vulkan render pass {:?}", .0)]
+    UnableToCreateRenderPass(#[source] vk::Result),
+
+    #[error("Unable to create Vulkan framebuffer {:?}", .0)]
+    UnableToCreateFramebuffer(#[source] vk::Result),
+
+    #[error("Unable to create Vulkan command pool {:?}", .0)]
+    UnableToCreateCommandPool(#[source] vk::Result),
+
+    #[error("Unable to allocate Vulkan command buffers {:?}", .0)]
+    UnableToAllocateCommandBuffers(#[source] vk::Result),
+
+    #[error("Unable to reset Vulkan command pool {:?}", .0)]
+    UnableToResetCommandPool(#[source] vk::Result),
+
+    #[error("Unable to begin Vulkan command buffer {:?}", .0)]
+    UnableToBeginCommandBuffer(#[source] vk::Result),
+
+    #[error("Unable to end Vulkan command buffer {:?}", .0)]
+    UnableToEndCommandBuffer(#[source] vk::Result),
+
+    #[error("Unable to submit graphics commands {:?}", .0)]
+    UnableToSubmitGraphicsCommands(#[source] vk::Result),
 }

@@ -115,4 +115,176 @@ impl RenderDevice {
     pub unsafe fn destroy_semaphore(&self, semaphore: vk::Semaphore) {
         self.logical_device.destroy_semaphore(semaphore, None)
     }
+
+    /// # Safety
+    ///
+    /// The caller is responsible for destroying the render pass before the
+    /// render device is dropped.
+    pub unsafe fn create_render_pass(
+        &self,
+        create_info: &vk::RenderPassCreateInfo,
+    ) -> Result<vk::RenderPass, VulkanError> {
+        self.logical_device
+            .create_render_pass(create_info, None)
+            .map_err(VulkanError::UnableToCreateRenderPass)
+    }
+
+    /// # Safety
+    ///
+    /// The caller is responsible for making sure that the render pass is not
+    /// in use by the GPU when it is destroyed.
+    pub unsafe fn destroy_render_pass(&self, render_pass: vk::RenderPass) {
+        self.logical_device.destroy_render_pass(render_pass, None)
+    }
+
+    /// # Safety
+    ///
+    /// The caller is responsible for destroying the framebuffer before
+    /// it is dropped.
+    pub unsafe fn create_framebuffer(
+        &self,
+        create_info: &vk::FramebufferCreateInfo,
+    ) -> Result<vk::Framebuffer, VulkanError> {
+        self.logical_device
+            .create_framebuffer(create_info, None)
+            .map_err(VulkanError::UnableToCreateFramebuffer)
+    }
+
+    /// # Safety
+    ///
+    /// The caller is responsible for making sure that the framebuffer is not
+    /// in use by the GPU when it is destroyed.
+    pub unsafe fn destroy_framebuffer(&self, framebuffer: vk::Framebuffer) {
+        self.logical_device.destroy_framebuffer(framebuffer, None)
+    }
+
+    /// # Safety
+    ///
+    /// The caller is responsible for destroying the command pool before the
+    /// render device is dropped.
+    pub unsafe fn create_command_pool(
+        &self,
+        create_info: &vk::CommandPoolCreateInfo,
+    ) -> Result<vk::CommandPool, VulkanError> {
+        self.logical_device
+            .create_command_pool(create_info, None)
+            .map_err(VulkanError::UnableToCreateCommandPool)
+    }
+
+    /// # Safety
+    ///
+    /// The caller is responsible for ensuring the command pool is not in use by
+    /// the GPU.
+    pub unsafe fn destroy_command_pool(&self, command_pool: vk::CommandPool) {
+        self.logical_device.destroy_command_pool(command_pool, None)
+    }
+
+    /// # Safety
+    ///
+    /// The caller is responsible for destroying the command buffers before
+    /// the Render Device is dropped.
+    pub unsafe fn allocate_command_buffers(
+        &self,
+        allocate_info: &vk::CommandBufferAllocateInfo,
+    ) -> Result<Vec<vk::CommandBuffer>, VulkanError> {
+        self.logical_device
+            .allocate_command_buffers(allocate_info)
+            .map_err(VulkanError::UnableToAllocateCommandBuffers)
+    }
+
+    /// # Safety
+    ///
+    /// Unsafe because the caller must ensure none of the command buffers is
+    /// being used by the GPU when freed.
+    pub unsafe fn free_command_buffers(
+        &self,
+        command_pool: &vk::CommandPool,
+        command_buffers: &[vk::CommandBuffer],
+    ) {
+        self.logical_device
+            .free_command_buffers(*command_pool, command_buffers)
+    }
+
+    /// # Safety
+    ///
+    /// Unsafe because the caller must ensure none of the allocated command
+    /// buffers is being used by the GPU when the pool is reset.
+    pub unsafe fn reset_command_pool(
+        &self,
+        command_pool: &vk::CommandPool,
+        flags: vk::CommandPoolResetFlags,
+    ) -> Result<(), VulkanError> {
+        self.logical_device
+            .reset_command_pool(*command_pool, flags)
+            .map_err(VulkanError::UnableToResetCommandPool)
+    }
+
+    pub fn begin_command_buffer(
+        &self,
+        command_buffer: &vk::CommandBuffer,
+        begin_info: &vk::CommandBufferBeginInfo,
+    ) -> Result<(), VulkanError> {
+        unsafe {
+            self.logical_device
+                .begin_command_buffer(*command_buffer, begin_info)
+                .map_err(VulkanError::UnableToBeginCommandBuffer)
+        }
+    }
+
+    pub fn end_command_buffer(
+        &self,
+        command_buffer: &vk::CommandBuffer,
+    ) -> Result<(), VulkanError> {
+        unsafe {
+            self.logical_device
+                .end_command_buffer(*command_buffer)
+                .map_err(VulkanError::UnableToEndCommandBuffer)
+        }
+    }
+
+    pub fn cmd_end_render_pass(&self, command_buffer: &vk::CommandBuffer) {
+        unsafe {
+            self.logical_device.cmd_end_render_pass(*command_buffer);
+        }
+    }
+
+    /// # Safety
+    ///
+    /// Unsafe because the caller must ensure that the relevant render pass
+    /// lives at least until this command has finished executing on the GPU.
+    pub unsafe fn cmd_begin_render_pass(
+        &self,
+        command_buffer: &vk::CommandBuffer,
+        render_pass_begin_info: &vk::RenderPassBeginInfo,
+        subpass_contents: vk::SubpassContents,
+    ) {
+        self.logical_device.cmd_begin_render_pass(
+            *command_buffer,
+            render_pass_begin_info,
+            subpass_contents,
+        )
+    }
+
+    /// - signal_fence is an optional handle to a fence which will be
+    ///   signaled once all submitted command buffers have finished
+    ///   execution.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because the caller must ensure that the command buffer
+    /// being submitted and all associated resources live until the
+    /// graphics commands finish executing.
+    pub unsafe fn submit_graphics_commands(
+        &self,
+        submit_info: vk::SubmitInfo,
+        signal_fence: &vk::Fence,
+    ) -> Result<(), VulkanError> {
+        self.logical_device
+            .queue_submit(
+                self.graphics_queue.raw_queue(),
+                &[submit_info],
+                *signal_fence,
+            )
+            .map_err(VulkanError::UnableToSubmitGraphicsCommands)
+    }
 }

@@ -15,8 +15,8 @@ pub enum SwapchainStatus {
 
 /// The swapchain and all related resources.
 pub struct Swapchain {
-    _images: Vec<vk::Image>,
-    image_views: Vec<vk::ImageView>,
+    surface_format_khr: vk::SurfaceFormatKHR,
+    images: Vec<vk::Image>,
     loader: ash::extensions::khr::Swapchain,
     swapchain_khr: vk::SwapchainKHR,
     extent: vk::Extent2D,
@@ -31,7 +31,8 @@ impl Swapchain {
         framebuffer_size: (u32, u32),
         previous: Option<Self>,
     ) -> Result<Self, VulkanError> {
-        let format = selection::choose_surface_format(&render_device);
+        let surface_format_khr =
+            selection::choose_surface_format(&render_device);
         let mode = selection::choose_present_mode(&render_device);
         let extent =
             selection::choose_swap_extent(&render_device, framebuffer_size)?;
@@ -43,8 +44,8 @@ impl Swapchain {
             surface: unsafe { render_device.surface_khr() },
 
             // image settings
-            image_format: format.format,
-            image_color_space: format.color_space,
+            image_format: surface_format_khr.format,
+            image_color_space: surface_format_khr.color_space,
             image_extent: extent,
             min_image_count: image_count,
             image_array_layers: 1,
@@ -92,15 +93,10 @@ impl Swapchain {
                 *image,
             );
         }
-        let image_views = selection::create_image_views(
-            &render_device,
-            &images,
-            format.format,
-        )?;
 
         Ok(Self {
-            _images: images,
-            image_views,
+            surface_format_khr,
+            images,
             loader,
             swapchain_khr,
             extent,
@@ -115,7 +111,23 @@ impl Swapchain {
 
     /// Get the number of swapchain images.
     pub fn swapchain_image_count(&self) -> u32 {
-        self.image_views.len() as u32
+        self.images.len() as u32
+    }
+
+    /// The format used by this swapchain's images.
+    pub fn format(&self) -> vk::Format {
+        self.surface_format_khr.format
+    }
+
+    /// Borrow swapchain images. Used to do things like build the swapchain
+    /// image views.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because the caller must ensure any usage of the raw vk::Image
+    /// resource will not outlive the Swapchain.
+    pub unsafe fn images(&self) -> &[vk::Image] {
+        &self.images
     }
 
     /// Acquire the next swapchain image for rendering.
@@ -193,9 +205,6 @@ impl Drop for Swapchain {
     /// before dropping.
     fn drop(&mut self) {
         unsafe {
-            for &image_view in &self.image_views {
-                self.render_device.destroy_image_view(image_view);
-            }
             self.loader.destroy_swapchain(self.swapchain_khr, None);
         }
     }
