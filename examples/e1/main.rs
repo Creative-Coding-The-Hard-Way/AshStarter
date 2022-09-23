@@ -6,22 +6,24 @@ use ccthw::{
     application::{Application, GlfwWindow, State},
     graphics::vulkan_api::{
         CommandBuffer, CommandPool, Fence, Framebuffer, ImageView,
-        RenderDevice, RenderPass, Semaphore, SemaphorePool, Swapchain,
-        SwapchainStatus, VulkanError,
+        RenderDevice, RenderPass, Semaphore, Swapchain, SwapchainStatus,
     },
     logging,
 };
 
-/// It's useful and convenient to organize some resources to have a separate
-/// instance for each swapchain image. These are the resources which have to be
-/// duplicated for each frame. Hence, "PerFrame".
-struct Frame {
+/// Example 1 is to use the Vulkan swapchain with a render pass to clear the
+/// screen to a flat color.
+///
+/// This example uses a fence to ensure that only a single frame's commands are
+/// ever executing at once. This is needlessly slow because it means Frame 0's
+/// commands will block the submission of Frame 1's commands. The next example
+/// shows how to use per-frame fences + semaphores to prevent this.
+struct Example1ClearScreen {
     command_buffer: CommandBuffer,
     command_pool: Arc<CommandPool>,
 
-    // per-frame resources
     // Signalled when the swapchain image is ready for rendering
-    acquire_semaphore: Option<Semaphore>,
+    acquire_semaphore: Semaphore,
 
     // Signalled when all graphics operations are complete and the frame is
     // ready to present.
@@ -31,64 +33,10 @@ struct Frame {
     // frame.
     queue_submit_fence: Fence,
 
-    // A view of the swapchain image used by this frame.
-    _swapchain_image_view: Arc<ImageView>,
-
-    // The framebuffer which targets this frame's swapchain image.
-    framebuffer: Framebuffer,
-}
-
-impl Frame {
-    fn new(
-        render_device: &Arc<RenderDevice>,
-        render_pass: &RenderPass,
-        semaphore_pool: &mut SemaphorePool,
-        swapchain: &Arc<Swapchain>,
-        swapchain_image_index: usize,
-    ) -> Result<Self, VulkanError> {
-        let acquire_semaphore = None;
-        let release_semaphore = semaphore_pool.get_semaphore()?;
-        let queue_submit_fence = Fence::new(render_device.clone())?;
-        let swapchain_image_view = Arc::new(ImageView::for_swapchain_image(
-            render_device.clone(),
-            swapchain.clone(),
-            swapchain_image_index,
-        )?);
-        let framebuffer = Framebuffer::new(
-            render_device.clone(),
-            render_pass,
-            &[swapchain_image_view.clone()],
-            swapchain.extent(),
-        )?;
-        let command_pool = Arc::new(CommandPool::new(
-            render_device.clone(),
-            render_device.graphics_queue_family_index(),
-            vk::CommandPoolCreateFlags::empty(),
-        )?);
-        let command_buffer = CommandBuffer::new(
-            render_device.clone(),
-            command_pool.clone(),
-            vk::CommandBufferLevel::PRIMARY,
-        )?;
-        Ok(Self {
-            command_buffer,
-            command_pool,
-            acquire_semaphore,
-            release_semaphore,
-            queue_submit_fence,
-            _swapchain_image_view: swapchain_image_view,
-            framebuffer,
-        })
-    }
-}
-
-/// Example 1 is to use the Vulkan swapchain with a render pass to clear the
-/// screen to a flat color.
-struct Example1ClearScreen {
-    frames: Vec<Frame>,
+    swapchain_image_views: Vec<Arc<ImageView>>,
+    framebuffers: Vec<Framebuffer>,
 
     render_pass: Option<RenderPass>,
-    semaphore_pool: SemaphorePool,
 
     swapchain_needs_rebuild: bool,
     swapchain: Option<Arc<Swapchain>>,
@@ -104,9 +52,8 @@ impl Example1ClearScreen {
         // resources.
         self.render_device.wait_idle()?;
 
-        // Drop all per-frame resources. The number of swapchain images and
-        // format could change which will require these to be rebuilt anyways.
-        self.frames.clear();
+        self.swapchain_image_views.clear();
+        self.framebuffers.clear();
 
         // Try to get exclusive ownership of the old swapchain if it exists.
         // If ownership cannot be taken it means some resource stil has an Arc
@@ -139,13 +86,20 @@ impl Example1ClearScreen {
         let image_count =
             self.swapchain.as_ref().unwrap().swapchain_image_count();
         for index in 0..image_count {
-            self.frames.push(Frame::new(
-                &self.render_device,
+            let swapchain_image_view =
+                Arc::new(ImageView::for_swapchain_image(
+                    self.render_device.clone(),
+                    self.swapchain.as_ref().unwrap().clone(),
+                    index as usize,
+                )?);
+            let framebuffer = Framebuffer::new(
+                self.render_device.clone(),
                 self.render_pass.as_ref().unwrap(),
-                &mut self.semaphore_pool,
-                self.swapchain.as_ref().unwrap(),
-                index as usize,
-            )?);
+                &[swapchain_image_view.clone()],
+                self.swapchain.as_ref().unwrap().extent(),
+            )?;
+            self.framebuffers.push(framebuffer);
+            self.swapchain_image_views.push(swapchain_image_view);
         }
 
         Ok(())
@@ -157,14 +111,33 @@ impl State for Example1ClearScreen {
         window.window_handle.set_key_polling(true);
 
         let render_device = Arc::new(window.create_render_device()?);
-        let semaphore_pool = SemaphorePool::new(render_device.clone());
+        let command_pool = Arc::new(CommandPool::new(
+            render_device.clone(),
+            render_device.graphics_queue_family_index(),
+            vk::CommandPoolCreateFlags::empty(),
+        )?);
+        let command_buffer = CommandBuffer::new(
+            render_device.clone(),
+            command_pool.clone(),
+            vk::CommandBufferLevel::PRIMARY,
+        )?;
+
+        let acquire_semaphore = Semaphore::new(render_device.clone())?;
+        let release_semaphore = Semaphore::new(render_device.clone())?;
+        let queue_submit_fence = Fence::new(render_device.clone())?;
 
         Ok(Self {
-            frames: vec![],
-            render_pass: None,
-            semaphore_pool,
             swapchain_needs_rebuild: true,
+            framebuffers: vec![],
+            swapchain_image_views: vec![],
+            render_pass: None,
             swapchain: None,
+
+            acquire_semaphore,
+            release_semaphore,
+            queue_submit_fence,
+            command_pool,
+            command_buffer,
             render_device,
         })
     }
@@ -201,12 +174,14 @@ impl State for Example1ClearScreen {
 
         // Get Swapchain index
         // -------------------
-        let acquire_semaphore = self.semaphore_pool.get_semaphore()?;
         let result = self
             .swapchain
             .as_ref()
             .unwrap()
-            .acquire_next_swapchain_image(Some(&acquire_semaphore), None)?;
+            .acquire_next_swapchain_image(
+                Some(&self.acquire_semaphore),
+                None,
+            )?;
 
         let index = match result {
             SwapchainStatus::NeedsRebuild => {
@@ -214,62 +189,53 @@ impl State for Example1ClearScreen {
                     glfw_window.window_handle.get_framebuffer_size(),
                 );
             }
-            SwapchainStatus::ImageAcquired(index) => {
-                let old_semaphore = self.frames[index]
-                    .acquire_semaphore
-                    .replace(acquire_semaphore);
-                if let Some(semaphore) = old_semaphore {
-                    self.semaphore_pool.return_semaphore(semaphore);
-                }
-                index
-            }
+            SwapchainStatus::ImageAcquired(index) => index,
         };
 
-        // Ideally this doesn't make the program stall for very long because
-        // other frames have been rendered between now and when this image
-        // was last used.
-        self.frames[index].queue_submit_fence.wait_and_reset()?;
+        // Wait for the previous frame's commands to finish executing before
+        // submitting anyithng for this frame.
+        self.queue_submit_fence.wait_and_reset()?;
 
-        // safe because the queue submit fence ensures that the command buffer
-        // is done executing before being reset
+        // Safe because the queue submit fence ensures that the command buffer
+        // is done executing before being reset.
         unsafe {
-            self.frames[index].command_pool.reset()?;
+            self.command_pool.reset()?;
         }
 
         // draw frame
         // ----------
-        self.frames[index].command_buffer.begin_one_time_submit()?;
+        self.command_buffer.begin_one_time_submit()?;
 
         // safe because the render pass and framebuffer will always outlive the
         // command buffer
         unsafe {
-            self.frames[index].command_buffer.begin_render_pass_inline(
+            self.command_buffer.begin_render_pass_inline(
                 self.render_pass.as_ref().unwrap(),
-                &self.frames[index].framebuffer,
+                &self.framebuffers[index],
                 self.swapchain.as_ref().unwrap().extent(),
                 [0.0, 0.0, 1.0, 1.0],
             );
         }
-        self.frames[index].command_buffer.end_render_pass();
+        self.command_buffer.end_render_pass();
 
-        self.frames[index].command_buffer.end_command_buffer()?;
+        self.command_buffer.end_command_buffer()?;
 
         unsafe {
-            self.frames[index].command_buffer.submit_graphics_commands(
-                &[self.frames[index].acquire_semaphore.as_ref().unwrap()],
+            self.command_buffer.submit_graphics_commands(
+                &[&self.acquire_semaphore],
                 &[vk::PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT],
-                &[&self.frames[index].release_semaphore],
-                Some(&self.frames[index].queue_submit_fence),
+                &[&self.release_semaphore],
+                Some(&self.queue_submit_fence),
             )?;
         }
 
         // present swapchain image
         // -----------------------
 
-        self.swapchain.as_ref().unwrap().present_swapchain_image(
-            index,
-            &self.frames[index].release_semaphore,
-        )?;
+        self.swapchain
+            .as_ref()
+            .unwrap()
+            .present_swapchain_image(index, &self.release_semaphore)?;
 
         Ok(())
     }
