@@ -1,3 +1,4 @@
+mod buffer;
 mod commands;
 mod error;
 mod ffi;
@@ -10,11 +11,12 @@ mod sync;
 mod texture;
 
 pub use self::{
+    buffer::HostCoherentBuffer,
     commands::{CommandBuffer, CommandPool},
     error::VulkanError,
     framebuffer::Framebuffer,
     instance::Instance,
-    render_device::{RenderDevice, VulkanDebug},
+    render_device::{Allocation, RenderDevice, VulkanDebug},
     render_pass::RenderPass,
     swapchain::{Swapchain, SwapchainStatus},
     sync::{Fence, Semaphore, SemaphorePool},

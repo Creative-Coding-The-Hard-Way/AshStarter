@@ -1,6 +1,8 @@
+use std::ffi::c_void;
+
 use ash::vk;
 
-use super::RenderDevice;
+use super::{Allocation, RenderDevice};
 use crate::graphics::vulkan_api::VulkanError;
 
 impl RenderDevice {
@@ -286,5 +288,126 @@ impl RenderDevice {
                 *signal_fence,
             )
             .map_err(VulkanError::UnableToSubmitGraphicsCommands)
+    }
+
+    /// Map a piece of device memory to a host-accessible pointer.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///  - only memmory accessible by the host can be mapped
+    ///  - memory that is not HOST_COHERENT requires additional synchronization
+    ///    after writes/reads
+    ///  - the application is responsible for making a corresponding call to
+    ///    unmap
+    ///  - device memory can only be mapped ONCE even if the offset and size
+    ///    would result in disjoint regions being mapped
+    pub unsafe fn map_memory(
+        &self,
+        device_memory: vk::DeviceMemory,
+        offset: vk::DeviceSize,
+        size: vk::DeviceSize,
+    ) -> Result<*mut c_void, VulkanError> {
+        self.logical_device
+            .map_memory(
+                device_memory,
+                offset,
+                size,
+                vk::MemoryMapFlags::empty(),
+            )
+            .map_err(VulkanError::UnableToMapDeviceMemory)
+    }
+
+    /// Unmap a piece of device memory.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because the application must ensure the mapped pointer is not
+    /// still being used.
+    pub unsafe fn unmap_memory(&self, device_memory: vk::DeviceMemory) {
+        self.logical_device.unmap_memory(device_memory);
+    }
+
+    /// Create a new Vulkan buffer.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///  - the caller must destroy the buffer before the render device is
+    ///    dropped
+    pub unsafe fn create_buffer(
+        &self,
+        create_info: &vk::BufferCreateInfo,
+    ) -> Result<vk::Buffer, VulkanError> {
+        self.logical_device
+            .create_buffer(create_info, None)
+            .map_err(|err| {
+                VulkanError::UnableToCreateBuffer(
+                    create_info.size,
+                    create_info.usage,
+                    err,
+                )
+            })
+    }
+
+    /// Destroy a Vulkan buffer.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///  - the caller must ensure no Device operations still depend on the
+    ///    buffer
+    pub unsafe fn destroy_buffer(&self, buffer: vk::Buffer) {
+        self.logical_device.destroy_buffer(buffer, None)
+    }
+
+    /// Get the memory allocation requirements for the buffer.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///  - the caller must ensure that the buffer has not previously been
+    ///    freed back to the device.
+    pub unsafe fn get_buffer_memory_requirements(
+        &self,
+        buffer: &vk::Buffer,
+    ) -> vk::MemoryRequirements {
+        self.logical_device.get_buffer_memory_requirements(*buffer)
+    }
+
+    /// Bind an allocation to a buffer.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///  - the caller must ensure the allocation and buffer have the same
+    ///    lifetime
+    pub unsafe fn bind_buffer_memory(
+        &self,
+        buffer: &vk::Buffer,
+        allocation: &Allocation,
+    ) -> Result<(), VulkanError> {
+        self.logical_device
+            .bind_buffer_memory(
+                *buffer,
+                allocation.device_memory(),
+                allocation.offset_in_bytes(),
+            )
+            .map_err(VulkanError::UnableToBindBufferMemory)
+    }
+
+    /// Flush mapped memory so writes on the host are visible on the device.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///  - the caller must ensure the mapped ranges are correct
+    pub unsafe fn flush_mapped_memory_ranges(
+        &self,
+        ranges: &[vk::MappedMemoryRange],
+    ) -> Result<(), VulkanError> {
+        self.logical_device
+            .flush_mapped_memory_ranges(ranges)
+            .map_err(VulkanError::UnableToFlushMappedMemoryRanges)
     }
 }

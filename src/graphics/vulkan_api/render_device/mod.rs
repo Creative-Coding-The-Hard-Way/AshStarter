@@ -1,13 +1,19 @@
+mod allocator;
 mod api;
 mod device_queue;
 mod physical_device;
 mod queue_families;
 mod window_surface;
 
+use std::sync::Mutex;
+
 use ash::vk;
 
+pub use self::allocator::Allocation;
 use self::{
-    device_queue::DeviceQueue, queue_families::QueueFamilies,
+    allocator::{create_system_allocator, Allocator, GPUMemoryAllocator},
+    device_queue::DeviceQueue,
+    queue_families::QueueFamilies,
     window_surface::WindowSurface,
 };
 use crate::graphics::vulkan_api::{Instance, VulkanError};
@@ -25,6 +31,7 @@ pub trait VulkanDebug {
 /// All operations whiche require the logical device are performed using this
 /// object.
 pub struct RenderDevice {
+    allocator: Mutex<Allocator>,
     graphics_queue: DeviceQueue,
     present_queue: DeviceQueue,
     physical_device: vk::PhysicalDevice,
@@ -57,6 +64,9 @@ impl RenderDevice {
         let (graphics_queue, present_queue) =
             queue_families.get_queues(&logical_device);
         let render_device = Self {
+            allocator: Mutex::new(create_system_allocator(
+                logical_device.clone(),
+            )),
             graphics_queue,
             present_queue,
             physical_device,
@@ -170,6 +180,64 @@ impl RenderDevice {
     /// swapchain images.
     pub fn present_queue(&self) -> vk::Queue {
         self.present_queue.raw_queue()
+    }
+
+    /// Allocate a chunk of device memory.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///  - the caller is responsible for freeing the allocated memory before
+    ///    the device is destroyed
+    pub unsafe fn allocate_memory(
+        &self,
+        memory_requirements: vk::MemoryRequirements,
+        property_flags: vk::MemoryPropertyFlags,
+    ) -> Result<Allocation, VulkanError> {
+        let memory_properties = self
+            .instance
+            .get_physical_device_memory_properties(&self.physical_device);
+        let memory_type_index = memory_properties
+            .memory_types
+            .iter()
+            .enumerate()
+            .find(|(i, memory_type)| {
+                let type_supported =
+                    memory_requirements.memory_type_bits & (1 << i) != 0;
+                let properties_supported =
+                    memory_type.property_flags.contains(property_flags);
+                type_supported & properties_supported
+            })
+            .map(|(i, _memory_type)| i as u32)
+            .ok_or(VulkanError::MemoryTypeNotFound(
+                property_flags,
+                memory_requirements,
+            ))?;
+        let allocate_info = vk::MemoryAllocateInfo {
+            memory_type_index,
+            allocation_size: memory_requirements.size,
+            ..Default::default()
+        };
+        self.allocator
+            .lock()
+            .unwrap()
+            .allocate(allocate_info, memory_requirements.alignment)
+    }
+
+    /// Return an allocated chunk of memory back to the device.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///  - the caller must ensure that the device is not using the memory in
+    ///    the given allocation any more.
+    ///  - the caller must ensure that the allocation is not used after being
+    ///    freed
+    pub unsafe fn free_memory(
+        &self,
+        allocation: &Allocation,
+    ) -> Result<(), VulkanError> {
+        self.allocator.lock().unwrap().free(allocation)
     }
 }
 

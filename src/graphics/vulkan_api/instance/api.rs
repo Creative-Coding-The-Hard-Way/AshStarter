@@ -37,4 +37,15 @@ impl Instance {
                 .map_err(VulkanError::UnableToEnumeratePhysicalDevices)
         }
     }
+
+    /// Get the physical device's memory properties.
+    pub fn get_physical_device_memory_properties(
+        &self,
+        physical_device: &vk::PhysicalDevice,
+    ) -> vk::PhysicalDeviceMemoryProperties {
+        unsafe {
+            self.ash
+                .get_physical_device_memory_properties(*physical_device)
+        }
+    }
 }

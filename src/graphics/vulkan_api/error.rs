@@ -102,4 +102,30 @@ pub enum VulkanError {
 
     #[error("Unable to submit graphics commands {:?}", .0)]
     UnableToSubmitGraphicsCommands(#[source] vk::Result),
+
+    #[error("Unable to allocate Vulkan device memory {:?}", .0)]
+    UnableToAllocateDeviceMemory(#[source] vk::Result),
+
+    #[error("Unable to map Vulkan device memory to a host-accessible pointer {:?}", .0)]
+    UnableToMapDeviceMemory(#[source] vk::Result),
+
+    #[error(
+        "Attempted to access device memory from the host without mapping first"
+    )]
+    DeviceMemoryIsNotMapped,
+
+    #[error("Device memory is not aligned as {:?}", .0)]
+    DeviceMemoryIsNotAlignedForType(String),
+
+    #[error("Unable to find a memory type for {:#?} with requirements {:#?}", .0, .1)]
+    MemoryTypeNotFound(vk::MemoryPropertyFlags, vk::MemoryRequirements),
+
+    #[error("Unable to create buffer with size {:#?}b flags {:#?}. Error {:#?}", .0, .1, .2)]
+    UnableToCreateBuffer(u64, vk::BufferUsageFlags, #[source] vk::Result),
+
+    #[error("Unable to bind Vulkan memory to a buffer {:#?}", .0)]
+    UnableToBindBufferMemory(#[source] vk::Result),
+
+    #[error("Unable to flush changes to mapped Vulkan memory {:#?}", .0)]
+    UnableToFlushMappedMemoryRanges(#[source] vk::Result),
 }
