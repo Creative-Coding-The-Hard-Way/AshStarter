@@ -1,3 +1,5 @@
+mod pipeline;
+
 use std::sync::Arc;
 
 use anyhow::Result;
@@ -6,8 +8,8 @@ use ccthw::{
     application::{Application, GlfwWindow, State},
     graphics::{
         vulkan_api::{
-            Framebuffer, HostCoherentBuffer, RenderDevice, RenderPass,
-            VulkanDebug,
+            Framebuffer, GraphicsPipeline, HostCoherentBuffer, PipelineLayout,
+            RenderDevice, RenderPass, VulkanDebug,
         },
         AcquiredFrame, SwapchainFrames,
     },
@@ -20,17 +22,19 @@ struct Vertex {
     pub color: [f32; 4],
 }
 
-/// This example uses SwapchainFrames type to manage the swapchain and
-/// per-frame synchronization.
-struct Example3SwapchainFrames {
-    _vertex_buffer: HostCoherentBuffer<Vertex>,
+/// This example renders a triangle using a vertex buffer and a shader
+/// pipeline.
+struct Example4FirstTriangle {
+    pipeline_layout: PipelineLayout,
+    graphics_pipeline: Option<GraphicsPipeline>,
+    vertex_buffer: HostCoherentBuffer<Vertex>,
     swapchain_frames: SwapchainFrames,
     framebuffers: Vec<Framebuffer>,
     render_pass: Option<RenderPass>,
     render_device: Arc<RenderDevice>,
 }
 
-impl Example3SwapchainFrames {
+impl Example4FirstTriangle {
     fn build_swapchain_resources(
         &mut self,
         framebuffer_size: (i32, i32),
@@ -55,11 +59,17 @@ impl Example3SwapchainFrames {
             )?);
         }
 
+        self.graphics_pipeline = Some(pipeline::create_pipeline(
+            &self.render_device,
+            self.render_pass.as_ref().unwrap(),
+            &self.pipeline_layout,
+        )?);
+
         Ok(())
     }
 }
 
-impl State for Example3SwapchainFrames {
+impl State for Example4FirstTriangle {
     fn new(window: &mut GlfwWindow) -> Result<Self> {
         window.window_handle.set_key_polling(true);
 
@@ -79,18 +89,23 @@ impl State for Example3SwapchainFrames {
                 color: [1.0, 1.0, 1.0, 1.0],
             };
             vertices[1] = Vertex {
-                pos: [0.5, 0.0],
+                pos: [-0.5, 0.0],
                 color: [1.0, 1.0, 1.0, 1.0],
             };
             vertices[2] = Vertex {
-                pos: [-0.5, 0.0],
+                pos: [0.5, 0.0],
                 color: [1.0, 1.0, 1.0, 1.0],
             };
         }
         vertex_buffer.flush()?;
 
+        let pipeline_layout =
+            pipeline::create_pipeline_layout(render_device.clone())?;
+
         Ok(Self {
-            _vertex_buffer: vertex_buffer,
+            pipeline_layout,
+            graphics_pipeline: None,
+            vertex_buffer,
             framebuffers: vec![],
             render_pass: None,
             swapchain_frames,
@@ -129,18 +144,29 @@ impl State for Example3SwapchainFrames {
             AcquiredFrame::Available(frame) => frame,
         };
 
+        let swapchain_extent = self.swapchain_frames.swapchain().extent();
+        let framebuffer = &self.framebuffers[frame.swapchain_image_index()];
+
         // safe because the render pass and framebuffer will always outlive the
         // command buffer
         unsafe {
-            let framebuffer = &self.framebuffers[frame.swapchain_image_index()];
-            frame.command_buffer().begin_render_pass_inline(
-                self.render_pass.as_ref().unwrap(),
-                framebuffer,
-                self.swapchain_frames.swapchain().extent(),
-                [0.0, 0.0, 1.0, 1.0],
-            );
+            frame
+                .command_buffer()
+                .begin_render_pass_inline(
+                    self.render_pass.as_ref().unwrap(),
+                    framebuffer,
+                    swapchain_extent,
+                    [0.0, 0.0, 1.0, 1.0],
+                )
+                .bind_graphics_pipeline(
+                    self.graphics_pipeline.as_ref().unwrap(),
+                )
+                .set_viewport(swapchain_extent)
+                .set_scissor(0, 0, swapchain_extent)
+                .bind_vertex_buffer(&self.vertex_buffer, 0)
+                .draw(3, 0)
+                .end_render_pass();
         }
-        frame.command_buffer().end_render_pass();
 
         self.swapchain_frames.present_frame(frame)?;
 
@@ -148,7 +174,7 @@ impl State for Example3SwapchainFrames {
     }
 }
 
-impl Drop for Example3SwapchainFrames {
+impl Drop for Example4FirstTriangle {
     fn drop(&mut self) {
         self.render_device
             .wait_idle()
@@ -158,6 +184,5 @@ impl Drop for Example3SwapchainFrames {
 
 fn main() -> Result<()> {
     logging::setup()?;
-    Application::<Example3SwapchainFrames>::new("Example 1 - Clear Screen")?
-        .run()
+    Application::<Example4FirstTriangle>::new("Example 1 - Clear Screen")?.run()
 }

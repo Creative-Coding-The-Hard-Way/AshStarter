@@ -18,6 +18,10 @@ memoffset = "*"
 thiserror = "1.0.29"
 spin_sleep = "1.0.0"
 
+[build-dependencies]
+anyhow = "1.0.44"
+glob = "0.3.0"
+
 [dependencies.glfw]
 version = "0.41.0"
 features = [ "vulkan" ]

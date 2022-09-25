@@ -4,6 +4,7 @@ mod error;
 mod ffi;
 mod framebuffer;
 mod instance;
+mod pipeline;
 mod render_device;
 mod render_pass;
 mod swapchain;
@@ -16,6 +17,7 @@ pub use self::{
     error::VulkanError,
     framebuffer::Framebuffer,
     instance::Instance,
+    pipeline::{GraphicsPipeline, PipelineLayout, ShaderModule},
     render_device::{Allocation, RenderDevice, VulkanDebug},
     render_pass::RenderPass,
     swapchain::{Swapchain, SwapchainStatus},

@@ -56,6 +56,17 @@ impl<T> HostCoherentBuffer<T> {
         })
     }
 
+    /// Get the raw Vulkan handle to the buffer.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - Ownership is not transferred. The caller must ensure no references
+    ///     to the buffer exist after this HostCoherentBuffer is dropped.
+    pub unsafe fn raw(&self) -> &vk::Buffer {
+        &self.buffer
+    }
+
     /// Flush the host caches so data is visible on the device.
     ///
     /// Generally this method does not need to be called explicitly because

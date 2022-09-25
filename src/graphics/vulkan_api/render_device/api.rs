@@ -410,4 +410,213 @@ impl RenderDevice {
             .flush_mapped_memory_ranges(ranges)
             .map_err(VulkanError::UnableToFlushMappedMemoryRanges)
     }
+
+    /// Create a new Vulkan shader module.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///  - the caller must destroy the shader module before the render device
+    ///    is dropped.
+    pub unsafe fn create_shader_module(
+        &self,
+        create_info: &vk::ShaderModuleCreateInfo,
+    ) -> Result<vk::ShaderModule, VulkanError> {
+        self.logical_device
+            .create_shader_module(create_info, None)
+            .map_err(VulkanError::UnableToCreateShaderModule)
+    }
+
+    /// Destroy a Vulkan shader module.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///  - the caller must ensure no GPU operations still reference the shader
+    ///    when it is destroyed
+    pub unsafe fn destroy_shader_module(
+        &self,
+        shader_module: vk::ShaderModule,
+    ) {
+        self.logical_device
+            .destroy_shader_module(shader_module, None)
+    }
+
+    /// Create a new graphics pipeline.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///  - the application is responsible for destroying the pipeline before
+    ///    the render device is dropped.
+    pub unsafe fn create_graphics_pipeline(
+        &self,
+        create_info: &vk::GraphicsPipelineCreateInfo,
+    ) -> Result<vk::Pipeline, VulkanError> {
+        let pipeline_cache = vk::PipelineCache::default();
+        let pipelines_result = self.logical_device.create_graphics_pipelines(
+            pipeline_cache,
+            &[*create_info],
+            None,
+        );
+        match pipelines_result {
+            Ok(pipelines) => Ok(pipelines[0]),
+            Err((_, result)) => {
+                Err(VulkanError::UnableToCreateGraphicsPipeline(result))
+            }
+        }
+    }
+
+    /// Destroy a pipeline.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - the caller must ensure that the pipeline is not being used by
+    ///     the GPU at the time of destruction.
+    pub unsafe fn destroy_pipeline(&self, pipeline: vk::Pipeline) {
+        self.logical_device.destroy_pipeline(pipeline, None);
+    }
+
+    /// Create a pipeline layout.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - The caller is responsible for destroying the pipeline layout
+    ///     before the Render Device is destroyed.
+    pub unsafe fn create_pipeline_layout(
+        &self,
+        create_info: &vk::PipelineLayoutCreateInfo,
+    ) -> Result<vk::PipelineLayout, VulkanError> {
+        self.logical_device
+            .create_pipeline_layout(create_info, None)
+            .map_err(VulkanError::UnableToCreatePipelineLayout)
+    }
+
+    /// Destroy a pipeline layout.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - The caller must ensure the GPU is not using the pipeline layout at
+    ///     the time of destruction.
+    pub unsafe fn destroy_pipeline_layout(
+        &self,
+        pipeline_layout: vk::PipelineLayout,
+    ) {
+        self.logical_device
+            .destroy_pipeline_layout(pipeline_layout, None);
+    }
+
+    /// Bind a pipeline for rendering.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - The application must not destroy the pipeline while any command
+    ///     buffers still reference it.
+    pub unsafe fn cmd_bind_pipeline(
+        &self,
+        command_buffer: &vk::CommandBuffer,
+        pipeline_bind_point: vk::PipelineBindPoint,
+        pipeline: &vk::Pipeline,
+    ) {
+        self.logical_device.cmd_bind_pipeline(
+            *command_buffer,
+            pipeline_bind_point,
+            *pipeline,
+        );
+    }
+
+    /// Set a viewport for rendering commands.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - first viewport must be between 0 and the number of viewports
+    ///     provided
+    ///   - first viewport must be 0 if multiviewports are not enabled
+    pub unsafe fn cmd_set_viewport(
+        &self,
+        command_buffer: &vk::CommandBuffer,
+        first_viewport: u32,
+        viewports: &[vk::Viewport],
+    ) {
+        self.logical_device.cmd_set_viewport(
+            *command_buffer,
+            first_viewport,
+            viewports,
+        );
+    }
+
+    /// Set scissor rectangles for rendering.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - first scissor must be between 0 and the number of scissors provided
+    ///   - only one scissor can be specified if multiViewport feature is not
+    ///     enabled
+    pub unsafe fn cmd_set_scissor(
+        &self,
+        command_buffer: &vk::CommandBuffer,
+        first_scissor: u32,
+        scissors: &[vk::Rect2D],
+    ) {
+        self.logical_device.cmd_set_scissor(
+            *command_buffer,
+            first_scissor,
+            scissors,
+        )
+    }
+
+    /// Draw vertices.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - there must be a pipeline bound
+    ///   - all of the relevant buffers and settings must be set in the command
+    ///     buffer prior to issuing a draw command
+    pub unsafe fn cmd_draw(
+        &self,
+        command_buffer: &vk::CommandBuffer,
+        vertex_count: u32,
+        instance_count: u32,
+        first_vertex: u32,
+        first_instance: u32,
+    ) {
+        self.logical_device.cmd_draw(
+            *command_buffer,
+            vertex_count,
+            instance_count,
+            first_vertex,
+            first_instance,
+        );
+    }
+
+    /// Bind vertex buffers for drawing.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - first_binding must be in the range 0..buffers.len()
+    ///   - there must be one offset for each buffer in buffers
+    ///   - each offset must be between 0 and the length of the respective
+    ///     buffer
+    pub unsafe fn cmd_bind_vertex_buffers(
+        &self,
+        command_buffer: &vk::CommandBuffer,
+        first_binding: u32,
+        buffers: &[vk::Buffer],
+        offsets: &[u64],
+    ) {
+        self.logical_device.cmd_bind_vertex_buffers(
+            *command_buffer,
+            first_binding,
+            buffers,
+            offsets,
+        )
+    }
 }

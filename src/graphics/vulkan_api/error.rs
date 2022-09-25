@@ -128,4 +128,19 @@ pub enum VulkanError {
 
     #[error("Unable to flush changes to mapped Vulkan memory {:#?}", .0)]
     UnableToFlushMappedMemoryRanges(#[source] vk::Result),
+
+    #[error("Invalid byte length for SPIRV shader!")]
+    InvalidSourceLengthInShaderSPIRV,
+
+    #[error("Invalid bytes found in compiled SPIRV shader module source")]
+    InvalidBytesInShaderSPIRV(#[source] core::array::TryFromSliceError),
+
+    #[error("Unable to create Vulkan shader module {:#?}", .0)]
+    UnableToCreateShaderModule(#[source] vk::Result),
+
+    #[error("Unabe to create graphics pipeline {:#?}", .0)]
+    UnableToCreateGraphicsPipeline(#[source] vk::Result),
+
+    #[error("Unable to create a pipeline layout {:#?}", .0)]
+    UnableToCreatePipelineLayout(#[source] vk::Result),
 }

@@ -107,6 +107,7 @@ dependencies = [
  "ash",
  "flexi_logger",
  "glfw",
+ "glob",
  "log",
  "memoffset",
  "nalgebra",
