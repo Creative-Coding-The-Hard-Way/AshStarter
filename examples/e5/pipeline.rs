@@ -2,8 +2,8 @@ use std::{ffi::CStr, sync::Arc};
 
 use ash::vk;
 use ccthw::graphics::vulkan_api::{
-    GraphicsPipeline, PipelineLayout, RenderDevice, RenderPass, ShaderModule,
-    VulkanError,
+    DescriptorSetLayout, GraphicsPipeline, PipelineLayout, RenderDevice,
+    RenderPass, ShaderModule, VulkanDebug, VulkanError,
 };
 use memoffset::offset_of;
 
@@ -12,7 +12,22 @@ use super::Vertex;
 pub fn create_pipeline_layout(
     render_device: Arc<RenderDevice>,
 ) -> Result<PipelineLayout, VulkanError> {
-    PipelineLayout::new(render_device, &[])
+    let descriptor_set_layout = Arc::new(DescriptorSetLayout::new(
+        render_device.clone(),
+        &[vk::DescriptorSetLayoutBinding {
+            binding: 0,
+            descriptor_type: vk::DescriptorType::UNIFORM_BUFFER,
+            descriptor_count: 1,
+            stage_flags: vk::ShaderStageFlags::VERTEX,
+            p_immutable_samplers: std::ptr::null(),
+        }],
+    )?);
+    descriptor_set_layout
+        .set_debug_name("triangle pipeline descriptor set layout");
+    let pipeline_layout =
+        PipelineLayout::new(render_device, &[descriptor_set_layout])?;
+    pipeline_layout.set_debug_name("triangle pipeline layout");
+    Ok(pipeline_layout)
 }
 
 pub fn create_pipeline(

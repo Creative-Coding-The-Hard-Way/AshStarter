@@ -2,7 +2,8 @@ use ash::vk;
 
 use super::CommandBuffer;
 use crate::graphics::vulkan_api::{
-    Framebuffer, GraphicsPipeline, HostCoherentBuffer, RenderPass, VulkanError,
+    DescriptorSet, Framebuffer, GraphicsPipeline, HostCoherentBuffer,
+    PipelineLayout, RenderPass, VulkanError,
 };
 
 impl CommandBuffer {
@@ -154,6 +155,34 @@ impl CommandBuffer {
             0,
             &[*buffer.raw()],
             &[offset],
+        );
+        self
+    }
+
+    /// Bind descriptor sets for a pipeline.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - Descriptor sets cannot typically be written while bound.
+    ///   - The application must keep all bound resources alive until the
+    ///     commands in this buffer finishexecuting.
+    pub unsafe fn bind_graphics_descriptor_sets(
+        &self,
+        pipeline_layout: &PipelineLayout,
+        descriptor_sets: &[&DescriptorSet],
+    ) -> &Self {
+        let raw_descriptor_sets: Vec<vk::DescriptorSet> = descriptor_sets
+            .iter()
+            .map(|descriptor_set| *descriptor_set.raw())
+            .collect();
+        self.render_device.cmd_bind_descriptor_sets(
+            &self.command_buffer,
+            vk::PipelineBindPoint::GRAPHICS,
+            pipeline_layout.raw(),
+            0,
+            &raw_descriptor_sets,
+            &[],
         );
         self
     }

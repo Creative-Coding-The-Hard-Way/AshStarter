@@ -9,3 +9,5 @@ for the Vulkan API.
 - [Example 1 - RenderPass + Framebuffer](./examples/e1)
 - [Example 2 - Multi-Frame Rendering](./examples/e2)
 - [Example 3 - SwapchainFrames](./examples/e3)
+- [Example 4 - First Triangle](./examples/e4)
+- [Example 4 - Uniforms](./examples/e5)

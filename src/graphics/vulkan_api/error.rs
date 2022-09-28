@@ -143,4 +143,13 @@ pub enum VulkanError {
 
     #[error("Unable to create a pipeline layout {:#?}", .0)]
     UnableToCreatePipelineLayout(#[source] vk::Result),
+
+    #[error("Unable to create a descriptor set layout {:#?}", .0)]
+    UnableToCreateDescriptorSetLayout(#[source] vk::Result),
+
+    #[error("Unable to create the descriptor pool {:#?}", .0)]
+    UnableToCreateDescriptorPool(#[source] vk::Result),
+
+    #[error("Unable to allocate descriptor sets {:#?}", .0)]
+    UnableToAllocateDescriptorSets(#[source] vk::Result),
 }

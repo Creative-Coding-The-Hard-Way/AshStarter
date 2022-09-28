@@ -619,4 +619,127 @@ impl RenderDevice {
             offsets,
         )
     }
+
+    /// Create a new Vulkan descriptor set layout.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - The caller must destroy the descriptor set layout before the render
+    ///     device is dropped.
+    pub unsafe fn create_descriptor_set_layout(
+        &self,
+        create_info: &vk::DescriptorSetLayoutCreateInfo,
+    ) -> Result<vk::DescriptorSetLayout, VulkanError> {
+        self.logical_device
+            .create_descriptor_set_layout(create_info, None)
+            .map_err(VulkanError::UnableToCreateDescriptorSetLayout)
+    }
+
+    /// Destroy a descriptor set layout.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - The caller must ensure that the layout is not in-use by any command
+    ///     buffers or gpu operations when it is destroyed.
+    pub unsafe fn destroy_descriptor_set_layout(
+        &self,
+        layout: vk::DescriptorSetLayout,
+    ) {
+        self.logical_device
+            .destroy_descriptor_set_layout(layout, None)
+    }
+
+    /// Create descriptor pool.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - The caller must destroy the descriptor pool before the render device
+    ///     is dropped.
+    pub unsafe fn create_descriptor_pool(
+        &self,
+        create_info: &vk::DescriptorPoolCreateInfo,
+    ) -> Result<vk::DescriptorPool, VulkanError> {
+        self.logical_device
+            .create_descriptor_pool(create_info, None)
+            .map_err(VulkanError::UnableToCreateDescriptorPool)
+    }
+
+    /// Destroy a descriptor pool.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - The caller must ensure that the pool is not in use at the time of
+    ///     destruction.
+    pub unsafe fn destroy_descriptor_pool(
+        &self,
+        descriptor_pool: vk::DescriptorPool,
+    ) {
+        self.logical_device
+            .destroy_descriptor_pool(descriptor_pool, None)
+    }
+
+    /// Allocate a descriptor set from a pool.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - The pool must outlive any usage of the returned descriptor sets.
+    ///   - The descriptor sets (and the associated pool) must be destroyed
+    ///     before this RenderDevice is dropped.
+    pub unsafe fn allocate_descriptor_sets(
+        &self,
+        create_info: &vk::DescriptorSetAllocateInfo,
+    ) -> Result<Vec<vk::DescriptorSet>, VulkanError> {
+        self.logical_device
+            .allocate_descriptor_sets(create_info)
+            .map_err(VulkanError::UnableToAllocateDescriptorSets)
+    }
+
+    /// Write or copy a descriptor set.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - device extensions are required to write/copy descriptor sets while
+    ///     they are bound
+    ///   - the caller must ensure all writes/copies are valid and refer to
+    ///     descriptor sets that still exist
+    pub unsafe fn update_descriptor_sets(
+        &self,
+        descriptor_writes: &[vk::WriteDescriptorSet],
+        descriptor_copies: &[vk::CopyDescriptorSet],
+    ) {
+        self.logical_device
+            .update_descriptor_sets(descriptor_writes, descriptor_copies)
+    }
+
+    /// Bind descriptor sets for writing.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - Descriptor sets cannot typically be written while they are bound
+    ///     for rendering.
+    pub unsafe fn cmd_bind_descriptor_sets(
+        &self,
+        command_buffer: &vk::CommandBuffer,
+        pipeline_bind_point: vk::PipelineBindPoint,
+        pipeline_layout: vk::PipelineLayout,
+        first_set: u32,
+        descriptor_sets: &[vk::DescriptorSet],
+        dynamic_offsets: &[u32],
+    ) {
+        self.logical_device.cmd_bind_descriptor_sets(
+            *command_buffer,
+            pipeline_bind_point,
+            pipeline_layout,
+            first_set,
+            descriptor_sets,
+            dynamic_offsets,
+        )
+    }
 }

@@ -1,5 +1,6 @@
 mod buffer;
 mod commands;
+mod descriptors;
 mod error;
 mod ffi;
 mod framebuffer;
@@ -14,6 +15,7 @@ mod texture;
 pub use self::{
     buffer::HostCoherentBuffer,
     commands::{CommandBuffer, CommandPool},
+    descriptors::{DescriptorPool, DescriptorSet, DescriptorSetLayout},
     error::VulkanError,
     framebuffer::Framebuffer,
     instance::Instance,
