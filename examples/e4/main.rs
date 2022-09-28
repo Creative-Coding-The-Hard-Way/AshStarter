@@ -184,5 +184,6 @@ impl Drop for Example4FirstTriangle {
 
 fn main() -> Result<()> {
     logging::setup()?;
-    Application::<Example4FirstTriangle>::new("Example 1 - Clear Screen")?.run()
+    Application::<Example4FirstTriangle>::new("Example 4 - First Triangle")?
+        .run()
 }

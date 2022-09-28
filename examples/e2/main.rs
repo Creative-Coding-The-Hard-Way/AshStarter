@@ -292,6 +292,6 @@ impl Drop for Example2MultipleFrames {
 
 fn main() -> Result<()> {
     logging::setup()?;
-    Application::<Example2MultipleFrames>::new("Example 1 - Clear Screen")?
+    Application::<Example2MultipleFrames>::new("Example 2 - Multiple Frames")?
         .run()
 }
