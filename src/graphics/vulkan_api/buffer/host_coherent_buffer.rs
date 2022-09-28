@@ -15,6 +15,30 @@ pub struct HostCoherentBuffer<T> {
 }
 
 impl<T> HostCoherentBuffer<T> {
+    /// Get the raw Vulkan handle to the buffer.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - Ownership is not transferred. The caller must ensure no references
+    ///     to the buffer exist after this HostCoherentBuffer is dropped.
+    pub unsafe fn raw(&self) -> &vk::Buffer {
+        &self.buffer
+    }
+
+    /// Flush the host caches so data is visible on the device.
+    ///
+    /// Generally this method does not need to be called explicitly because
+    /// the memory is allocated to be host coherent.
+    pub fn flush(&self) -> Result<(), VulkanError> {
+        unsafe { self.allocation.flush_mapped_memory(&self.render_device) }
+    }
+}
+
+impl<T> HostCoherentBuffer<T>
+where
+    T: Copy,
+{
     /// Create a new Device buffer that the host can read and write.
     ///
     /// len is the number of elements to be stored in the buffer.
@@ -56,34 +80,33 @@ impl<T> HostCoherentBuffer<T> {
         })
     }
 
-    /// Get the raw Vulkan handle to the buffer.
+    /// Access the underlying memory as if it were a slice of T.
     ///
     /// # Safety
     ///
     /// Unsafe because:
-    ///   - Ownership is not transferred. The caller must ensure no references
-    ///     to the buffer exist after this HostCoherentBuffer is dropped.
-    pub unsafe fn raw(&self) -> &vk::Buffer {
-        &self.buffer
-    }
-
-    /// Flush the host caches so data is visible on the device.
-    ///
-    /// Generally this method does not need to be called explicitly because
-    /// the memory is allocated to be host coherent.
-    pub fn flush(&self) -> Result<(), VulkanError> {
-        unsafe { self.allocation.flush_mapped_memory(&self.render_device) }
-    }
-
-    /// Access the underlying memory as if it were a slice of T.
-    pub fn as_slice(&self) -> Result<&[T], VulkanError> {
+    ///   - If the buffer is newly created then the values of T inside will have
+    ///     undefined values.
+    ///   - Reading from the buffer before writing data is unsafe and undefined
+    ///     behavior.
+    ///   - The caller must synchronize reads/writes to the buffer externally.
+    pub unsafe fn as_slice(&self) -> Result<&[T], VulkanError> {
         // safe because the allocation was created with the HOST_VISIBLE bit
         // and is mapped when the buffer is created
         unsafe { self.allocation.as_slice() }
     }
 
     /// Access the underlying memory as if it were a mut slice of T.
-    pub fn as_slice_mut(&mut self) -> Result<&mut [T], VulkanError> {
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - If the buffer is newly created then the values of T inside will have
+    ///     undefined values.
+    ///   - Reading from the buffer before writing data is unsafe and undefined
+    ///     behavior.
+    ///   - The caller must synchronize reads/writes to the buffer externally.
+    pub unsafe fn as_slice_mut(&mut self) -> Result<&mut [T], VulkanError> {
         // safe because the allocation was created with the HOST_VISIBLE bit
         // and is mapped when the buffer is created
         unsafe { self.allocation.as_slice_mut() }

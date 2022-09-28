@@ -16,6 +16,7 @@ use ccthw::{
     logging,
 };
 
+#[derive(Debug, Copy, Clone)]
 #[repr(C, packed)]
 struct Vertex {
     pub pos: [f32; 2],
@@ -82,7 +83,11 @@ impl State for Example4FirstTriangle {
             3,
         )?;
         vertex_buffer.set_debug_name("triangle vertices");
-        {
+        unsafe {
+            // SAFE because the vertex slice is only being written, so no
+            // uninitialized values are being read. The vertex buffer is not
+            // in-use by the GPU so there are no races associated with writing
+            // here.
             let vertices = vertex_buffer.as_slice_mut()?;
             vertices[0] = Vertex {
                 pos: [0.0, 0.5],

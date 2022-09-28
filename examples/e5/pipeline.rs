@@ -111,8 +111,8 @@ pub fn create_pipeline(
         rasterizer_discard_enable: vk::FALSE,
         polygon_mode: vk::PolygonMode::FILL,
         line_width: 1.0,
-        cull_mode: vk::CullModeFlags::BACK,
-        front_face: vk::FrontFace::CLOCKWISE,
+        cull_mode: vk::CullModeFlags::NONE,
+        front_face: vk::FrontFace::COUNTER_CLOCKWISE,
         depth_bias_enable: vk::FALSE,
         ..Default::default()
     };

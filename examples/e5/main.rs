@@ -7,6 +7,7 @@ use ash::vk;
 use ccthw::{
     application::{Application, GlfwWindow, State},
     graphics::{
+        ortho_projection,
         vulkan_api::{
             DescriptorPool, DescriptorSet, Framebuffer, GraphicsPipeline,
             HostCoherentBuffer, PipelineLayout, RenderDevice, RenderPass,
@@ -17,12 +18,14 @@ use ccthw::{
     logging,
 };
 
+#[derive(Debug, Copy, Clone)]
 #[repr(C, packed)]
 struct Vertex {
     pub pos: [f32; 2],
     pub color: [f32; 4],
 }
 
+#[derive(Debug, Copy, Clone)]
 #[repr(C, packed)]
 struct UniformBufferObject {
     pub proj: [[f32; 4]; 4],
@@ -36,7 +39,7 @@ struct Example4FirstTriangle {
     pipeline_layout: PipelineLayout,
     graphics_pipeline: Option<GraphicsPipeline>,
     vertex_buffer: HostCoherentBuffer<Vertex>,
-    _uniform_buffer: HostCoherentBuffer<UniformBufferObject>,
+    uniform_buffer: HostCoherentBuffer<UniformBufferObject>,
     swapchain_frames: SwapchainFrames,
     framebuffers: Vec<Framebuffer>,
     render_pass: Option<RenderPass>,
@@ -74,6 +77,20 @@ impl Example4FirstTriangle {
             &self.pipeline_layout,
         )?);
 
+        let right = framebuffer_size.0 as f32 / 2.0;
+        let left = -right;
+        let top = framebuffer_size.1 as f32 / 2.0;
+        let bottom = -top;
+        let projection = ortho_projection(left, right, bottom, top, 0.0, 1.0);
+        unsafe {
+            // Safe because no frames are in-flight (and therefore using this
+            // buffer) at the time of writing. See the call to
+            // "wait_for_all_frames_to_complete" above.
+            self.uniform_buffer.as_slice_mut()?[0] = UniformBufferObject {
+                proj: projection.into(),
+            };
+        }
+
         Ok(())
     }
 }
@@ -91,18 +108,22 @@ impl State for Example4FirstTriangle {
             3,
         )?;
         vertex_buffer.set_debug_name("triangle vertices");
-        {
+        unsafe {
+            // SAFE because the vertex slice is only being written, so no
+            // uninitialized values are being read. The vertex buffer is not
+            // in-use by the GPU so there are no races associated with writing
+            // here.
             let vertices = vertex_buffer.as_slice_mut()?;
             vertices[0] = Vertex {
-                pos: [0.0, 0.5],
+                pos: [0.0, 50.0],
                 color: [1.0, 1.0, 1.0, 1.0],
             };
             vertices[1] = Vertex {
-                pos: [-0.5, 0.0],
+                pos: [-50.0, 0.0],
                 color: [1.0, 1.0, 1.0, 1.0],
             };
             vertices[2] = Vertex {
-                pos: [0.5, 0.0],
+                pos: [50.0, 0.0],
                 color: [1.0, 1.0, 1.0, 1.0],
             };
         }
@@ -113,7 +134,11 @@ impl State for Example4FirstTriangle {
             1,
         )?;
         uniform_buffer.set_debug_name("uniform buffer");
-        {
+        unsafe {
+            // SAFE because the slice is only being written, so no
+            // uninitialized values are being read. The buffer is not
+            // in-use by the GPU so there are no races associated with writing
+            // here.
             uniform_buffer.as_slice_mut()?[0] = UniformBufferObject {
                 proj: [
                     [1.0, 0.0, 0.0, 0.0], // r1
@@ -154,7 +179,7 @@ impl State for Example4FirstTriangle {
             _descriptor_pool: descriptor_pool,
             pipeline_layout,
             graphics_pipeline: None,
-            _uniform_buffer: uniform_buffer,
+            uniform_buffer,
             vertex_buffer,
             framebuffers: vec![],
             render_pass: None,
