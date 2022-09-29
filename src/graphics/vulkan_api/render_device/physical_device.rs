@@ -3,7 +3,7 @@ use ash::vk;
 use crate::{
     graphics::vulkan_api::{
         render_device::{QueueFamilies, WindowSurface},
-        Instance, VulkanError,
+        ArePhysicalDeviceFeaturesSuitableFn, Instance, VulkanError,
     },
     logging::PrettyList,
 };
@@ -20,11 +20,19 @@ pub fn required_device_extensions() -> Vec<String> {
 pub fn find_optimal_physical_device(
     instance: &Instance,
     window_surface: &WindowSurface,
+    are_features_suitable: ArePhysicalDeviceFeaturesSuitableFn,
 ) -> Result<vk::PhysicalDevice, VulkanError> {
     instance
         .enumerate_physical_devices()?
         .into_iter()
-        .find(|device| is_device_suitable(instance, window_surface, device))
+        .find(|device| {
+            is_device_suitable(
+                instance,
+                window_surface,
+                device,
+                are_features_suitable,
+            )
+        })
         .ok_or(VulkanError::NoSuitableDeviceFound)
 }
 
@@ -32,6 +40,7 @@ fn is_device_suitable(
     instance: &Instance,
     window_surface: &WindowSurface,
     physical_device: &vk::PhysicalDevice,
+    are_features_suitable: ArePhysicalDeviceFeaturesSuitableFn,
 ) -> bool {
     if any_missing_extensions(instance, physical_device) {
         return false;
@@ -72,7 +81,9 @@ fn is_device_suitable(
         }
     }
 
-    true
+    are_features_suitable(
+        &instance.get_physical_device_features2(*physical_device),
+    )
 }
 
 /// Check that all required device extensions are available.

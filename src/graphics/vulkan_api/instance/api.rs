@@ -1,6 +1,8 @@
+use std::os::raw::c_void;
+
 use ash::vk;
 
-use super::Instance;
+use super::{Instance, PhysicalDeviceFeatures};
 use crate::graphics::vulkan_api::VulkanError;
 
 impl Instance {
@@ -46,6 +48,33 @@ impl Instance {
         unsafe {
             self.ash
                 .get_physical_device_memory_properties(*physical_device)
+        }
+    }
+
+    /// Get the physical device's features along with specific features enabled
+    /// by the get_physical_device_features2 api.
+    pub fn get_physical_device_features2(
+        &self,
+        physical_device: vk::PhysicalDevice,
+    ) -> PhysicalDeviceFeatures {
+        let mut physical_device_descriptor_indexing_features =
+            vk::PhysicalDeviceDescriptorIndexingFeatures::default();
+        let mut physical_device_features_v2 = vk::PhysicalDeviceFeatures2 {
+            p_next: &mut physical_device_descriptor_indexing_features
+                as *mut vk::PhysicalDeviceDescriptorIndexingFeatures
+                as *mut c_void,
+            ..Default::default()
+        };
+        unsafe {
+            self.ash.get_physical_device_features2(
+                physical_device,
+                &mut physical_device_features_v2,
+            );
+        }
+        PhysicalDeviceFeatures {
+            features: physical_device_features_v2.features,
+            descriptor_indexing_features:
+                physical_device_descriptor_indexing_features,
         }
     }
 }

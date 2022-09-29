@@ -2,6 +2,9 @@ use std::ffi::c_void;
 
 use ash::{extensions::ext::DebugUtils, vk};
 
+pub use self::physical_device_features::{
+    ArePhysicalDeviceFeaturesSuitableFn, PhysicalDeviceFeatures,
+};
 use crate::{
     graphics::vulkan_api::{ffi::to_os_ptrs, VulkanError},
     logging::PrettyList,
@@ -11,6 +14,7 @@ mod api;
 mod debug_callback;
 mod extensions;
 mod layers;
+mod physical_device_features;
 
 /// The Vulkan library instance.
 pub struct Instance {
@@ -74,31 +78,22 @@ impl Instance {
         physical_device: &vk::PhysicalDevice,
         physical_device_extensions: &[String],
         queue_create_infos: &[vk::DeviceQueueCreateInfo],
+        mut physical_device_features: PhysicalDeviceFeatures,
     ) -> Result<ash::Device, VulkanError> {
         let (_c_layer_names, layer_name_ptrs) =
             unsafe { to_os_ptrs(&self.layers) };
         let (_c_ext_names, ext_name_ptrs) =
             unsafe { to_os_ptrs(physical_device_extensions) };
 
-        let mut indexing_features =
-            vk::PhysicalDeviceDescriptorIndexingFeatures {
-                shader_sampled_image_array_non_uniform_indexing: vk::TRUE,
-                runtime_descriptor_array: vk::TRUE,
-                descriptor_binding_variable_descriptor_count: vk::TRUE,
-                ..Default::default()
-            };
-        let physical_device_features = vk::PhysicalDeviceFeatures2 {
-            p_next: &mut indexing_features
+        let physical_device_features_v2 = vk::PhysicalDeviceFeatures2 {
+            p_next: &mut physical_device_features.descriptor_indexing_features
                 as *mut vk::PhysicalDeviceDescriptorIndexingFeatures
                 as *mut c_void,
-            features: vk::PhysicalDeviceFeatures {
-                ..Default::default()
-            },
+            features: physical_device_features.features,
             ..Default::default()
         };
-
         let create_info = vk::DeviceCreateInfo {
-            p_next: &physical_device_features
+            p_next: &physical_device_features_v2
                 as *const vk::PhysicalDeviceFeatures2
                 as *const c_void,
             queue_create_info_count: queue_create_infos.len() as u32,

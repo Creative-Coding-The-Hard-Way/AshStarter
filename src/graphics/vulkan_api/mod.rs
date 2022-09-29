@@ -18,7 +18,9 @@ pub use self::{
     descriptors::{DescriptorPool, DescriptorSet, DescriptorSetLayout},
     error::VulkanError,
     framebuffer::Framebuffer,
-    instance::Instance,
+    instance::{
+        ArePhysicalDeviceFeaturesSuitableFn, Instance, PhysicalDeviceFeatures,
+    },
     pipeline::{GraphicsPipeline, PipelineLayout, ShaderModule},
     render_device::{Allocation, RenderDevice, VulkanDebug},
     render_pass::RenderPass,

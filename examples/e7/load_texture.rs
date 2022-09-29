@@ -170,7 +170,7 @@ pub fn load_texture(
             address_mode_u: vk::SamplerAddressMode::REPEAT,
             address_mode_v: vk::SamplerAddressMode::REPEAT,
             address_mode_w: vk::SamplerAddressMode::REPEAT,
-            anisotropy_enable: vk::FALSE,
+            anisotropy_enable: vk::TRUE,
             max_anisotropy: 1.0,
             border_color: vk::BorderColor::INT_OPAQUE_BLACK,
             unnormalized_coordinates: vk::FALSE,

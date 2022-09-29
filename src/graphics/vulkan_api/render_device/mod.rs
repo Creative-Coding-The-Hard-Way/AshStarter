@@ -16,7 +16,10 @@ use self::{
     queue_families::QueueFamilies,
     window_surface::WindowSurface,
 };
-use crate::graphics::vulkan_api::{Instance, VulkanError};
+use crate::graphics::vulkan_api::{
+    ArePhysicalDeviceFeaturesSuitableFn, Instance, PhysicalDeviceFeatures,
+    VulkanError,
+};
 
 /// Types which implement this trait can name their Vulkan resources so they
 /// have a friendly name in Vulkan debug logs.
@@ -45,11 +48,14 @@ impl RenderDevice {
     pub fn new(
         instance: Instance,
         surface_khr: ash::vk::SurfaceKHR,
+        physical_device_features: PhysicalDeviceFeatures,
+        are_features_suitable: ArePhysicalDeviceFeaturesSuitableFn,
     ) -> Result<Self, VulkanError> {
         let window_surface = WindowSurface::new(&instance, surface_khr);
         let physical_device = physical_device::find_optimal_physical_device(
             &instance,
             &window_surface,
+            are_features_suitable,
         )?;
         let queue_families = QueueFamilies::find_for_physical_device(
             &instance,
@@ -60,6 +66,7 @@ impl RenderDevice {
             &physical_device,
             &physical_device::required_device_extensions(),
             &queue_families.as_queue_create_infos(),
+            physical_device_features,
         )?;
         let (graphics_queue, present_queue) =
             queue_families.get_queues(&logical_device);

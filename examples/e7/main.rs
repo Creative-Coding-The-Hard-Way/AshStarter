@@ -11,8 +11,8 @@ use ccthw::{
         ortho_projection,
         vulkan_api::{
             DescriptorPool, DescriptorSet, Framebuffer, GraphicsPipeline,
-            HostCoherentBuffer, ImageView, PipelineLayout, RenderDevice,
-            RenderPass, Sampler, VulkanDebug,
+            HostCoherentBuffer, ImageView, PhysicalDeviceFeatures,
+            PipelineLayout, RenderDevice, RenderPass, Sampler, VulkanDebug,
         },
         AcquiredFrame, SwapchainFrames,
     },
@@ -59,60 +59,27 @@ struct Example7Textures {
     render_device: Arc<RenderDevice>,
 }
 
-impl Example7Textures {
-    fn build_swapchain_resources(
-        &mut self,
-        framebuffer_size: (i32, i32),
-    ) -> Result<()> {
-        self.swapchain_frames.wait_for_all_frames_to_complete()?;
-        self.framebuffers.clear();
-        self.swapchain_frames.rebuild_swapchain(framebuffer_size)?;
-
-        self.render_pass = Some(RenderPass::single_sampled(
-            self.render_device.clone(),
-            self.swapchain_frames.swapchain().format(),
-        )?);
-
-        let extent = self.swapchain_frames.swapchain().extent();
-        for i in 0..self.swapchain_frames.swapchain_image_count() {
-            let image_view = self.swapchain_frames.swapchain_image_view(i)?;
-            self.framebuffers.push(Framebuffer::new(
-                self.render_device.clone(),
-                self.render_pass.as_ref().unwrap(),
-                &[image_view.clone()],
-                extent,
-            )?);
-        }
-
-        self.graphics_pipeline = Some(pipeline::create_pipeline(
-            &self.render_device,
-            self.render_pass.as_ref().unwrap(),
-            &self.pipeline_layout,
-        )?);
-
-        let right = framebuffer_size.0 as f32 / 2.0;
-        let left = -right;
-        let top = framebuffer_size.1 as f32 / 2.0;
-        let bottom = -top;
-        let projection = ortho_projection(left, right, bottom, top, 0.0, 1.0);
-        unsafe {
-            // Safe because no frames are in-flight (and therefore using this
-            // buffer) at the time of writing. See the call to
-            // "wait_for_all_frames_to_complete" above.
-            self.uniform_buffer.as_slice_mut()?[0] = UniformBufferObject {
-                proj: projection.into(),
-            };
-        }
-
-        Ok(())
-    }
-}
-
 impl State for Example7Textures {
     fn new(window: &mut GlfwWindow) -> Result<Self> {
         window.window_handle.set_key_polling(true);
 
-        let render_device = Arc::new(window.create_render_device()?);
+        let render_device =
+            Arc::new(window.create_render_device_with_features(
+                PhysicalDeviceFeatures {
+                    features: vk::PhysicalDeviceFeatures {
+                        sampler_anisotropy: vk::TRUE,
+                        ..Default::default()
+                    },
+                    ..Default::default()
+                },
+                |physical_device_features| {
+                    // check for anisotropy support because the texture sampler
+                    // uses anisotropy
+                    physical_device_features.features.sampler_anisotropy
+                        == vk::TRUE
+                },
+            )?);
+
         let swapchain_frames = SwapchainFrames::new(render_device.clone())?;
 
         let mut vertex_buffer = HostCoherentBuffer::new(
@@ -272,6 +239,55 @@ impl State for Example7Textures {
         }
 
         self.swapchain_frames.present_frame(frame)?;
+
+        Ok(())
+    }
+}
+
+impl Example7Textures {
+    fn build_swapchain_resources(
+        &mut self,
+        framebuffer_size: (i32, i32),
+    ) -> Result<()> {
+        self.swapchain_frames.wait_for_all_frames_to_complete()?;
+        self.framebuffers.clear();
+        self.swapchain_frames.rebuild_swapchain(framebuffer_size)?;
+
+        self.render_pass = Some(RenderPass::single_sampled(
+            self.render_device.clone(),
+            self.swapchain_frames.swapchain().format(),
+        )?);
+
+        let extent = self.swapchain_frames.swapchain().extent();
+        for i in 0..self.swapchain_frames.swapchain_image_count() {
+            let image_view = self.swapchain_frames.swapchain_image_view(i)?;
+            self.framebuffers.push(Framebuffer::new(
+                self.render_device.clone(),
+                self.render_pass.as_ref().unwrap(),
+                &[image_view.clone()],
+                extent,
+            )?);
+        }
+
+        self.graphics_pipeline = Some(pipeline::create_pipeline(
+            &self.render_device,
+            self.render_pass.as_ref().unwrap(),
+            &self.pipeline_layout,
+        )?);
+
+        let right = framebuffer_size.0 as f32 / 2.0;
+        let left = -right;
+        let top = framebuffer_size.1 as f32 / 2.0;
+        let bottom = -top;
+        let projection = ortho_projection(left, right, bottom, top, 0.0, 1.0);
+        unsafe {
+            // Safe because no frames are in-flight (and therefore using this
+            // buffer) at the time of writing. See the call to
+            // "wait_for_all_frames_to_complete" above.
+            self.uniform_buffer.as_slice_mut()?[0] = UniformBufferObject {
+                proj: projection.into(),
+            };
+        }
 
         Ok(())
     }

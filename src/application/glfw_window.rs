@@ -6,7 +6,10 @@ use glfw::{ClientApiHint, WindowEvent, WindowHint, WindowMode};
 
 use crate::{
     application::ApplicationError,
-    graphics::vulkan_api::{Instance, RenderDevice},
+    graphics::vulkan_api::{
+        ArePhysicalDeviceFeaturesSuitableFn, Instance, PhysicalDeviceFeatures,
+        RenderDevice,
+    },
 };
 
 /// All resources required for running a single-windowed GLFW application which
@@ -107,8 +110,21 @@ impl GlfwWindow {
         Ok(())
     }
 
+    /// Create a render device with default physical device features.
     pub fn create_render_device(
         &self,
+    ) -> Result<RenderDevice, ApplicationError> {
+        self.create_render_device_with_features(
+            PhysicalDeviceFeatures::default(),
+            |_features| true,
+        )
+    }
+
+    /// Create a render device with the requested physical device features.
+    pub fn create_render_device_with_features(
+        &self,
+        physical_device_features: PhysicalDeviceFeatures,
+        are_features_suitable: ArePhysicalDeviceFeaturesSuitableFn,
     ) -> Result<RenderDevice, ApplicationError> {
         let instance = self.create_vulkan_instance()?;
 
@@ -126,6 +142,8 @@ impl GlfwWindow {
         let render_device = RenderDevice::new(
             instance,
             vk::SurfaceKHR::from_raw(surface_handle),
+            physical_device_features,
+            are_features_suitable,
         )?;
 
         Ok(render_device)
