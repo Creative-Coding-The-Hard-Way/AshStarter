@@ -18,6 +18,7 @@ impl PipelineLayout {
     pub fn new(
         render_device: Arc<RenderDevice>,
         descriptor_set_layouts: &[Arc<DescriptorSetLayout>],
+        push_constant_ranges: &[vk::PushConstantRange],
     ) -> Result<Self, VulkanError> {
         let raw_descriptor_set_layouts: Vec<vk::DescriptorSetLayout> =
             descriptor_set_layouts
@@ -31,6 +32,8 @@ impl PipelineLayout {
         let create_info = vk::PipelineLayoutCreateInfo {
             p_set_layouts: raw_descriptor_set_layouts.as_ptr(),
             set_layout_count: raw_descriptor_set_layouts.len() as u32,
+            p_push_constant_ranges: push_constant_ranges.as_ptr(),
+            push_constant_range_count: push_constant_ranges.len() as u32,
             ..Default::default()
         };
         let pipeline_layout =

@@ -10,4 +10,5 @@ for the Vulkan API.
 - [Example 2 - Multi-Frame Rendering](./examples/e2)
 - [Example 3 - SwapchainFrames](./examples/e3)
 - [Example 4 - First Triangle](./examples/e4)
-- [Example 4 - Uniforms](./examples/e5)
+- [Example 5 - Uniforms](./examples/e5)
+- [Example 6 - Push Constants](./examples/e6)

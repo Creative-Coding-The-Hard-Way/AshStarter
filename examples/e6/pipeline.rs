@@ -2,17 +2,39 @@ use std::{ffi::CStr, sync::Arc};
 
 use ash::vk;
 use ccthw::graphics::vulkan_api::{
-    GraphicsPipeline, PipelineLayout, RenderDevice, RenderPass, ShaderModule,
-    VulkanError,
+    DescriptorSetLayout, GraphicsPipeline, PipelineLayout, RenderDevice,
+    RenderPass, ShaderModule, VulkanDebug, VulkanError,
 };
 use memoffset::offset_of;
 
-use super::Vertex;
+use super::{PushConstant, Vertex};
 
 pub fn create_pipeline_layout(
     render_device: Arc<RenderDevice>,
 ) -> Result<PipelineLayout, VulkanError> {
-    PipelineLayout::new(render_device, &[], &[])
+    let descriptor_set_layout = Arc::new(DescriptorSetLayout::new(
+        render_device.clone(),
+        &[vk::DescriptorSetLayoutBinding {
+            binding: 0,
+            descriptor_type: vk::DescriptorType::UNIFORM_BUFFER,
+            descriptor_count: 1,
+            stage_flags: vk::ShaderStageFlags::VERTEX,
+            p_immutable_samplers: std::ptr::null(),
+        }],
+    )?);
+    descriptor_set_layout
+        .set_debug_name("triangle pipeline descriptor set layout");
+    let pipeline_layout = PipelineLayout::new(
+        render_device,
+        &[descriptor_set_layout],
+        &[vk::PushConstantRange {
+            stage_flags: vk::ShaderStageFlags::VERTEX,
+            offset: 0,
+            size: std::mem::size_of::<PushConstant>() as u32,
+        }],
+    )?;
+    pipeline_layout.set_debug_name("triangle pipeline layout");
+    Ok(pipeline_layout)
 }
 
 pub fn create_pipeline(
@@ -96,8 +118,8 @@ pub fn create_pipeline(
         rasterizer_discard_enable: vk::FALSE,
         polygon_mode: vk::PolygonMode::FILL,
         line_width: 1.0,
-        cull_mode: vk::CullModeFlags::BACK,
-        front_face: vk::FrontFace::CLOCKWISE,
+        cull_mode: vk::CullModeFlags::NONE,
+        front_face: vk::FrontFace::COUNTER_CLOCKWISE,
         depth_bias_enable: vk::FALSE,
         ..Default::default()
     };

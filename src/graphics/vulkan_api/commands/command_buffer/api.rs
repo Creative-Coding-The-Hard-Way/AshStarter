@@ -186,4 +186,37 @@ impl CommandBuffer {
         );
         self
     }
+
+    /// Write push_constant data to the command buffer for use when executing.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - the pipeline layout must include push constant definitions for the
+    ///     values being provided
+    ///   - the type being provided should be packed and members should be
+    ///     aligned for use by the GPU.
+    pub unsafe fn push_constant<T>(
+        &self,
+        pipeline_layout: &PipelineLayout,
+        shader_stage_flags: vk::ShaderStageFlags,
+        value: T,
+    ) -> &Self
+    where
+        T: Copy,
+    {
+        let constants: &[u8] = std::slice::from_raw_parts(
+            &value as *const T as *const u8,
+            std::mem::size_of::<T>(),
+        );
+        let offset = 0;
+        self.render_device.cmd_push_constants(
+            &self.command_buffer,
+            &pipeline_layout.raw(),
+            shader_stage_flags,
+            offset,
+            constants,
+        );
+        self
+    }
 }

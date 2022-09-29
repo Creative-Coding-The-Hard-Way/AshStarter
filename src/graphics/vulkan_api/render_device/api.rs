@@ -742,4 +742,29 @@ impl RenderDevice {
             dynamic_offsets,
         )
     }
+
+    /// Send push constant data along with the command buffer.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - the pipeline layout must be created with the required push constants
+    ///   - the constant buffer must include enough data to identify the push
+    ///     constants defined in the layout
+    pub unsafe fn cmd_push_constants(
+        &self,
+        command_buffer: &vk::CommandBuffer,
+        pipeline_layout: &vk::PipelineLayout,
+        shader_stage_flags: vk::ShaderStageFlags,
+        offset: u32,
+        constants: &[u8],
+    ) {
+        self.logical_device.cmd_push_constants(
+            *command_buffer,
+            *pipeline_layout,
+            shader_stage_flags,
+            offset,
+            constants,
+        )
+    }
 }

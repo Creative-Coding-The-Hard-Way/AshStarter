@@ -25,7 +25,7 @@ pub fn create_pipeline_layout(
     descriptor_set_layout
         .set_debug_name("triangle pipeline descriptor set layout");
     let pipeline_layout =
-        PipelineLayout::new(render_device, &[descriptor_set_layout])?;
+        PipelineLayout::new(render_device, &[descriptor_set_layout], &[])?;
     pipeline_layout.set_debug_name("triangle pipeline layout");
     Ok(pipeline_layout)
 }

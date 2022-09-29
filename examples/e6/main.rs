@@ -31,9 +31,16 @@ struct UniformBufferObject {
     pub proj: [[f32; 4]; 4],
 }
 
+#[derive(Debug, Copy, Clone)]
+#[repr(C, packed)]
+struct PushConstant {
+    pub color: [f32; 4],
+}
+
 /// This example renders a triangle using a vertex buffer and a shader
 /// pipeline.
-struct Example5Uniforms {
+struct Example6PushConstants {
+    frame_count: u64,
     descriptor_set: DescriptorSet,
     _descriptor_pool: Arc<DescriptorPool>,
     pipeline_layout: PipelineLayout,
@@ -46,7 +53,7 @@ struct Example5Uniforms {
     render_device: Arc<RenderDevice>,
 }
 
-impl Example5Uniforms {
+impl Example6PushConstants {
     fn build_swapchain_resources(
         &mut self,
         framebuffer_size: (i32, i32),
@@ -95,7 +102,7 @@ impl Example5Uniforms {
     }
 }
 
-impl State for Example5Uniforms {
+impl State for Example6PushConstants {
     fn new(window: &mut GlfwWindow) -> Result<Self> {
         window.window_handle.set_key_polling(true);
 
@@ -175,6 +182,7 @@ impl State for Example5Uniforms {
         }
 
         Ok(Self {
+            frame_count: 0,
             descriptor_set,
             _descriptor_pool: descriptor_pool,
             pipeline_layout,
@@ -221,6 +229,8 @@ impl State for Example5Uniforms {
 
         let swapchain_extent = self.swapchain_frames.swapchain().extent();
         let framebuffer = &self.framebuffers[frame.swapchain_image_index()];
+        self.frame_count += 1;
+        let green_value = (self.frame_count as f32 / 3000.0).sin().abs();
 
         // safe because the render pass and framebuffer will always outlive the
         // command buffer
@@ -243,6 +253,13 @@ impl State for Example5Uniforms {
                     &self.pipeline_layout,
                     &[&self.descriptor_set],
                 )
+                .push_constant(
+                    &self.pipeline_layout,
+                    vk::ShaderStageFlags::VERTEX,
+                    PushConstant {
+                        color: [0.2, green_value, 0.2, 1.0],
+                    },
+                )
                 .draw(3, 0)
                 .end_render_pass();
         }
@@ -253,7 +270,7 @@ impl State for Example5Uniforms {
     }
 }
 
-impl Drop for Example5Uniforms {
+impl Drop for Example6PushConstants {
     fn drop(&mut self) {
         self.render_device
             .wait_idle()
@@ -263,5 +280,6 @@ impl Drop for Example5Uniforms {
 
 fn main() -> Result<()> {
     logging::setup()?;
-    Application::<Example5Uniforms>::new("Example 5 - Uniforms")?.run()
+    Application::<Example6PushConstants>::new("Example 6 - Push Constants")?
+        .run()
 }
