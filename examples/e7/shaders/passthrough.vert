@@ -6,11 +6,11 @@ layout(binding = 0) uniform UniformBufferObject {
 } ubo;
 
 layout(location = 0) in vec2 pos;
-layout(location = 1) in vec4 color;
+layout(location = 1) in vec2 uv;
 
-layout(location = 0) out vec4 vertex_color;
+layout(location = 0) out vec2 vertex_uv;
 
 void main() {
-    vertex_color = color;
+    vertex_uv = uv;
     gl_Position = ubo.proj * vec4(pos, 0.0, 1.0);
 }

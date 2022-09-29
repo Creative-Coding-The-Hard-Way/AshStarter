@@ -3,12 +3,13 @@ use std::sync::Arc;
 use ash::vk;
 
 use crate::graphics::vulkan_api::{
-    RenderDevice, Swapchain, VulkanDebug, VulkanError,
+    Image, RenderDevice, Swapchain, VulkanDebug, VulkanError,
 };
 
 enum ImageViewResource {
     /// Used when the ImageView is for a swapchain image.
     Swapchain(Arc<Swapchain>),
+    Image(Arc<Image>),
 }
 
 /// An owned Vulkan image view which keeps the viewed resource alive for its
@@ -55,6 +56,22 @@ impl ImageView {
         Ok(Self {
             image_view: raw_image_view,
             _viewed_resource: ImageViewResource::Swapchain(swapchain.clone()),
+            render_device,
+        })
+    }
+
+    /// Create a view for the given image. The view keeps the Image arc until
+    /// dropped.
+    pub fn for_image(
+        render_device: Arc<RenderDevice>,
+        image: Arc<Image>,
+        create_info: &vk::ImageViewCreateInfo,
+    ) -> Result<Self, VulkanError> {
+        let raw_image_view =
+            unsafe { render_device.create_image_view(create_info)? };
+        Ok(Self {
+            image_view: raw_image_view,
+            _viewed_resource: ImageViewResource::Image(image),
             render_device,
         })
     }

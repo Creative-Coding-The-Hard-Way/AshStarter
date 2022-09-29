@@ -3,8 +3,8 @@ use std::sync::Arc;
 use ash::vk;
 
 use crate::graphics::vulkan_api::{
-    DescriptorPool, DescriptorSetLayout, HostCoherentBuffer, RenderDevice,
-    VulkanDebug, VulkanError,
+    DescriptorPool, DescriptorSetLayout, HostCoherentBuffer, ImageView,
+    RenderDevice, Sampler, VulkanDebug, VulkanError,
 };
 
 /// An owned descriptor set.
@@ -80,6 +80,42 @@ impl DescriptorSet {
                 p_image_info: std::ptr::null(),
                 p_texel_buffer_view: std::ptr::null(),
                 p_buffer_info: &buffer_info,
+                ..Default::default()
+            }],
+            &[],
+        )
+    }
+
+    /// Write a combined image sampler to the descriptor set.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - device extensions are required if writing to a descriptor set while
+    ///     it is bound
+    ///   - assumes that the bound image is in the shader read only optimal
+    ///     layout
+    pub unsafe fn write_combined_image_sampler(
+        &self,
+        binding: u32,
+        image_view: &ImageView,
+        sampler: &Sampler,
+    ) {
+        let image_info = vk::DescriptorImageInfo {
+            sampler: *sampler.raw(),
+            image_view: image_view.raw(),
+            image_layout: vk::ImageLayout::SHADER_READ_ONLY_OPTIMAL,
+        };
+        self.render_device.update_descriptor_sets(
+            &[vk::WriteDescriptorSet {
+                dst_set: self.descriptor_set,
+                dst_binding: binding,
+                dst_array_element: 0,
+                descriptor_count: 1,
+                descriptor_type: vk::DescriptorType::COMBINED_IMAGE_SAMPLER,
+                p_image_info: &image_info,
+                p_texel_buffer_view: std::ptr::null(),
+                p_buffer_info: std::ptr::null(),
                 ..Default::default()
             }],
             &[],

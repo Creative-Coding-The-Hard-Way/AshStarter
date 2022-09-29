@@ -11,8 +11,8 @@ use ccthw::{
         ortho_projection,
         vulkan_api::{
             DescriptorPool, DescriptorSet, Framebuffer, GraphicsPipeline,
-            HostCoherentBuffer, Image, PipelineLayout, RenderDevice,
-            RenderPass, VulkanDebug,
+            HostCoherentBuffer, ImageView, PipelineLayout, RenderDevice,
+            RenderPass, Sampler, VulkanDebug,
         },
         AcquiredFrame, SwapchainFrames,
     },
@@ -24,7 +24,16 @@ use load_texture::load_texture;
 #[repr(C, packed)]
 struct Vertex {
     pub pos: [f32; 2],
-    pub color: [f32; 4],
+    pub uv: [f32; 2],
+}
+
+impl Vertex {
+    fn new(x: f32, y: f32, u: f32, v: f32) -> Self {
+        Self {
+            pos: [x, y],
+            uv: [u, v],
+        }
+    }
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -36,7 +45,8 @@ struct UniformBufferObject {
 /// This example renders a triangle using a vertex buffer and a shader
 /// pipeline.
 struct Example7Textures {
-    _image: Image,
+    _tex_image_view: ImageView,
+    _tex_image_sampler: Sampler,
     descriptor_set: DescriptorSet,
     _descriptor_pool: Arc<DescriptorPool>,
     pipeline_layout: PipelineLayout,
@@ -108,7 +118,7 @@ impl State for Example7Textures {
         let mut vertex_buffer = HostCoherentBuffer::new(
             render_device.clone(),
             vk::BufferUsageFlags::VERTEX_BUFFER,
-            3,
+            6,
         )?;
         vertex_buffer.set_debug_name("triangle vertices");
         unsafe {
@@ -117,18 +127,14 @@ impl State for Example7Textures {
             // in-use by the GPU so there are no races associated with writing
             // here.
             let vertices = vertex_buffer.as_slice_mut()?;
-            vertices[0] = Vertex {
-                pos: [0.0, 50.0],
-                color: [1.0, 1.0, 1.0, 1.0],
-            };
-            vertices[1] = Vertex {
-                pos: [-50.0, 0.0],
-                color: [1.0, 1.0, 1.0, 1.0],
-            };
-            vertices[2] = Vertex {
-                pos: [50.0, 0.0],
-                color: [1.0, 1.0, 1.0, 1.0],
-            };
+            vertices.copy_from_slice(&[
+                Vertex::new(-125.0, -125.0, 0.0, 1.0),
+                Vertex::new(-125.0, 125.0, 0.0, 0.0),
+                Vertex::new(125.0, 125.0, 1.0, 0.0),
+                Vertex::new(-125.0, -125.0, 0.0, 1.0),
+                Vertex::new(125.0, 125.0, 1.0, 0.0),
+                Vertex::new(125.0, -125.0, 1.0, 1.0),
+            ]);
         }
 
         let mut uniform_buffer = HostCoherentBuffer::new(
@@ -156,10 +162,16 @@ impl State for Example7Textures {
             pipeline::create_pipeline_layout(render_device.clone())?;
         let descriptor_pool = Arc::new(DescriptorPool::new(
             render_device.clone(),
-            &[vk::DescriptorPoolSize {
-                ty: vk::DescriptorType::UNIFORM_BUFFER,
-                descriptor_count: 1,
-            }],
+            &[
+                vk::DescriptorPoolSize {
+                    ty: vk::DescriptorType::UNIFORM_BUFFER,
+                    descriptor_count: 1,
+                },
+                vk::DescriptorPoolSize {
+                    ty: vk::DescriptorType::COMBINED_IMAGE_SAMPLER,
+                    descriptor_count: 1,
+                },
+            ],
         )?);
         let descriptor_set = {
             DescriptorSet::allocate(
@@ -172,16 +184,21 @@ impl State for Example7Textures {
             .unwrap()
         };
 
+        let (tex_image_view, tex_image_sampler) = load_texture(&render_device)?;
+
         // Safe because the descriptor set has not been bound yet.
         unsafe {
             descriptor_set.write_uniform_buffer(0, &uniform_buffer);
+            descriptor_set.write_combined_image_sampler(
+                1,
+                &tex_image_view,
+                &tex_image_sampler,
+            );
         }
 
-        let image = load_texture(&render_device)?;
-        image.set_debug_name("my example texture");
-
         Ok(Self {
-            _image: image,
+            _tex_image_view: tex_image_view,
+            _tex_image_sampler: tex_image_sampler,
             descriptor_set,
             _descriptor_pool: descriptor_pool,
             pipeline_layout,
@@ -250,7 +267,7 @@ impl State for Example7Textures {
                     &self.pipeline_layout,
                     &[&self.descriptor_set],
                 )
-                .draw(3, 0)
+                .draw(6, 0)
                 .end_render_pass();
         }
 

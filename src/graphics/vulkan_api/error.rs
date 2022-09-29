@@ -158,4 +158,7 @@ pub enum VulkanError {
 
     #[error("Unable to bind image memory{:#?}", .0)]
     UnableToBindImageMemory(#[source] vk::Result),
+
+    #[error("Unable to create Sampler {:#?}", .0)]
+    UnableToCreateSampler(#[source] vk::Result),
 }

@@ -877,4 +877,31 @@ impl RenderDevice {
             image_memory_barriers,
         )
     }
+
+    /// Create a new Image sampler.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - The caller must destroy the image sampler before the RenderDevice is
+    ///     dropped.
+    pub unsafe fn create_sampler(
+        &self,
+        create_info: &vk::SamplerCreateInfo,
+    ) -> Result<vk::Sampler, VulkanError> {
+        self.logical_device
+            .create_sampler(create_info, None)
+            .map_err(VulkanError::UnableToCreateSampler)
+    }
+
+    /// Destroy an image sampler.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - The caller must not destry the sampler while it is in-use by the
+    ///     gpu.
+    pub unsafe fn destroy_sampler(&self, sampler: vk::Sampler) {
+        self.logical_device.destroy_sampler(sampler, None)
+    }
 }

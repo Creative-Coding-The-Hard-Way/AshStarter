@@ -3,10 +3,13 @@ use std::sync::Arc;
 use anyhow::Result;
 use ash::vk;
 use ccthw::graphics::vulkan_api::{
-    CommandBuffer, CommandPool, Fence, HostCoherentBuffer, Image, RenderDevice,
+    CommandBuffer, CommandPool, Fence, HostCoherentBuffer, Image, ImageView,
+    RenderDevice, Sampler,
 };
 
-pub fn load_texture(render_device: &Arc<RenderDevice>) -> Result<Image> {
+pub fn load_texture(
+    render_device: &Arc<RenderDevice>,
+) -> Result<(ImageView, Sampler)> {
     let image = image::load_from_memory_with_format(
         include_bytes!("./assets/example_texture.png"),
         image::ImageFormat::Png,
@@ -27,7 +30,7 @@ pub fn load_texture(render_device: &Arc<RenderDevice>) -> Result<Image> {
     let image = {
         let create_info = vk::ImageCreateInfo {
             image_type: vk::ImageType::TYPE_2D,
-            format: vk::Format::R8G8B8A8_UINT,
+            format: vk::Format::R8G8B8A8_SRGB,
             extent: vk::Extent3D {
                 width,
                 height,
@@ -43,7 +46,7 @@ pub fn load_texture(render_device: &Arc<RenderDevice>) -> Result<Image> {
             sharing_mode: vk::SharingMode::EXCLUSIVE,
             ..Default::default()
         };
-        Image::new(render_device.clone(), &create_info)?
+        Arc::new(Image::new(render_device.clone(), &create_info)?)
     };
 
     let command_pool = Arc::new(CommandPool::new(
@@ -129,10 +132,58 @@ pub fn load_texture(render_device: &Arc<RenderDevice>) -> Result<Image> {
     command_buffer.end_command_buffer()?;
 
     let fence = Fence::new(render_device.clone())?;
+    fence.reset()?;
     unsafe {
         command_buffer.submit_graphics_commands(&[], &[], &[], Some(&fence))?;
     };
     fence.wait_and_reset()?;
 
-    Ok(image)
+    // create view
+    // -----------
+
+    let image_view = {
+        let create_info = vk::ImageViewCreateInfo {
+            image: unsafe { *image.raw() },
+            view_type: vk::ImageViewType::TYPE_2D,
+            format: vk::Format::R8G8B8A8_SRGB,
+            components: vk::ComponentMapping::default(),
+            flags: vk::ImageViewCreateFlags::empty(),
+            subresource_range: vk::ImageSubresourceRange {
+                aspect_mask: vk::ImageAspectFlags::COLOR,
+                base_mip_level: 0,
+                level_count: 1,
+                base_array_layer: 0,
+                layer_count: 1,
+            },
+            ..Default::default()
+        };
+        ImageView::for_image(render_device.clone(), image, &create_info)?
+    };
+
+    // create sampler
+    // --------------
+
+    let sampler = {
+        let create_info = vk::SamplerCreateInfo {
+            mag_filter: vk::Filter::NEAREST,
+            min_filter: vk::Filter::NEAREST,
+            address_mode_u: vk::SamplerAddressMode::REPEAT,
+            address_mode_v: vk::SamplerAddressMode::REPEAT,
+            address_mode_w: vk::SamplerAddressMode::REPEAT,
+            anisotropy_enable: vk::FALSE,
+            max_anisotropy: 1.0,
+            border_color: vk::BorderColor::INT_OPAQUE_BLACK,
+            unnormalized_coordinates: vk::FALSE,
+            compare_enable: vk::FALSE,
+            compare_op: vk::CompareOp::ALWAYS,
+            mipmap_mode: vk::SamplerMipmapMode::LINEAR,
+            mip_lod_bias: 0.0,
+            min_lod: 0.0,
+            max_lod: 0.0,
+            ..Default::default()
+        };
+        Sampler::new(render_device.clone(), &create_info)?
+    };
+
+    Ok((image_view, sampler))
 }

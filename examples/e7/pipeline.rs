@@ -14,13 +14,22 @@ pub fn create_pipeline_layout(
 ) -> Result<PipelineLayout, VulkanError> {
     let descriptor_set_layout = Arc::new(DescriptorSetLayout::new(
         render_device.clone(),
-        &[vk::DescriptorSetLayoutBinding {
-            binding: 0,
-            descriptor_type: vk::DescriptorType::UNIFORM_BUFFER,
-            descriptor_count: 1,
-            stage_flags: vk::ShaderStageFlags::VERTEX,
-            p_immutable_samplers: std::ptr::null(),
-        }],
+        &[
+            vk::DescriptorSetLayoutBinding {
+                binding: 0,
+                descriptor_type: vk::DescriptorType::UNIFORM_BUFFER,
+                descriptor_count: 1,
+                stage_flags: vk::ShaderStageFlags::VERTEX,
+                p_immutable_samplers: std::ptr::null(),
+            },
+            vk::DescriptorSetLayoutBinding {
+                binding: 1,
+                descriptor_type: vk::DescriptorType::COMBINED_IMAGE_SAMPLER,
+                descriptor_count: 1,
+                stage_flags: vk::ShaderStageFlags::FRAGMENT,
+                p_immutable_samplers: std::ptr::null(),
+            },
+        ],
     )?);
     descriptor_set_layout
         .set_debug_name("triangle pipeline descriptor set layout");
@@ -75,8 +84,8 @@ pub fn create_pipeline(
         vk::VertexInputAttributeDescription {
             binding: 0,
             location: 1,
-            format: vk::Format::R32G32B32A32_SFLOAT,
-            offset: offset_of!(Vertex, color) as u32,
+            format: vk::Format::R32G32_SFLOAT,
+            offset: offset_of!(Vertex, uv) as u32,
         },
     ];
     let vertex_input_state = vk::PipelineVertexInputStateCreateInfo {
