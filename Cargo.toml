@@ -17,6 +17,7 @@ nalgebra = "*"
 memoffset = "*"
 thiserror = "1.0.29"
 spin_sleep = "1.0.0"
+image = "0.24.4"
 
 [build-dependencies]
 anyhow = "1.0.44"

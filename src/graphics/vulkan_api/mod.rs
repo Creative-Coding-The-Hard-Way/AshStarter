@@ -24,5 +24,5 @@ pub use self::{
     render_pass::RenderPass,
     swapchain::{Swapchain, SwapchainStatus},
     sync::{Fence, Semaphore, SemaphorePool},
-    texture::ImageView,
+    texture::{Image, ImageView},
 };

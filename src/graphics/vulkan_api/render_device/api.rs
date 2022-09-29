@@ -767,4 +767,114 @@ impl RenderDevice {
             constants,
         )
     }
+
+    /// Create a Vulkan image.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - the image must be destroyed before the render device is dropped.
+    pub unsafe fn create_image(
+        &self,
+        create_info: &vk::ImageCreateInfo,
+    ) -> Result<vk::Image, VulkanError> {
+        self.logical_device
+            .create_image(create_info, None)
+            .map_err(VulkanError::UnableToCreateImage)
+    }
+
+    /// Destroy a Vulkan image.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - the image must not be destroyed if it is in-use by the GPU
+    ///   - an image must not be destroyed if other resources still reference
+    ///     it
+    pub unsafe fn destroy_image(&self, image: vk::Image) {
+        self.logical_device.destroy_image(image, None)
+    }
+
+    /// Get memory requirements for a newly-created image.
+    pub fn get_image_memory_requirements(
+        &self,
+        image: vk::Image,
+    ) -> vk::MemoryRequirements {
+        unsafe { self.logical_device.get_image_memory_requirements(image) }
+    }
+
+    /// Bind a memory allocation to a Vulkan image.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - it is not safe to free the memory while the image exists
+    ///   - the application must free both the allocation and the image before
+    ///     the render device is dropped
+    pub unsafe fn bind_image_memory(
+        &self,
+        image: &vk::Image,
+        allocation: &Allocation,
+    ) -> Result<(), VulkanError> {
+        self.logical_device
+            .bind_image_memory(
+                *image,
+                allocation.device_memory(),
+                allocation.offset_in_bytes(),
+            )
+            .map_err(VulkanError::UnableToBindImageMemory)
+    }
+
+    /// Copy a buffer to a Vulkan image.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - the image and buffer must both exist
+    ///   - the BufferImageCopy regions must be configured correctly
+    ///   - the dst_image_layout must match the images current layout
+    pub unsafe fn cmd_copy_buffer_to_image(
+        &self,
+        command_buffer: &vk::CommandBuffer,
+        src_buffer: &vk::Buffer,
+        dst_image: &vk::Image,
+        dst_image_layout: vk::ImageLayout,
+        regions: &[vk::BufferImageCopy],
+    ) {
+        self.logical_device.cmd_copy_buffer_to_image(
+            *command_buffer,
+            *src_buffer,
+            *dst_image,
+            dst_image_layout,
+            regions,
+        )
+    }
+
+    /// Write a pipeline memory barrier into the command buffer.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - it is up to the caller to correctly create barriers
+    #[allow(clippy::too_many_arguments)]
+    pub unsafe fn cmd_pipeline_barrier(
+        &self,
+        command_buffer: &vk::CommandBuffer,
+        src_stage_mask: vk::PipelineStageFlags,
+        dst_stage_mask: vk::PipelineStageFlags,
+        dependency_flags: vk::DependencyFlags,
+        memory_barriers: &[vk::MemoryBarrier],
+        buffer_memory_barriers: &[vk::BufferMemoryBarrier],
+        image_memory_barriers: &[vk::ImageMemoryBarrier],
+    ) {
+        self.logical_device.cmd_pipeline_barrier(
+            *command_buffer,
+            src_stage_mask,
+            dst_stage_mask,
+            dependency_flags,
+            memory_barriers,
+            buffer_memory_barriers,
+            image_memory_barriers,
+        )
+    }
 }

@@ -152,4 +152,10 @@ pub enum VulkanError {
 
     #[error("Unable to allocate descriptor sets {:#?}", .0)]
     UnableToAllocateDescriptorSets(#[source] vk::Result),
+
+    #[error("Unable to create image {:#?}", .0)]
+    UnableToCreateImage(#[source] vk::Result),
+
+    #[error("Unable to bind image memory{:#?}", .0)]
+    UnableToBindImageMemory(#[source] vk::Result),
 }

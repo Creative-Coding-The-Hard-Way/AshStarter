@@ -2,7 +2,7 @@ use ash::vk;
 
 use super::CommandBuffer;
 use crate::graphics::vulkan_api::{
-    DescriptorSet, Framebuffer, GraphicsPipeline, HostCoherentBuffer,
+    DescriptorSet, Framebuffer, GraphicsPipeline, HostCoherentBuffer, Image,
     PipelineLayout, RenderPass, VulkanError,
 };
 
@@ -216,6 +216,55 @@ impl CommandBuffer {
             shader_stage_flags,
             offset,
             constants,
+        );
+        self
+    }
+
+    /// Add a pipeline barrier to the command buffer.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - The application must use barriers to coordinate memory dependencies
+    ///     between gpu operations.
+    pub unsafe fn pipeline_image_memory_barriers(
+        &self,
+        src_stage_mask: vk::PipelineStageFlags,
+        dst_stage_mask: vk::PipelineStageFlags,
+        image_memory_barriers: &[vk::ImageMemoryBarrier],
+    ) -> &Self {
+        self.render_device.cmd_pipeline_barrier(
+            &self.command_buffer,
+            src_stage_mask,
+            dst_stage_mask,
+            vk::DependencyFlags::empty(),
+            &[],
+            &[],
+            image_memory_barriers,
+        );
+        self
+    }
+
+    /// Copy a buffer to an image.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - The application must use pipeline image memory barriers to control
+    ///     memory dependencies for copies.
+    pub unsafe fn copy_buffer_to_image<T>(
+        &self,
+        src_buffer: &HostCoherentBuffer<T>,
+        dst_image: &Image,
+        dst_image_layout: vk::ImageLayout,
+        regions: &[vk::BufferImageCopy],
+    ) -> &Self {
+        self.render_device.cmd_copy_buffer_to_image(
+            &self.command_buffer,
+            src_buffer.raw(),
+            dst_image.raw(),
+            dst_image_layout,
+            regions,
         );
         self
     }
