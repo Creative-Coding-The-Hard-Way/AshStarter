@@ -79,10 +79,18 @@ impl CommandBuffer {
             command_buffer_count: 1,
             p_command_buffers: &self.command_buffer,
             wait_semaphore_count: raw_wait_semaphores.len() as u32,
-            p_wait_semaphores: raw_wait_semaphores.as_ptr(),
+            p_wait_semaphores: if !raw_wait_semaphores.is_empty() {
+                raw_wait_semaphores.as_ptr()
+            } else {
+                std::ptr::null()
+            },
             p_wait_dst_stage_mask: wait_stages.as_ptr(),
             signal_semaphore_count: raw_signal_semaphores.len() as u32,
-            p_signal_semaphores: raw_signal_semaphores.as_ptr(),
+            p_signal_semaphores: if !raw_signal_semaphores.is_empty() {
+                raw_signal_semaphores.as_ptr()
+            } else {
+                std::ptr::null()
+            },
             ..Default::default()
         };
         self.render_device
