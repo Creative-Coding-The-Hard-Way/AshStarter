@@ -6,3 +6,7 @@ maintain state.
 ## Commands
 
 From the project root: `cargo run --example e0`
+
+## Screenshot 
+
+![./Screenshot.jpg](./Screenshot.jpg)

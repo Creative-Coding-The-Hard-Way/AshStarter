@@ -5,3 +5,7 @@ This example shows how to render an untextured triangle to the screen.
 ## Commands
 
 From the project root: `cargo run --example e4`
+
+## Screenshot 
+
+![./Screenshot.jpg](./Screenshot.jpg)
