@@ -6,3 +6,7 @@ screen using a Vulkan RenderPass.
 ## Commands
 
 From the project root: `cargo run --example e1`
+
+## Screenshot 
+
+![./Screenshot.jpg](./Screenshot.jpg)
