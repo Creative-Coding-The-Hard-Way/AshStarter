@@ -80,6 +80,25 @@ where
         })
     }
 
+    /// Create a new Device buffer that the host can read and write.
+    ///
+    /// The initial size is based on the length of the provided slice. Data from
+    /// the slice is copied into the buffer immediately.
+    pub fn new_with_data(
+        render_device: Arc<RenderDevice>,
+        usage: vk::BufferUsageFlags,
+        initial_data: &[T],
+    ) -> Result<Self, VulkanError> {
+        let mut buffer = Self::new(render_device, usage, initial_data.len())?;
+        unsafe {
+            // SAFE because the buffer cannot be in-use by the GPU until after
+            // it's returned from this constructor method (e.g. no chance for
+            // data races).
+            buffer.as_slice_mut()?.copy_from_slice(initial_data);
+        }
+        Ok(buffer)
+    }
+
     /// Access the underlying memory as if it were a slice of T.
     ///
     /// # Safety

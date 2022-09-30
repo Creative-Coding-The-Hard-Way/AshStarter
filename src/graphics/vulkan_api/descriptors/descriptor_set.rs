@@ -51,7 +51,7 @@ impl DescriptorSet {
         &self.descriptor_set
     }
 
-    /// Write a buffer to the descriptor set.
+    /// Write a uniform buffer to the descriptor set.
     ///
     /// # Safety
     ///
@@ -65,6 +65,41 @@ impl DescriptorSet {
         binding: u32,
         buffer: &HostCoherentBuffer<T>,
     ) {
+        self.write_buffer(binding, buffer, vk::DescriptorType::UNIFORM_BUFFER)
+    }
+
+    /// Write a storage buffer to the descriptor set.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - device extensions are required if writing to a descriptor set while
+    ///     it is bound
+    ///   - the caller must ensure that the buffer lives at least as long as
+    ///     the descriptor set while it's reference.d
+    pub unsafe fn write_storage_buffer<T>(
+        &self,
+        binding: u32,
+        buffer: &HostCoherentBuffer<T>,
+    ) {
+        self.write_buffer(binding, buffer, vk::DescriptorType::STORAGE_BUFFER)
+    }
+
+    /// Write a buffer to the descriptor set.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - device extensions are required if writing to a descriptor set while
+    ///     it is bound
+    ///   - the caller must ensure that the buffer lives at least as long as
+    ///     the descriptor set while it's reference.d
+    pub unsafe fn write_buffer<T>(
+        &self,
+        binding: u32,
+        buffer: &HostCoherentBuffer<T>,
+        descriptor_type: vk::DescriptorType,
+    ) {
         let buffer_info = vk::DescriptorBufferInfo {
             buffer: *buffer.raw(),
             offset: 0,
@@ -76,7 +111,7 @@ impl DescriptorSet {
                 dst_binding: binding,
                 dst_array_element: 0,
                 descriptor_count: 1,
-                descriptor_type: vk::DescriptorType::UNIFORM_BUFFER,
+                descriptor_type,
                 p_image_info: std::ptr::null(),
                 p_texel_buffer_view: std::ptr::null(),
                 p_buffer_info: &buffer_info,
