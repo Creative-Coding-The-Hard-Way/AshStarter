@@ -6,3 +6,7 @@ to shaders.
 ## Commands
 
 From the project root: `cargo run --example e7`
+
+## Screenshot 
+
+![./Screenshot.jpg](./Screenshot.jpg)
