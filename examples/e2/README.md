@@ -7,3 +7,7 @@ for the previous frame to finish rasterizing before starting on the next.
 ## Commands
 
 From the project root: `cargo run --example e2`
+
+## Screenshot 
+
+![./Screenshot.jpg](./Screenshot.jpg)
