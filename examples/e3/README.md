@@ -6,3 +6,7 @@ swapchain and per-frame synchronization primitives.
 ## Commands
 
 From the project root: `cargo run --example e3`
+
+## Screenshot 
+
+![./Screenshot.jpg](./Screenshot.jpg)
