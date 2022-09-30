@@ -1,6 +1,7 @@
+mod msaa_renderpass;
 mod pipeline;
 
-use std::sync::Arc;
+use std::{sync::Arc, time::Instant};
 
 use anyhow::Result;
 use ash::vk;
@@ -10,12 +11,13 @@ use ccthw::{
         ortho_projection,
         vulkan_api::{
             DescriptorPool, DescriptorSet, Framebuffer, GraphicsPipeline,
-            HostCoherentBuffer, PipelineLayout, RenderDevice, RenderPass,
-            VulkanDebug,
+            HostCoherentBuffer, ImageView, PipelineLayout, RenderDevice,
+            RenderPass, VulkanDebug,
         },
         AcquiredFrame, SwapchainFrames,
     },
     logging,
+    math::Mat4,
 };
 
 #[derive(Debug, Copy, Clone)]
@@ -34,13 +36,15 @@ struct UniformBufferObject {
 #[derive(Debug, Copy, Clone)]
 #[repr(C, packed)]
 struct PushConstant {
-    pub color: [f32; 4],
+    pub angle: f32,
 }
 
 /// This example renders a triangle using a vertex buffer and a shader
 /// pipeline.
-struct Example6PushConstants {
-    frame_count: u64,
+struct Example8Multisampling {
+    samples: vk::SampleCountFlags,
+    msaa_render_target: Option<Arc<ImageView>>,
+    application_start: std::time::Instant,
     descriptor_set: DescriptorSet,
     _descriptor_pool: Arc<DescriptorPool>,
     pipeline_layout: PipelineLayout,
@@ -53,7 +57,7 @@ struct Example6PushConstants {
     render_device: Arc<RenderDevice>,
 }
 
-impl Example6PushConstants {
+impl Example8Multisampling {
     fn build_swapchain_resources(
         &mut self,
         framebuffer_size: (i32, i32),
@@ -62,9 +66,16 @@ impl Example6PushConstants {
         self.framebuffers.clear();
         self.swapchain_frames.rebuild_swapchain(framebuffer_size)?;
 
-        self.render_pass = Some(RenderPass::single_sampled(
+        self.msaa_render_target =
+            Some(Arc::new(msaa_renderpass::create_msaa_image(
+                &self.render_device,
+                &self.swapchain_frames,
+                self.samples,
+            )?));
+        self.render_pass = Some(msaa_renderpass::create_msaa_render_pass(
             self.render_device.clone(),
             self.swapchain_frames.swapchain().format(),
+            self.samples,
         )?);
 
         let extent = self.swapchain_frames.swapchain().extent();
@@ -73,7 +84,10 @@ impl Example6PushConstants {
             self.framebuffers.push(Framebuffer::new(
                 self.render_device.clone(),
                 self.render_pass.as_ref().unwrap(),
-                &[image_view.clone()],
+                &[
+                    self.msaa_render_target.as_ref().unwrap().clone(),
+                    image_view.clone(),
+                ],
                 extent,
             )?);
         }
@@ -82,6 +96,7 @@ impl Example6PushConstants {
             &self.render_device,
             self.render_pass.as_ref().unwrap(),
             &self.pipeline_layout,
+            self.samples,
         )?);
 
         let right = framebuffer_size.0 as f32 / 2.0;
@@ -102,7 +117,7 @@ impl Example6PushConstants {
     }
 }
 
-impl State for Example6PushConstants {
+impl State for Example8Multisampling {
     fn new(window: &mut GlfwWindow) -> Result<Self> {
         window.window_handle.set_key_polling(true);
 
@@ -122,15 +137,15 @@ impl State for Example6PushConstants {
             // here.
             let vertices = vertex_buffer.as_slice_mut()?;
             vertices[0] = Vertex {
-                pos: [0.0, 50.0],
+                pos: [0.0, 150.0],
                 color: [1.0, 1.0, 1.0, 1.0],
             };
             vertices[1] = Vertex {
-                pos: [-50.0, 0.0],
+                pos: [-150.0, 0.0],
                 color: [1.0, 1.0, 1.0, 1.0],
             };
             vertices[2] = Vertex {
-                pos: [50.0, 0.0],
+                pos: [150.0, 0.0],
                 color: [1.0, 1.0, 1.0, 1.0],
             };
         }
@@ -147,12 +162,7 @@ impl State for Example6PushConstants {
             // in-use by the GPU so there are no races associated with writing
             // here.
             uniform_buffer.as_slice_mut()?[0] = UniformBufferObject {
-                proj: [
-                    [1.0, 0.0, 0.0, 0.0], // r1
-                    [0.0, 1.0, 0.0, 0.0], // r2
-                    [0.0, 0.0, 1.0, 0.0], // r3
-                    [0.0, 0.0, 0.0, 1.0], // r4
-                ],
+                proj: Mat4::identity().into(),
             };
         }
 
@@ -182,7 +192,12 @@ impl State for Example6PushConstants {
         }
 
         Ok(Self {
-            frame_count: 0,
+            samples: msaa_renderpass::pick_max_supported_msaa_count(
+                &render_device,
+                vk::SampleCountFlags::TYPE_64,
+            ),
+            msaa_render_target: None,
+            application_start: Instant::now(),
             descriptor_set,
             _descriptor_pool: descriptor_pool,
             pipeline_layout,
@@ -229,8 +244,8 @@ impl State for Example6PushConstants {
 
         let swapchain_extent = self.swapchain_frames.swapchain().extent();
         let framebuffer = &self.framebuffers[frame.swapchain_image_index()];
-        self.frame_count += 1;
-        let green_value = (self.frame_count as f32 / 3000.0).sin().abs();
+        let angle = (Instant::now() - self.application_start).as_secs_f32()
+            * (std::f32::consts::PI * 2.0 / 10.0);
 
         // safe because the render pass and framebuffer will always outlive the
         // command buffer
@@ -241,7 +256,7 @@ impl State for Example6PushConstants {
                     self.render_pass.as_ref().unwrap(),
                     framebuffer,
                     swapchain_extent,
-                    [0.0, 0.0, 1.0, 1.0],
+                    [0.2, 0.2, 0.2, 1.0],
                 )
                 .bind_graphics_pipeline(
                     self.graphics_pipeline.as_ref().unwrap(),
@@ -256,9 +271,7 @@ impl State for Example6PushConstants {
                 .push_constant(
                     &self.pipeline_layout,
                     vk::ShaderStageFlags::VERTEX,
-                    PushConstant {
-                        color: [0.2, green_value, 0.2, 1.0],
-                    },
+                    PushConstant { angle },
                 )
                 .draw(3, 0)
                 .end_render_pass();
@@ -270,7 +283,7 @@ impl State for Example6PushConstants {
     }
 }
 
-impl Drop for Example6PushConstants {
+impl Drop for Example8Multisampling {
     fn drop(&mut self) {
         self.render_device
             .wait_idle()
@@ -280,6 +293,6 @@ impl Drop for Example6PushConstants {
 
 fn main() -> Result<()> {
     logging::setup()?;
-    Application::<Example6PushConstants>::new("Example 6 - Push Constants")?
+    Application::<Example8Multisampling>::new("Example 8 - Multisampling")?
         .run()
 }

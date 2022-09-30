@@ -904,4 +904,14 @@ impl RenderDevice {
     pub unsafe fn destroy_sampler(&self, sampler: vk::Sampler) {
         self.logical_device.destroy_sampler(sampler, None)
     }
+
+    /// Get the physical device properties for this render device.
+    pub fn get_physical_device_properties(
+        &self,
+    ) -> vk::PhysicalDeviceProperties {
+        unsafe {
+            self.instance
+                .get_physical_device_properties(self.physical_device)
+        }
+    }
 }

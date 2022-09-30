@@ -41,6 +41,7 @@ pub fn create_pipeline(
     render_device: &Arc<RenderDevice>,
     render_pass: &RenderPass,
     layout: &PipelineLayout,
+    samples: vk::SampleCountFlags,
 ) -> Result<GraphicsPipeline, VulkanError> {
     let shader_entry_name =
         unsafe { CStr::from_bytes_with_nul_unchecked(b"main\0") };
@@ -125,7 +126,7 @@ pub fn create_pipeline(
     };
     let multisample_state = vk::PipelineMultisampleStateCreateInfo {
         sample_shading_enable: vk::FALSE,
-        rasterization_samples: vk::SampleCountFlags::TYPE_1,
+        rasterization_samples: samples,
         ..Default::default()
     };
     let color_blend_attachment = vk::PipelineColorBlendAttachmentState {

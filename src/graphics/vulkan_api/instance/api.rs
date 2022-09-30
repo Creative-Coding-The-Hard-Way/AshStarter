@@ -77,4 +77,17 @@ impl Instance {
                 physical_device_descriptor_indexing_features,
         }
     }
+
+    /// Get the physical device properties for a given device.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - The properties are only relevant to the provided physical device.
+    pub unsafe fn get_physical_device_properties(
+        &self,
+        physical_device: vk::PhysicalDevice,
+    ) -> vk::PhysicalDeviceProperties {
+        self.ash.get_physical_device_properties(physical_device)
+    }
 }

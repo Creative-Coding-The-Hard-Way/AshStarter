@@ -11,10 +11,14 @@ layout(location = 1) in vec4 color;
 layout(location = 0) out vec4 vertex_color;
 
 layout(push_constant) uniform PushConstants {
-    vec4 color;
+    float angle;
 } pc;
 
 void main() {
-    vertex_color = pc.color * color;
-    gl_Position = ubo.proj * vec4(pos, 0.0, 1.0);
+    mat2 rot = mat2(
+        cos(pc.angle), -sin(pc.angle),
+        sin(pc.angle), cos(pc.angle)
+    );
+    vertex_color = color;
+    gl_Position = ubo.proj * vec4(pos * rot, 0.0, 1.0);
 }

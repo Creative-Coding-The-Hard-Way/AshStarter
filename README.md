@@ -13,3 +13,4 @@ for the Vulkan API.
 - [Example 5 - Uniforms](./examples/e5)
 - [Example 6 - Push Constants](./examples/e6)
 - [Example 7 - Textures](./examples/e7)
+- [Example 8 - Multisampling](./examples/e8)

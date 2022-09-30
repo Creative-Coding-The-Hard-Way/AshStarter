@@ -64,8 +64,16 @@ impl RenderPass {
             ..Default::default()
         };
 
+        Self::new(render_device, &create_info)
+    }
+
+    /// Create a new owned Render Pass with the given create info.
+    pub fn new(
+        render_device: Arc<RenderDevice>,
+        create_info: &vk::RenderPassCreateInfo,
+    ) -> Result<Self, VulkanError> {
         let render_pass =
-            unsafe { render_device.create_render_pass(&create_info)? };
+            unsafe { render_device.create_render_pass(create_info)? };
 
         Ok(Self {
             render_pass,
