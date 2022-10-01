@@ -7,6 +7,7 @@ use crate::graphics::vulkan_api::{
 };
 
 const SINGLE_QUEUE_PRIORITY: [f32; 1] = [1.0];
+const TWO_QUEUE_PRIORITY: [f32; 2] = [1.0, 1.0];
 
 /// The indices for all of the required queue families for this application.
 pub struct QueueFamilies {
@@ -31,7 +32,9 @@ impl QueueFamilies {
             .iter()
             .enumerate()
             .for_each(|(i, family)| {
-                if family.queue_flags.contains(vk::QueueFlags::GRAPHICS) {
+                if family.queue_flags.contains(
+                    vk::QueueFlags::GRAPHICS | vk::QueueFlags::COMPUTE,
+                ) {
                     graphics_family = Some(i as u32);
                 }
 
@@ -76,8 +79,8 @@ impl QueueFamilies {
     pub fn as_queue_create_infos(&self) -> Vec<vk::DeviceQueueCreateInfo> {
         let mut create_infos = vec![vk::DeviceQueueCreateInfo {
             queue_family_index: self.graphics_family_index,
-            p_queue_priorities: SINGLE_QUEUE_PRIORITY.as_ptr(),
-            queue_count: 1,
+            p_queue_priorities: TWO_QUEUE_PRIORITY.as_ptr(),
+            queue_count: 2,
             ..Default::default()
         }];
 
@@ -98,7 +101,7 @@ impl QueueFamilies {
     pub fn get_queues(
         &self,
         logical_device: &ash::Device,
-    ) -> (DeviceQueue, DeviceQueue) {
+    ) -> (DeviceQueue, DeviceQueue, DeviceQueue) {
         let raw_graphics_queue = unsafe {
             logical_device.get_device_queue(self.graphics_family_index, 0)
         };
@@ -106,6 +109,15 @@ impl QueueFamilies {
             raw_graphics_queue,
             self.graphics_family_index,
             0,
+        );
+
+        let raw_compute_queue = unsafe {
+            logical_device.get_device_queue(self.graphics_family_index, 1)
+        };
+        let compute_queue = DeviceQueue::from_raw(
+            raw_compute_queue,
+            self.graphics_family_index,
+            1,
         );
 
         let is_same_family =
@@ -123,6 +135,6 @@ impl QueueFamilies {
             )
         };
 
-        (graphics_queue, present_queue)
+        (graphics_queue, present_queue, compute_queue)
     }
 }

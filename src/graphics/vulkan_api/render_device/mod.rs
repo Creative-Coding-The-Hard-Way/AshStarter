@@ -37,6 +37,7 @@ pub struct RenderDevice {
     allocator: Mutex<Allocator>,
     graphics_queue: DeviceQueue,
     present_queue: DeviceQueue,
+    compute_queue: DeviceQueue,
     physical_device: vk::PhysicalDevice,
     logical_device: ash::Device,
     window_surface: WindowSurface,
@@ -68,7 +69,7 @@ impl RenderDevice {
             &queue_families.as_queue_create_infos(),
             physical_device_features,
         )?;
-        let (graphics_queue, present_queue) =
+        let (graphics_queue, present_queue, compute_queue) =
             queue_families.get_queues(&logical_device);
         let render_device = Self {
             allocator: Mutex::new(create_system_allocator(
@@ -76,6 +77,7 @@ impl RenderDevice {
             )),
             graphics_queue,
             present_queue,
+            compute_queue,
             physical_device,
             logical_device,
             window_surface,

@@ -96,6 +96,60 @@ impl CommandBuffer {
         self.render_device
             .submit_graphics_commands(submit_info, &raw_signal_fence)
     }
+
+    /// - wait_semaphores is a set of semaphores to wait on before
+    ///   executing commands.
+    /// - wait_stage is the graphics pipeline stage to perform the
+    ///   semaphore wait.
+    /// - signal_semaphores the set of semaphores to signal when the
+    ///   command buffer has finished executing
+    /// - signal_fence an optional fence to signal when the command
+    ///   buffer has finished executing
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because the caller is responsible for ensuring that the
+    /// command buffer and all referenced resources are not dropped
+    /// until all submitted commands have finished executing.
+    pub unsafe fn submit_compute_commands(
+        &self,
+        wait_semaphores: &[&Semaphore],
+        wait_stages: &[vk::PipelineStageFlags],
+        signal_semaphores: &[&Semaphore],
+        signal_fence: Option<&Fence>,
+    ) -> Result<(), VulkanError> {
+        let raw_wait_semaphores: Vec<vk::Semaphore> = wait_semaphores
+            .iter()
+            .map(|semaphore| *semaphore.raw())
+            .collect();
+        let raw_signal_semaphores: Vec<vk::Semaphore> = signal_semaphores
+            .iter()
+            .map(|semaphore| *semaphore.raw())
+            .collect();
+        let raw_signal_fence = signal_fence
+            .map(|fence| *fence.raw())
+            .unwrap_or(vk::Fence::null());
+        let submit_info = vk::SubmitInfo {
+            command_buffer_count: 1,
+            p_command_buffers: &self.command_buffer,
+            wait_semaphore_count: raw_wait_semaphores.len() as u32,
+            p_wait_semaphores: if !raw_wait_semaphores.is_empty() {
+                raw_wait_semaphores.as_ptr()
+            } else {
+                std::ptr::null()
+            },
+            p_wait_dst_stage_mask: wait_stages.as_ptr(),
+            signal_semaphore_count: raw_signal_semaphores.len() as u32,
+            p_signal_semaphores: if !raw_signal_semaphores.is_empty() {
+                raw_signal_semaphores.as_ptr()
+            } else {
+                std::ptr::null()
+            },
+            ..Default::default()
+        };
+        self.render_device
+            .submit_compute_commands(submit_info, &raw_signal_fence)
+    }
 }
 
 impl VulkanDebug for CommandBuffer {

@@ -290,6 +290,29 @@ impl RenderDevice {
             .map_err(VulkanError::UnableToSubmitGraphicsCommands)
     }
 
+    /// - signal_fence is an optional handle to a fence which will be
+    ///   signaled once all submitted command buffers have finished
+    ///   execution.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because the caller must ensure that the command buffer
+    /// being submitted and all associated resources live until the
+    /// compute commands finish executing.
+    pub unsafe fn submit_compute_commands(
+        &self,
+        submit_info: vk::SubmitInfo,
+        signal_fence: &vk::Fence,
+    ) -> Result<(), VulkanError> {
+        self.logical_device
+            .queue_submit(
+                self.compute_queue.raw_queue(),
+                &[submit_info],
+                *signal_fence,
+            )
+            .map_err(VulkanError::UnableToSubmitGraphicsCommands)
+    }
+
     /// Map a piece of device memory to a host-accessible pointer.
     ///
     /// # Safety
