@@ -96,38 +96,42 @@ impl MSAADisplay {
 
     /// Request a frame from the swapchain and begin an onscreen MSAA render
     /// pass.
-    pub fn begin_frame(
-        &mut self,
-        clear_color: [f32; 4],
-    ) -> Result<AcquiredFrame> {
-        let mut frame = match self.swapchain_frames.acquire_swapchain_frame()? {
+    pub fn begin_frame(&mut self) -> Result<AcquiredFrame> {
+        let frame = match self.swapchain_frames.acquire_swapchain_frame()? {
             AcquiredFrame::SwapchainNeedsRebuild => {
                 return Ok(AcquiredFrame::SwapchainNeedsRebuild);
             }
             AcquiredFrame::Available(frame) => frame,
         };
-
-        let swapchain_extent = self.swapchain_frames.swapchain().extent();
-        let framebuffer = &self.framebuffers[frame.swapchain_image_index()];
-
-        // safe because the render pass and framebuffer will always outlive the
-        // command buffer
-        unsafe {
-            frame.command_buffer().begin_render_pass_inline(
-                &self.render_pass,
-                framebuffer,
-                swapchain_extent,
-                clear_color,
-            );
-        };
-
         Ok(AcquiredFrame::Available(frame))
     }
 
-    /// End the the render pass and return the frame to the swapchain for
-    /// command buffer execution and presentation.
-    pub fn end_frame(&mut self, mut frame: Frame) -> Result<()> {
-        frame.command_buffer().end_render_pass();
+    /// Begin a fullscreen MSAA render pass which targets the current swapchain
+    /// framebuffer.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - the application must ensure the render pass begins at the correct
+    ///     place in the command buffer.
+    pub unsafe fn begin_render_pass(
+        &self,
+        frame: &mut Frame,
+        clear_color: [f32; 4],
+    ) {
+        let swapchain_extent = self.swapchain_frames.swapchain().extent();
+        let framebuffer = &self.framebuffers[frame.swapchain_image_index()];
+        frame.command_buffer().begin_render_pass_inline(
+            &self.render_pass,
+            framebuffer,
+            swapchain_extent,
+            clear_color,
+        );
+    }
+
+    /// Return the frame to the swapchain for command buffer execution and
+    /// presentation.
+    pub fn end_frame(&mut self, frame: Frame) -> Result<()> {
         self.swapchain_frames.present_frame(frame)?;
         Ok(())
     }

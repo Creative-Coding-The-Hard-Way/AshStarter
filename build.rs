@@ -36,6 +36,7 @@ fn compile_shader(shader_file_path: &Path) -> Result<()> {
         .arg(shader_file_path.to_str().unwrap())
         .arg("-o")
         .arg(&output_path)
+        .arg("--target-env=vulkan1.3")
         .output()
         .unwrap();
 
@@ -62,6 +63,9 @@ fn main() -> Result<()> {
         compile_shader(path_entry?.as_path())?;
     }
     for path_entry in glob::glob("./**/*.frag")? {
+        compile_shader(path_entry?.as_path())?;
+    }
+    for path_entry in glob::glob("./**/*.comp")? {
         compile_shader(path_entry?.as_path())?;
     }
     Ok(())

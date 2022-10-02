@@ -7,6 +7,7 @@ pub struct PhysicalDeviceFeatures {
     pub features: vk::PhysicalDeviceFeatures,
     pub descriptor_indexing_features:
         vk::PhysicalDeviceDescriptorIndexingFeatures,
+    pub maintenance4: vk::PhysicalDeviceMaintenance4Features,
 }
 
 /// A Function which inspects a PhysicalDeviceFeatures struct and returns

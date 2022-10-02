@@ -57,8 +57,17 @@ impl Instance {
         &self,
         physical_device: vk::PhysicalDevice,
     ) -> PhysicalDeviceFeatures {
+        let mut physical_device_maintenence4_features =
+            vk::PhysicalDeviceMaintenance4Features {
+                ..Default::default()
+            };
         let mut physical_device_descriptor_indexing_features =
-            vk::PhysicalDeviceDescriptorIndexingFeatures::default();
+            vk::PhysicalDeviceDescriptorIndexingFeatures {
+                p_next: &mut physical_device_maintenence4_features
+                    as *mut vk::PhysicalDeviceMaintenance4Features
+                    as *mut c_void,
+                ..Default::default()
+            };
         let mut physical_device_features_v2 = vk::PhysicalDeviceFeatures2 {
             p_next: &mut physical_device_descriptor_indexing_features
                 as *mut vk::PhysicalDeviceDescriptorIndexingFeatures
@@ -75,6 +84,7 @@ impl Instance {
             features: physical_device_features_v2.features,
             descriptor_indexing_features:
                 physical_device_descriptor_indexing_features,
+            maintenance4: physical_device_maintenence4_features,
         }
     }
 

@@ -6,10 +6,6 @@ struct Vertex {
   vec4 color;
 };
 
-layout(push_constant) uniform PushConstants {
-    float angle;
-} pc;
-
 layout(binding = 0) uniform UniformBufferObject {
   mat4 proj;
 } ubo;
@@ -22,10 +18,6 @@ layout(location = 0) out vec4 vertex_color;
 
 void main() {
     Vertex vertex = sbo.data[gl_VertexIndex];
-    mat2 rot = mat2(
-        cos(pc.angle), -sin(pc.angle),
-        sin(pc.angle), cos(pc.angle)
-    );
     vertex_color = vertex.color;
-    gl_Position = ubo.proj * vec4(vertex.pos * rot, 0.0, 1.0);
+    gl_Position = ubo.proj * vec4(vertex.pos, 0.0, 1.0);
 }

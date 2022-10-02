@@ -2,8 +2,8 @@ use ash::vk;
 
 use super::CommandBuffer;
 use crate::graphics::vulkan_api::{
-    DescriptorSet, Framebuffer, GraphicsPipeline, HostCoherentBuffer, Image,
-    PipelineLayout, RenderPass, VulkanError,
+    ComputePipeline, DescriptorSet, Framebuffer, GraphicsPipeline,
+    HostCoherentBuffer, Image, PipelineLayout, RenderPass, VulkanError,
 };
 
 impl CommandBuffer {
@@ -76,6 +76,25 @@ impl CommandBuffer {
             &self.command_buffer,
             vk::PipelineBindPoint::GRAPHICS,
             graphics_pipeline.raw(),
+        );
+        self
+    }
+
+    /// Bind a pipeline for compute operations.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - The application must not drop the bound pipeline until this command
+    ///     buffer is destroyed or finishes executing.
+    pub unsafe fn bind_compute_pipeline(
+        &self,
+        compute_pipeline: &ComputePipeline,
+    ) -> &Self {
+        self.render_device.cmd_bind_pipeline(
+            &self.command_buffer,
+            vk::PipelineBindPoint::COMPUTE,
+            compute_pipeline.raw(),
         );
         self
     }
@@ -187,6 +206,34 @@ impl CommandBuffer {
         self
     }
 
+    /// Bind descriptor sets for a pipeline.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - Descriptor sets cannot typically be written while bound.
+    ///   - The application must keep all bound resources alive until the
+    ///     commands in this buffer finishexecuting.
+    pub unsafe fn bind_compute_descriptor_sets(
+        &self,
+        pipeline_layout: &PipelineLayout,
+        descriptor_sets: &[&DescriptorSet],
+    ) -> &Self {
+        let raw_descriptor_sets: Vec<vk::DescriptorSet> = descriptor_sets
+            .iter()
+            .map(|descriptor_set| *descriptor_set.raw())
+            .collect();
+        self.render_device.cmd_bind_descriptor_sets(
+            &self.command_buffer,
+            vk::PipelineBindPoint::COMPUTE,
+            pipeline_layout.raw(),
+            0,
+            &raw_descriptor_sets,
+            &[],
+        );
+        self
+    }
+
     /// Write push_constant data to the command buffer for use when executing.
     ///
     /// # Safety
@@ -245,6 +292,31 @@ impl CommandBuffer {
         self
     }
 
+    /// Add a pipeline barrier to the command buffer.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - The application must use barriers to coordinate memory dependencies
+    ///     between gpu operations.
+    pub unsafe fn pipeline_buffer_memory_barriers(
+        &self,
+        src_stage_mask: vk::PipelineStageFlags,
+        dst_stage_mask: vk::PipelineStageFlags,
+        buffer_memory_barriers: &[vk::BufferMemoryBarrier],
+    ) -> &Self {
+        self.render_device.cmd_pipeline_barrier(
+            &self.command_buffer,
+            src_stage_mask,
+            dst_stage_mask,
+            vk::DependencyFlags::empty(),
+            &[],
+            buffer_memory_barriers,
+            &[],
+        );
+        self
+    }
+
     /// Copy a buffer to an image.
     ///
     /// # Safety
@@ -265,6 +337,28 @@ impl CommandBuffer {
             dst_image.raw(),
             dst_image_layout,
             regions,
+        );
+        self
+    }
+
+    /// Dispatch compute invokes.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - memory safety depends on the correct implementation of the compute
+    ///     shader.
+    pub unsafe fn dispatch(
+        &self,
+        group_count_x: u32,
+        group_count_y: u32,
+        group_count_z: u32,
+    ) -> &Self {
+        self.render_device.cmd_dispatch(
+            &self.command_buffer,
+            group_count_x,
+            group_count_y,
+            group_count_z,
         );
         self
     }

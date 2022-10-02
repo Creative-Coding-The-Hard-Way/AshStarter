@@ -225,15 +225,14 @@ impl State for Example9MSAADisplay {
     }
 
     fn update(&mut self, glfw_window: &mut GlfwWindow) -> Result<()> {
-        let mut frame =
-            match self.msaa_display.begin_frame([0.2, 0.2, 0.2, 1.0])? {
-                AcquiredFrame::SwapchainNeedsRebuild => {
-                    return self.build_swapchain_resources(
-                        glfw_window.window_handle.get_framebuffer_size(),
-                    );
-                }
-                AcquiredFrame::Available(frame) => frame,
-            };
+        let mut frame = match self.msaa_display.begin_frame()? {
+            AcquiredFrame::SwapchainNeedsRebuild => {
+                return self.build_swapchain_resources(
+                    glfw_window.window_handle.get_framebuffer_size(),
+                );
+            }
+            AcquiredFrame::Available(frame) => frame,
+        };
 
         let angle = (Instant::now() - self.application_start).as_secs_f32()
             * (std::f32::consts::PI * 2.0 / 5.0);
@@ -241,6 +240,8 @@ impl State for Example9MSAADisplay {
         // safe because the render pass and framebuffer will always outlive the
         // command buffer
         unsafe {
+            self.msaa_display
+                .begin_render_pass(&mut frame, [0.2, 0.2, 0.2, 1.0]);
             frame
                 .command_buffer()
                 .bind_graphics_pipeline(&self.pipeline)
@@ -255,7 +256,8 @@ impl State for Example9MSAADisplay {
                     vk::ShaderStageFlags::VERTEX,
                     PushConstant { angle },
                 )
-                .draw(3, 0);
+                .draw(3, 0)
+                .end_render_pass();
         };
 
         self.msaa_display.end_frame(frame)?;

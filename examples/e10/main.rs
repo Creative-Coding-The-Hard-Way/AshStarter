@@ -1,3 +1,5 @@
+mod pipeline;
+
 use std::{sync::Arc, time::Instant};
 
 use anyhow::Result;
@@ -8,8 +10,7 @@ use ccthw::{
         msaa_display::MSAADisplay,
         ortho_projection,
         vulkan_api::{
-            DescriptorPool, DescriptorSet, DescriptorSetLayout,
-            GraphicsPipeline, HostCoherentBuffer, PipelineLayout, RenderDevice,
+            HostCoherentBuffer, PhysicalDeviceFeatures, RenderDevice,
             VulkanDebug,
         },
         AcquiredFrame,
@@ -47,15 +48,22 @@ struct PushConstant {
     pub angle: f32,
 }
 
-/// This example renders a triangle using a vertex buffer and a shader
-/// pipeline.
+/// This example renders a triangle that rotates.
+/// Triangle vertices are updated using a compute shader, rather than updating
+/// on the CPU.
+///
+/// NOTE: This example is outrageously over-synchronized. Compute operations are
+/// submitted on a separate GPU queue, but there are two calls to
+/// device.wait_idle PER FRAME. This is basically never the right choice in a
+/// real application, but it means there's no need to worry about memory
+/// barriers or semaphores or fences or anything else. Future examples will
+/// show better ways to synchronize this sort of GPU operation.
 struct Example10Compute {
     application_start: std::time::Instant,
     _vertex_buffer: HostCoherentBuffer<Vertex>,
     uniform_buffer: HostCoherentBuffer<UniformBufferObject>,
-    pipeline_layout: PipelineLayout,
-    descriptor_set: DescriptorSet,
-    pipeline: GraphicsPipeline,
+    graphics: pipeline::Graphics,
+    compute: pipeline::Compute,
 
     msaa_display: MSAADisplay,
     render_device: Arc<RenderDevice>,
@@ -69,10 +77,10 @@ impl Example10Compute {
         self.msaa_display
             .rebuild_swapchain_resources(framebuffer_size)?;
 
-        self.pipeline = self.msaa_display.create_graphics_pipeline(
+        self.graphics.pipeline = self.msaa_display.create_graphics_pipeline(
             include_bytes!("./shaders/passthrough.vert.spv"),
             include_bytes!("./shaders/passthrough.frag.spv"),
-            &self.pipeline_layout,
+            &self.graphics.pipeline_layout,
         )?;
 
         let right = framebuffer_size.0 as f32 / 2.0;
@@ -97,7 +105,18 @@ impl State for Example10Compute {
     fn new(window: &mut GlfwWindow) -> Result<Self> {
         window.window_handle.set_key_polling(true);
 
-        let render_device = Arc::new(window.create_render_device()?);
+        let render_device =
+            Arc::new(window.create_render_device_with_features(
+                PhysicalDeviceFeatures {
+                    maintenance4: vk::PhysicalDeviceMaintenance4Features {
+                        maintenance4: vk::TRUE,
+                        ..Default::default()
+                    },
+                    ..Default::default()
+                },
+                |features| features.maintenance4.maintenance4 == vk::TRUE,
+            )?);
+
         let msaa_display = MSAADisplay::new(render_device.clone(), window)?;
 
         let vertex_buffer = HostCoherentBuffer::new_with_data(
@@ -126,77 +145,26 @@ impl State for Example10Compute {
         )?;
         uniform_buffer.set_debug_name("uniform buffer");
 
-        let pipeline_layout = {
-            let descriptor_set_layout = Arc::new(DescriptorSetLayout::new(
-                render_device.clone(),
-                &[
-                    vk::DescriptorSetLayoutBinding {
-                        binding: 0,
-                        descriptor_type: vk::DescriptorType::UNIFORM_BUFFER,
-                        descriptor_count: 1,
-                        stage_flags: vk::ShaderStageFlags::VERTEX,
-                        p_immutable_samplers: std::ptr::null(),
-                    },
-                    vk::DescriptorSetLayoutBinding {
-                        binding: 1,
-                        descriptor_type: vk::DescriptorType::STORAGE_BUFFER,
-                        descriptor_count: 1,
-                        stage_flags: vk::ShaderStageFlags::VERTEX,
-                        p_immutable_samplers: std::ptr::null(),
-                    },
-                ],
-            )?);
-            PipelineLayout::new(
-                render_device.clone(),
-                &[descriptor_set_layout],
-                &[vk::PushConstantRange {
-                    stage_flags: vk::ShaderStageFlags::VERTEX,
-                    offset: 0,
-                    size: std::mem::size_of::<PushConstant>() as u32,
-                }],
-            )?
-        };
-        let descriptor_set = {
-            let pool = Arc::new(DescriptorPool::new(
-                render_device.clone(),
-                &[
-                    vk::DescriptorPoolSize {
-                        ty: vk::DescriptorType::UNIFORM_BUFFER,
-                        descriptor_count: 1,
-                    },
-                    vk::DescriptorPoolSize {
-                        ty: vk::DescriptorType::STORAGE_BUFFER,
-                        descriptor_count: 1,
-                    },
-                ],
-            )?);
-            DescriptorSet::allocate(
-                &render_device,
-                &pool,
-                pipeline_layout.descriptor_set_layout(0),
-                1,
-            )?
-            .pop()
-            .unwrap()
-        };
+        let graphics = pipeline::Graphics::new(&render_device, &msaa_display)?;
+        let compute = pipeline::Compute::new(&render_device)?;
         unsafe {
-            descriptor_set.write_uniform_buffer(0, &uniform_buffer);
-            descriptor_set.write_storage_buffer(1, &vertex_buffer);
+            graphics
+                .descriptor_set
+                .write_uniform_buffer(0, &uniform_buffer);
+            graphics
+                .descriptor_set
+                .write_storage_buffer(1, &vertex_buffer);
+            compute
+                .descriptor_set
+                .write_storage_buffer(0, &vertex_buffer);
         }
-
-        let pipeline = msaa_display.create_graphics_pipeline(
-            include_bytes!("./shaders/passthrough.vert.spv"),
-            include_bytes!("./shaders/passthrough.frag.spv"),
-            &pipeline_layout,
-        )?;
 
         Ok(Self {
             application_start: Instant::now(),
             uniform_buffer,
             _vertex_buffer: vertex_buffer,
-            pipeline_layout,
-            descriptor_set,
-            pipeline,
+            graphics,
+            compute,
 
             msaa_display,
             render_device,
@@ -225,40 +193,81 @@ impl State for Example10Compute {
     }
 
     fn update(&mut self, glfw_window: &mut GlfwWindow) -> Result<()> {
-        let mut frame =
-            match self.msaa_display.begin_frame([0.2, 0.2, 0.2, 1.0])? {
-                AcquiredFrame::SwapchainNeedsRebuild => {
-                    return self.build_swapchain_resources(
-                        glfw_window.window_handle.get_framebuffer_size(),
-                    );
-                }
-                AcquiredFrame::Available(frame) => frame,
-            };
+        let mut frame = match self.msaa_display.begin_frame()? {
+            AcquiredFrame::SwapchainNeedsRebuild => {
+                return self.build_swapchain_resources(
+                    glfw_window.window_handle.get_framebuffer_size(),
+                );
+            }
+            AcquiredFrame::Available(frame) => frame,
+        };
 
-        let angle = (Instant::now() - self.application_start).as_secs_f32()
+        let last_frame = self.application_start;
+        self.application_start = Instant::now();
+
+        let angle = (self.application_start - last_frame).as_secs_f32()
             * (std::f32::consts::PI * 2.0 / 5.0);
 
-        // safe because the render pass and framebuffer will always outlive the
-        // command buffer
+        let vertex_count = unsafe { self._vertex_buffer.as_slice()?.len() };
+        let group_count_x = ((vertex_count / 64) + 1) * 64;
+
+        unsafe { self.compute.command_pool.reset()? };
+        self.compute.command_buffer.begin_one_time_submit()?;
         unsafe {
+            self.compute
+                .command_buffer
+                .bind_compute_pipeline(&self.compute.pipeline)
+                .push_constant(
+                    &self.compute.pipeline_layout,
+                    vk::ShaderStageFlags::COMPUTE,
+                    PushConstant { angle },
+                )
+                .bind_compute_descriptor_sets(
+                    &self.compute.pipeline_layout,
+                    &[&self.compute.descriptor_set],
+                )
+                .dispatch(group_count_x as u32, 1, 1)
+        };
+        self.compute.command_buffer.end_command_buffer()?;
+        unsafe {
+            self.compute.command_buffer.submit_compute_commands(
+                &[],
+                &[],
+                &[],
+                None,
+            )?;
+        }
+
+        // Wait for all Device operations to complete before moving on to
+        // render this frame. This means there's no chance of this frame's
+        // draw command accidentally reading from the vertex buffer while
+        // the compute pipeline is still executing.
+        self.render_device.wait_idle()?;
+
+        // Draw the updated triangle
+        unsafe {
+            self.msaa_display
+                .begin_render_pass(&mut frame, [0.2, 0.2, 0.2, 1.0]);
+
             frame
                 .command_buffer()
-                .bind_graphics_pipeline(&self.pipeline)
+                .bind_graphics_pipeline(&self.graphics.pipeline)
                 .set_viewport(self.msaa_display.swapchain_extent())
                 .set_scissor(0, 0, self.msaa_display.swapchain_extent())
                 .bind_graphics_descriptor_sets(
-                    &self.pipeline_layout,
-                    &[&self.descriptor_set],
+                    &self.graphics.pipeline_layout,
+                    &[&self.graphics.descriptor_set],
                 )
-                .push_constant(
-                    &self.pipeline_layout,
-                    vk::ShaderStageFlags::VERTEX,
-                    PushConstant { angle },
-                )
-                .draw(3, 0);
+                .draw(3, 0)
+                .end_render_pass()
         };
 
         self.msaa_display.end_frame(frame)?;
+
+        // Wait for all Device operations to complete before finishing this
+        // frame. This means there's no chance of the next update writing
+        // to the vertex buffer while this frame is attempting to read from it.
+        self.render_device.wait_idle()?;
 
         Ok(())
     }

@@ -1,0 +1,35 @@
+#version 460
+#extension GL_ARB_separate_shader_objects: enable
+
+layout (constant_id=1) const int execution_sixe_x = 64;
+layout (local_size_x_id = 1) in;
+
+struct Vertex {
+  vec2 pos;
+  vec4 color;
+};
+
+layout(push_constant) uniform PushConstant {
+    float angle;
+} pc;
+
+layout(std430, binding = 0) buffer SBO {
+    Vertex data[];
+} sbo;
+
+
+void main() {
+    // Current SSBO index
+    uint index = gl_GlobalInvocationID.x;
+    if (index >= 3) {
+        return;
+    }
+
+    Vertex vertex = sbo.data[index];
+    mat2 rot = mat2(
+        cos(pc.angle), -sin(pc.angle),
+        sin(pc.angle), cos(pc.angle)
+    );
+    vertex.pos = vertex.pos * rot;
+    sbo.data[index] = vertex;
+}

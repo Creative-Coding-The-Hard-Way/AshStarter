@@ -99,6 +99,10 @@ where
         Ok(buffer)
     }
 
+    pub fn size_in_bytes(&self) -> usize {
+        self.allocation.size_in_bytes()
+    }
+
     /// Access the underlying memory as if it were a slice of T.
     ///
     /// # Safety

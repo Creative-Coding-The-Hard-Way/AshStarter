@@ -490,6 +490,31 @@ impl RenderDevice {
         }
     }
 
+    /// Create a new compute pipeline.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///  - the application is responsible for destroying the pipeline before
+    ///    the render device is dropped.
+    pub unsafe fn create_compute_pipeline(
+        &self,
+        create_info: &vk::ComputePipelineCreateInfo,
+    ) -> Result<vk::Pipeline, VulkanError> {
+        let pipeline_cache = vk::PipelineCache::default();
+        let pipelines_result = self.logical_device.create_compute_pipelines(
+            pipeline_cache,
+            &[*create_info],
+            None,
+        );
+        match pipelines_result {
+            Ok(pipelines) => Ok(pipelines[0]),
+            Err((_, result)) => {
+                Err(VulkanError::UnableToCreateGraphicsPipeline(result))
+            }
+        }
+    }
+
     /// Destroy a pipeline.
     ///
     /// # Safety
@@ -936,5 +961,27 @@ impl RenderDevice {
             self.instance
                 .get_physical_device_properties(self.physical_device)
         }
+    }
+
+    /// Dispatch compute invokes.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - memory safety depends on the correct implementation of the compute
+    ///     shader.
+    pub unsafe fn cmd_dispatch(
+        &self,
+        command_buffer: &vk::CommandBuffer,
+        group_count_x: u32,
+        group_count_y: u32,
+        group_count_z: u32,
+    ) {
+        self.logical_device.cmd_dispatch(
+            *command_buffer,
+            group_count_x,
+            group_count_y,
+            group_count_z,
+        )
     }
 }

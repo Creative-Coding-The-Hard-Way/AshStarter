@@ -78,15 +78,26 @@ impl Instance {
         physical_device: &vk::PhysicalDevice,
         physical_device_extensions: &[String],
         queue_create_infos: &[vk::DeviceQueueCreateInfo],
-        mut physical_device_features: PhysicalDeviceFeatures,
+        physical_device_features: PhysicalDeviceFeatures,
     ) -> Result<ash::Device, VulkanError> {
         let (_c_layer_names, layer_name_ptrs) =
             unsafe { to_os_ptrs(&self.layers) };
         let (_c_ext_names, ext_name_ptrs) =
             unsafe { to_os_ptrs(physical_device_extensions) };
 
+        let mut maintenance4_features =
+            vk::PhysicalDeviceMaintenance4Features {
+                ..physical_device_features.maintenance4
+            };
+        let mut descriptor_indexing_features =
+            vk::PhysicalDeviceDescriptorIndexingFeatures {
+                p_next: &mut maintenance4_features
+                    as *mut vk::PhysicalDeviceMaintenance4Features
+                    as *mut c_void,
+                ..physical_device_features.descriptor_indexing_features
+            };
         let physical_device_features_v2 = vk::PhysicalDeviceFeatures2 {
-            p_next: &mut physical_device_features.descriptor_indexing_features
+            p_next: &mut descriptor_indexing_features
                 as *mut vk::PhysicalDeviceDescriptorIndexingFeatures
                 as *mut c_void,
             features: physical_device_features.features,

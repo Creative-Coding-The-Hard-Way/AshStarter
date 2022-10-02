@@ -21,7 +21,7 @@ fn missing_extensions(
     required_extensions: &[String],
 ) -> Result<Vec<String>, VulkanError> {
     let available_extensions = entry
-        .enumerate_instance_extension_properties()
+        .enumerate_instance_extension_properties(None)
         .map_err(VulkanError::UnableToListAvailableExtensions)?;
 
     let available_names: Vec<String> = available_extensions

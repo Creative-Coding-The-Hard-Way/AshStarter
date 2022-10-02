@@ -11,7 +11,7 @@ opt-level = 1               # Use slightly better optimizations
 anyhow = "1.0.44"
 flexi_logger = "0.17.1"
 log = "0.4.13"
-ash = { version = "0.35.1", features = ["linked"] }
+ash = { version = "0.37.0", features = ["linked"] }
 aquamarine = "*"
 nalgebra = "*"
 memoffset = "*"

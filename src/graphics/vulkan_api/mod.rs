@@ -21,7 +21,9 @@ pub use self::{
     instance::{
         ArePhysicalDeviceFeaturesSuitableFn, Instance, PhysicalDeviceFeatures,
     },
-    pipeline::{GraphicsPipeline, PipelineLayout, ShaderModule},
+    pipeline::{
+        ComputePipeline, GraphicsPipeline, PipelineLayout, ShaderModule,
+    },
     render_device::{Allocation, RenderDevice, VulkanDebug},
     render_pass::RenderPass,
     swapchain::{Swapchain, SwapchainStatus},
