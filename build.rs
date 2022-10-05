@@ -1,8 +1,11 @@
-use std::{path::Path, process::Command};
+use std::{
+    path::{Path, PathBuf},
+    process::Command,
+};
 
 use anyhow::{Context, Error, Result};
 
-fn compile_shader(shader_file_path: &Path) -> Result<()> {
+fn output_file_for_shader_file(shader_file_path: &Path) -> Result<PathBuf> {
     let parent = shader_file_path.parent().with_context(|| {
         format!(
             "unable to get parent dir for shader at {:?}",
@@ -25,12 +28,28 @@ fn compile_shader(shader_file_path: &Path) -> Result<()> {
             )
         })?;
     let output_file_name = format!("{}.spv", shader_file_name);
+    Ok(parent.join(Path::new(&output_file_name)))
+}
 
-    let output_path = parent
-        .join(Path::new(&output_file_name))
-        .to_str()
-        .unwrap()
-        .to_owned();
+fn needs_rebuild(shader_file_path: &Path, output_path: &Path) -> Result<bool> {
+    if !output_path.try_exists()? {
+        return Ok(true);
+    }
+
+    let shader_last_modified_time =
+        std::fs::metadata(shader_file_path)?.modified()?;
+    let output_last_modified_time =
+        std::fs::metadata(output_path)?.modified()?;
+
+    Ok(shader_last_modified_time > output_last_modified_time)
+}
+
+fn compile_shader(shader_file_path: &Path) -> Result<()> {
+    let output_path = output_file_for_shader_file(shader_file_path)?;
+
+    if !needs_rebuild(shader_file_path, &output_path).unwrap_or(true) {
+        return Ok(());
+    }
 
     let output = Command::new("glslc")
         .arg(shader_file_path.to_str().unwrap())
@@ -51,7 +70,11 @@ fn compile_shader(shader_file_path: &Path) -> Result<()> {
         )));
     } else {
         let shader_path_str = shader_file_path.to_str().unwrap();
-        println!("cargo:warning={} -> {}", shader_path_str, output_path);
+        println!(
+            "cargo:warning={} -> {}",
+            shader_path_str,
+            output_path.to_str().unwrap()
+        );
         println!("cargo:rerun-if-changed={}", shader_path_str);
     }
 

@@ -14,6 +14,21 @@ impl MSAADisplay {
         fragment_shader_bytes: &[u8],
         pipeline_layout: &PipelineLayout,
     ) -> Result<GraphicsPipeline, VulkanError> {
+        self.create_graphics_pipeline_with_topology(
+            vertex_shader_bytes,
+            fragment_shader_bytes,
+            pipeline_layout,
+            vk::PrimitiveTopology::TRIANGLE_LIST,
+        )
+    }
+
+    pub fn create_graphics_pipeline_with_topology(
+        &self,
+        vertex_shader_bytes: &[u8],
+        fragment_shader_bytes: &[u8],
+        pipeline_layout: &PipelineLayout,
+        primitive_topology: vk::PrimitiveTopology,
+    ) -> Result<GraphicsPipeline, VulkanError> {
         let shader_entry_name =
             unsafe { CStr::from_bytes_with_nul_unchecked(b"main\0") };
         let vertex_shader_program = ShaderModule::from_spirv_bytes(
@@ -41,7 +56,7 @@ impl MSAADisplay {
         let vertex_input_state =
             vk::PipelineVertexInputStateCreateInfo::default();
         let input_assembly_state = vk::PipelineInputAssemblyStateCreateInfo {
-            topology: vk::PrimitiveTopology::TRIANGLE_LIST,
+            topology: primitive_topology,
             ..Default::default()
         };
         let dynamic_states =

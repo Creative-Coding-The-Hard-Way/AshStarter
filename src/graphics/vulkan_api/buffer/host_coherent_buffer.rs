@@ -8,6 +8,7 @@ use crate::graphics::vulkan_api::{
 
 /// A Vulkan Device buffer which is mapped to host-coherent memory.
 pub struct HostCoherentBuffer<T> {
+    element_count: usize,
     buffer: vk::Buffer,
     allocation: Allocation,
     render_device: Arc<RenderDevice>,
@@ -73,6 +74,7 @@ where
         unsafe { render_device.bind_buffer_memory(&buffer, &allocation)? };
 
         Ok(Self {
+            element_count: len,
             buffer,
             allocation,
             render_device,
@@ -99,6 +101,11 @@ where
         Ok(buffer)
     }
 
+    /// How many elements of type T are stored in this buffer.
+    pub fn element_count(&self) -> usize {
+        self.element_count
+    }
+
     pub fn size_in_bytes(&self) -> usize {
         self.allocation.size_in_bytes()
     }
@@ -116,7 +123,7 @@ where
     pub unsafe fn as_slice(&self) -> Result<&[T], VulkanError> {
         // safe because the allocation was created with the HOST_VISIBLE bit
         // and is mapped when the buffer is created
-        unsafe { self.allocation.as_slice() }
+        self.allocation.as_slice()
     }
 
     /// Access the underlying memory as if it were a mut slice of T.
@@ -132,7 +139,7 @@ where
     pub unsafe fn as_slice_mut(&mut self) -> Result<&mut [T], VulkanError> {
         // safe because the allocation was created with the HOST_VISIBLE bit
         // and is mapped when the buffer is created
-        unsafe { self.allocation.as_slice_mut() }
+        self.allocation.as_slice_mut()
     }
 }
 
