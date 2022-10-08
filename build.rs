@@ -48,6 +48,10 @@ fn compile_shader(shader_file_path: &Path) -> Result<()> {
     let output_path = output_file_for_shader_file(shader_file_path)?;
 
     if !needs_rebuild(shader_file_path, &output_path).unwrap_or(true) {
+        println!(
+            "cargo:warning=Skip rebuild for {} because it's up to date",
+            shader_file_path.to_str().unwrap()
+        );
         return Ok(());
     }
 
@@ -82,14 +86,12 @@ fn compile_shader(shader_file_path: &Path) -> Result<()> {
 }
 
 fn main() -> Result<()> {
-    for path_entry in glob::glob("./**/*.vert")? {
+    let all_paths = glob::glob("./**/*.vert")?
+        .chain(glob::glob("./**/*.frag")?)
+        .chain(glob::glob("./**/*.comp")?);
+    for path_entry in all_paths {
         compile_shader(path_entry?.as_path())?;
     }
-    for path_entry in glob::glob("./**/*.frag")? {
-        compile_shader(path_entry?.as_path())?;
-    }
-    for path_entry in glob::glob("./**/*.comp")? {
-        compile_shader(path_entry?.as_path())?;
-    }
+
     Ok(())
 }

@@ -2,8 +2,8 @@ use ash::vk;
 
 use super::CommandBuffer;
 use crate::graphics::vulkan_api::{
-    ComputePipeline, DescriptorSet, Framebuffer, GraphicsPipeline,
-    HostCoherentBuffer, Image, PipelineLayout, RenderPass, VulkanError,
+    Buffer, ComputePipeline, DescriptorSet, Framebuffer, GraphicsPipeline,
+    Image, PipelineLayout, RenderPass, VulkanError,
 };
 
 impl CommandBuffer {
@@ -164,15 +164,15 @@ impl CommandBuffer {
     /// Unsafe because:
     ///   - The application must ensure that the vertex buffer lives until the
     ///     commands have finished executing.
-    pub unsafe fn bind_vertex_buffer<T>(
+    pub unsafe fn bind_vertex_buffer(
         &self,
-        buffer: &HostCoherentBuffer<T>,
+        buffer: &impl Buffer,
         offset: u64,
     ) -> &Self {
         self.render_device.cmd_bind_vertex_buffers(
             &self.command_buffer,
             0,
-            &[*buffer.raw()],
+            &[buffer.raw()],
             &[offset],
         );
         self
@@ -324,16 +324,16 @@ impl CommandBuffer {
     /// Unsafe because:
     ///   - The application must use pipeline image memory barriers to control
     ///     memory dependencies for copies.
-    pub unsafe fn copy_buffer_to_image<T>(
+    pub unsafe fn copy_buffer_to_image(
         &self,
-        src_buffer: &HostCoherentBuffer<T>,
+        src_buffer: &impl Buffer,
         dst_image: &Image,
         dst_image_layout: vk::ImageLayout,
         regions: &[vk::BufferImageCopy],
     ) -> &Self {
         self.render_device.cmd_copy_buffer_to_image(
             &self.command_buffer,
-            src_buffer.raw(),
+            &src_buffer.raw(),
             dst_image.raw(),
             dst_image_layout,
             regions,

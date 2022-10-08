@@ -3,8 +3,8 @@ use std::sync::Arc;
 use ash::vk;
 
 use crate::graphics::vulkan_api::{
-    DescriptorPool, DescriptorSetLayout, HostCoherentBuffer, ImageView,
-    RenderDevice, Sampler, VulkanDebug, VulkanError,
+    Buffer, DescriptorPool, DescriptorSetLayout, ImageView, RenderDevice,
+    Sampler, VulkanDebug, VulkanError,
 };
 
 /// An owned descriptor set.
@@ -60,10 +60,10 @@ impl DescriptorSet {
     ///     it is bound
     ///   - the caller must ensure that the buffer lives at least as long as
     ///     the descriptor set while it's reference.d
-    pub unsafe fn write_uniform_buffer<T>(
+    pub unsafe fn write_uniform_buffer(
         &self,
         binding: u32,
-        buffer: &HostCoherentBuffer<T>,
+        buffer: &impl Buffer,
     ) {
         self.write_buffer(binding, buffer, vk::DescriptorType::UNIFORM_BUFFER)
     }
@@ -77,10 +77,10 @@ impl DescriptorSet {
     ///     it is bound
     ///   - the caller must ensure that the buffer lives at least as long as
     ///     the descriptor set while it's reference.d
-    pub unsafe fn write_storage_buffer<T>(
+    pub unsafe fn write_storage_buffer(
         &self,
         binding: u32,
-        buffer: &HostCoherentBuffer<T>,
+        buffer: &impl Buffer,
     ) {
         self.write_buffer(binding, buffer, vk::DescriptorType::STORAGE_BUFFER)
     }
@@ -94,14 +94,14 @@ impl DescriptorSet {
     ///     it is bound
     ///   - the caller must ensure that the buffer lives at least as long as
     ///     the descriptor set while it's reference.d
-    pub unsafe fn write_buffer<T>(
+    pub unsafe fn write_buffer(
         &self,
         binding: u32,
-        buffer: &HostCoherentBuffer<T>,
+        buffer: &impl Buffer,
         descriptor_type: vk::DescriptorType,
     ) {
         let buffer_info = vk::DescriptorBufferInfo {
-            buffer: *buffer.raw(),
+            buffer: buffer.raw(),
             offset: 0,
             range: vk::WHOLE_SIZE,
         };

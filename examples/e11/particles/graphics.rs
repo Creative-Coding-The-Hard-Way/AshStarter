@@ -7,14 +7,15 @@ use ccthw::{
         msaa_display::MSAADisplay,
         ortho_projection,
         vulkan_api::{
-            CommandBuffer, DescriptorPool, DescriptorSet, DescriptorSetLayout,
-            GraphicsPipeline, HostCoherentBuffer, PipelineLayout, RenderDevice,
+            Buffer, CommandBuffer, DescriptorPool, DescriptorSet,
+            DescriptorSetLayout, GraphicsPipeline, HostCoherentBuffer,
+            PipelineLayout, RenderDevice,
         },
     },
     math::Mat4,
 };
 
-use super::{Particle, SimulationConfig};
+use super::SimulationConfig;
 
 /// Used to pass the projection matrix to the vertex shader.
 #[derive(Debug, Copy, Clone)]
@@ -25,7 +26,7 @@ struct UniformBufferObject {
 
 /// All of the resources needed to render particles to the screen.
 pub struct Graphics {
-    particles: Arc<HostCoherentBuffer<Particle>>,
+    particles: Arc<dyn Buffer>,
     uniform_buffer: HostCoherentBuffer<UniformBufferObject>,
     descriptor_set: DescriptorSet,
     pipeline_layout: PipelineLayout,
@@ -36,7 +37,7 @@ impl Graphics {
     pub fn new(
         render_device: &Arc<RenderDevice>,
         msaa_display: &MSAADisplay,
-        particles: Arc<HostCoherentBuffer<Particle>>,
+        particles: Arc<dyn Buffer>,
         config: SimulationConfig,
     ) -> Result<Self> {
         let pipeline_layout = {

@@ -1,0 +1,41 @@
+#version 460
+#extension GL_ARB_separate_shader_objects: enable
+#define PI 3.1415926
+
+layout (constant_id=1) const int execution_sixe_x = 32;
+layout (local_size_x_id = 1) in;
+
+struct Particle {
+  vec2 pos;
+  vec2 vel;
+  vec4 color;
+};
+
+layout(binding = 0) uniform SimulationConfig {
+    vec2 dimensions;
+} config;
+
+layout(std430, binding = 1) buffer SBO {
+    Particle particles[];
+} sbo;
+
+void main() {
+    uint particle_count = sbo.particles.length();
+
+    // Current SSBO index
+    uint index = gl_GlobalInvocationID.x;
+    if (index >= particle_count) {
+        return;
+    }
+
+    float index_norm = float(index) / float(particle_count);
+    float angle = index_norm * (13.0 * 2.0) * PI;
+    float radius = config.dimensions.y * 0.5 * index_norm;
+
+    Particle particle;
+    particle.pos = radius * vec2(cos(angle), sin(angle));
+    particle.vel = -particle.pos;
+    particle.color = vec4(1.0, 1.0, 1.0, 1.0);
+
+    sbo.particles[index] = particle;
+}

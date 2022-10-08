@@ -3,7 +3,7 @@ use std::{marker::PhantomData, sync::Arc};
 use ash::vk;
 
 use crate::graphics::vulkan_api::{
-    Allocation, RenderDevice, VulkanDebug, VulkanError,
+    Allocation, Buffer, RenderDevice, VulkanDebug, VulkanError,
 };
 
 /// A Vulkan Device buffer which is mapped to host-coherent memory.
@@ -16,17 +16,6 @@ pub struct HostCoherentBuffer<T> {
 }
 
 impl<T> HostCoherentBuffer<T> {
-    /// Get the raw Vulkan handle to the buffer.
-    ///
-    /// # Safety
-    ///
-    /// Unsafe because:
-    ///   - Ownership is not transferred. The caller must ensure no references
-    ///     to the buffer exist after this HostCoherentBuffer is dropped.
-    pub unsafe fn raw(&self) -> &vk::Buffer {
-        &self.buffer
-    }
-
     /// Flush the host caches so data is visible on the device.
     ///
     /// Generally this method does not need to be called explicitly because
@@ -101,15 +90,6 @@ where
         Ok(buffer)
     }
 
-    /// How many elements of type T are stored in this buffer.
-    pub fn element_count(&self) -> usize {
-        self.element_count
-    }
-
-    pub fn size_in_bytes(&self) -> usize {
-        self.allocation.size_in_bytes()
-    }
-
     /// Access the underlying memory as if it were a slice of T.
     ///
     /// # Safety
@@ -140,6 +120,20 @@ where
         // safe because the allocation was created with the HOST_VISIBLE bit
         // and is mapped when the buffer is created
         self.allocation.as_slice_mut()
+    }
+}
+
+impl<T> Buffer for HostCoherentBuffer<T> {
+    unsafe fn raw(&self) -> vk::Buffer {
+        self.buffer
+    }
+
+    fn size_in_bytes(&self) -> usize {
+        self.allocation.size_in_bytes()
+    }
+
+    fn element_count(&self) -> usize {
+        self.element_count
     }
 }
 

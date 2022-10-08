@@ -13,7 +13,7 @@ mod sync;
 mod texture;
 
 pub use self::{
-    buffer::HostCoherentBuffer,
+    buffer::{Buffer, DeviceLocalBuffer, HostCoherentBuffer},
     commands::{CommandBuffer, CommandPool},
     descriptors::{DescriptorPool, DescriptorSet, DescriptorSetLayout},
     error::VulkanError,

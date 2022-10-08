@@ -30,10 +30,11 @@ impl MSAADisplay {
     pub fn new(
         render_device: Arc<RenderDevice>,
         glfw_window: &mut GlfwWindow,
+        desired_samples: vk::SampleCountFlags,
     ) -> Result<Self> {
         let samples = Self::pick_max_supported_msaa_count(
             &render_device,
-            vk::SampleCountFlags::TYPE_8,
+            desired_samples,
         );
 
         let mut swapchain_frames = SwapchainFrames::new(render_device.clone())?;

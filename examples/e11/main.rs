@@ -8,20 +8,23 @@ use ccthw::{
     application::{Application, GlfwWindow, State},
     graphics::{
         msaa_display::MSAADisplay,
-        vulkan_api::{
-            HostCoherentBuffer, PhysicalDeviceFeatures, RenderDevice,
-        },
+        vulkan_api::{DeviceLocalBuffer, PhysicalDeviceFeatures, RenderDevice},
         AcquiredFrame,
     },
     logging,
 };
-use particles::{Graphics, Particle, SimulationConfig};
+use particles::{
+    Graphics, Initializer, Integrator, Particle, SimulationConfig,
+};
 
 /// This example renders a gpu driven particle system using async
 /// compute shaders to simulate particles.
 struct Example11GPUParticles {
+    particles: Arc<DeviceLocalBuffer<Particle>>,
     simulation_config: SimulationConfig,
     graphics: Graphics,
+    initializer: Initializer,
+    integrator: Integrator,
 
     msaa_display: MSAADisplay,
     render_device: Arc<RenderDevice>,
@@ -41,15 +44,15 @@ impl State for Example11GPUParticles {
                 },
                 |features| features.maintenance4.maintenance4 == vk::TRUE,
             )?);
-        let msaa_display = MSAADisplay::new(render_device.clone(), window)?;
-        let particles = Arc::new(HostCoherentBuffer::new_with_data(
+        let msaa_display = MSAADisplay::new(
+            render_device.clone(),
+            window,
+            vk::SampleCountFlags::TYPE_2,
+        )?;
+        let particles = Arc::new(DeviceLocalBuffer::<Particle>::new(
             render_device.clone(),
             vk::BufferUsageFlags::STORAGE_BUFFER,
-            &[Particle {
-                pos: [0.0, 0.0],
-                vel: [0.0, 0.0],
-                color: [1.0, 1.0, 1.0, 1.0],
-            }],
+            1_000_000,
         )?);
         let (w, h) = window.window_handle.get_framebuffer_size();
         let simulation_config =
@@ -57,12 +60,27 @@ impl State for Example11GPUParticles {
         let graphics = Graphics::new(
             &render_device,
             &msaa_display,
-            particles,
+            particles.clone(),
             simulation_config,
         )?;
+
+        let mut initializer = Initializer::new(&render_device)?;
+
+        // safe because initialization is synchronous and nothing is using the
+        // particle buffer yet
+        unsafe {
+            initializer.initialize_particles(&particles, simulation_config)?
+        };
+
+        let integrator = Integrator::new(&render_device)?;
+
         Ok(Self {
             simulation_config,
             graphics,
+            initializer,
+            integrator,
+            particles,
+
             msaa_display,
             render_device,
         })
@@ -81,6 +99,13 @@ impl State for Example11GPUParticles {
             WindowEvent::Key(Key::Escape, _, Action::Release, _) => {
                 glfw_window.window_handle.set_should_close(true);
             }
+            WindowEvent::Key(Key::Enter, _, Action::Release, _) => unsafe {
+                self.render_device.wait_idle()?;
+                self.initializer.initialize_particles(
+                    &self.particles,
+                    self.simulation_config,
+                )?;
+            },
             WindowEvent::FramebufferSize(_, _) => {
                 self.msaa_display.invalidate_swapchain();
             }
@@ -97,6 +122,15 @@ impl State for Example11GPUParticles {
                 );
             }
             AcquiredFrame::Available(frame) => frame,
+        };
+
+        unsafe {
+            self.render_device.wait_idle()?;
+
+            // Safe(ish) because this function stalls the gpu until the
+            // integration finishes.
+            self.integrator
+                .integrate_particles(&self.particles, self.simulation_config)?
         };
 
         unsafe {
