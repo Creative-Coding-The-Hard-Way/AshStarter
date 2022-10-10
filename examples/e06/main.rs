@@ -164,6 +164,7 @@ impl State for Example6PushConstants {
                 ty: vk::DescriptorType::UNIFORM_BUFFER,
                 descriptor_count: 1,
             }],
+            1,
         )?);
         let descriptor_set = {
             DescriptorSet::allocate(

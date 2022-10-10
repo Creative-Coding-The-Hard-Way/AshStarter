@@ -117,7 +117,11 @@ impl State for Example10Compute {
                 |features| features.maintenance4.maintenance4 == vk::TRUE,
             )?);
 
-        let msaa_display = MSAADisplay::new(render_device.clone(), window)?;
+        let msaa_display = MSAADisplay::new(
+            render_device.clone(),
+            window,
+            vk::SampleCountFlags::TYPE_8,
+        )?;
 
         let vertex_buffer = HostCoherentBuffer::new_with_data(
             render_device.clone(),

@@ -62,6 +62,7 @@ impl Graphics {
                         descriptor_count: 1,
                     },
                 ],
+                1,
             )?);
             DescriptorSet::allocate(
                 render_device,
@@ -123,6 +124,7 @@ impl Compute {
                     ty: vk::DescriptorType::STORAGE_BUFFER,
                     descriptor_count: 1,
                 }],
+                1,
             )?);
             DescriptorSet::allocate(
                 render_device,
@@ -156,7 +158,7 @@ impl Compute {
         };
         let command_pool = Arc::new(CommandPool::new(
             render_device.clone(),
-            render_device.graphics_queue_family_index(),
+            render_device.compute_queue_family_index(),
             vk::CommandPoolCreateFlags::TRANSIENT,
         )?);
         let command_buffer = CommandBuffer::new(

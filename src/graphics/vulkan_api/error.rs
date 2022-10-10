@@ -161,4 +161,7 @@ pub enum VulkanError {
 
     #[error("Unable to create Sampler {:#?}", .0)]
     UnableToCreateSampler(#[source] vk::Result),
+
+    #[error("Unable to get Fence status {:#?}", .0)]
+    UnableToGetFenceStatus(#[source] vk::Result),
 }

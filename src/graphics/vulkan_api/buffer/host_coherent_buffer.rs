@@ -103,7 +103,9 @@ where
     pub unsafe fn as_slice(&self) -> Result<&[T], VulkanError> {
         // safe because the allocation was created with the HOST_VISIBLE bit
         // and is mapped when the buffer is created
-        self.allocation.as_slice()
+        self.allocation
+            .as_slice()
+            .map(|slice| &slice[..self.element_count])
     }
 
     /// Access the underlying memory as if it were a mut slice of T.
@@ -119,7 +121,10 @@ where
     pub unsafe fn as_slice_mut(&mut self) -> Result<&mut [T], VulkanError> {
         // safe because the allocation was created with the HOST_VISIBLE bit
         // and is mapped when the buffer is created
-        self.allocation.as_slice_mut()
+        let element_count = self.element_count;
+        self.allocation
+            .as_slice_mut()
+            .map(|slice| &mut slice[..element_count])
     }
 }
 

@@ -139,6 +139,7 @@ impl State for Example7Textures {
                     descriptor_count: 1,
                 },
             ],
+            1,
         )?);
         let descriptor_set = {
             DescriptorSet::allocate(

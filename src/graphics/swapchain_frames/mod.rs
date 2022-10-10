@@ -3,6 +3,7 @@ mod frame;
 use std::sync::Arc;
 
 pub use self::frame::Frame;
+use super::vulkan_api::Semaphore;
 use crate::graphics::{
     vulkan_api::{
         ImageView, RenderDevice, SemaphorePool, Swapchain, SwapchainStatus,
@@ -96,6 +97,7 @@ impl SwapchainFrames {
         if let Some(semaphore) =
             current_frame.replace_acquire_semaphore(acquire_semaphore)
         {
+            semaphore.set_debug_name("scratch semaphore");
             self.semaphore_pool.return_semaphore(semaphore);
         }
 
@@ -106,11 +108,20 @@ impl SwapchainFrames {
     }
 
     /// Submit frame commands and tell the swapchain to present it.
-    pub fn present_frame(
+    pub fn present_frame(&mut self, frame: Frame) -> Result<(), GraphicsError> {
+        self.present_frame_with_signal(frame, &[])
+    }
+
+    /// Submit frame commands and tell the swapchain to present it.
+    ///
+    /// - graphics_complete_signal_semaphores are signalled when the graphics
+    ///   commands for this frame have completed executing
+    pub fn present_frame_with_signal(
         &mut self,
         mut frame: Frame,
+        graphics_complete_signal_semaphores: &[&Semaphore],
     ) -> Result<(), GraphicsError> {
-        frame.submit_frame_commands()?;
+        frame.submit_frame_commands(graphics_complete_signal_semaphores)?;
         self.swapchain.as_ref().unwrap().present_swapchain_image(
             frame.swapchain_image_index(),
             frame.release_semaphore(),

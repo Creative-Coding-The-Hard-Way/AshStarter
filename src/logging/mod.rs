@@ -3,7 +3,7 @@ mod pretty_list;
 use std::fmt::Write as FmtWrite;
 
 use anyhow::Result;
-use flexi_logger::{DeferredNow, Logger, Record};
+use flexi_logger::{DeferredNow, Duplicate, Logger, Record};
 use textwrap::{termwidth, Options};
 
 pub use self::pretty_list::PrettyList;
@@ -11,7 +11,9 @@ pub use self::pretty_list::PrettyList;
 /// Setup console logging for this application.
 pub fn setup() -> Result<(), anyhow::Error> {
     Logger::with_env_or_str("info")
+        .log_to_file()
         .format(multiline_format)
+        .duplicate_to_stdout(Duplicate::All)
         .start()?;
 
     log::info!(

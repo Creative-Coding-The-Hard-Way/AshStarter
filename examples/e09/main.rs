@@ -98,7 +98,11 @@ impl State for Example9MSAADisplay {
         window.window_handle.set_key_polling(true);
 
         let render_device = Arc::new(window.create_render_device()?);
-        let msaa_display = MSAADisplay::new(render_device.clone(), window)?;
+        let msaa_display = MSAADisplay::new(
+            render_device.clone(),
+            window,
+            vk::SampleCountFlags::TYPE_8,
+        )?;
 
         let vertex_buffer = HostCoherentBuffer::new_with_data(
             render_device.clone(),
@@ -169,6 +173,7 @@ impl State for Example9MSAADisplay {
                         descriptor_count: 1,
                     },
                 ],
+                1,
             )?);
             DescriptorSet::allocate(
                 &render_device,

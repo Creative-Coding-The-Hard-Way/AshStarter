@@ -341,6 +341,36 @@ impl CommandBuffer {
         self
     }
 
+    /// Copy the entire contents of one buffer to another.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - the caller must ensure that both buffers are the same size in bytes
+    pub unsafe fn copy_entire_buffer(
+        &self,
+        src_buffer: &impl Buffer,
+        dst_buffer: &impl Buffer,
+    ) -> &Self {
+        debug_assert!(src_buffer.size_in_bytes() == dst_buffer.size_in_bytes());
+        let regions = [vk::BufferCopy2 {
+            src_offset: 0,
+            dst_offset: 0,
+            size: src_buffer.size_in_bytes() as u64,
+            ..Default::default()
+        }];
+        let copy_buffer_info = vk::CopyBufferInfo2 {
+            src_buffer: src_buffer.raw(),
+            dst_buffer: dst_buffer.raw(),
+            p_regions: regions.as_ptr(),
+            region_count: regions.len() as u32,
+            ..Default::default()
+        };
+        self.render_device
+            .cmd_copy_buffer(&self.command_buffer, &copy_buffer_info);
+        self
+    }
+
     /// Dispatch compute invokes.
     ///
     /// # Safety

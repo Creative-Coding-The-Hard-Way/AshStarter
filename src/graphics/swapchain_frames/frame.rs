@@ -105,6 +105,10 @@ impl Frame {
         &mut self,
         acquire_semaphore: Semaphore,
     ) -> Option<Semaphore> {
+        acquire_semaphore.set_debug_name(format!(
+            "Frame {} acquire semaphore",
+            self.swapchain_image_index
+        ));
         self.acquire_semaphore.replace(acquire_semaphore)
     }
 
@@ -122,13 +126,21 @@ impl Frame {
     }
 
     /// End the command buffer and submit to the graphics queue.
-    pub(super) fn submit_frame_commands(&mut self) -> Result<(), VulkanError> {
+    pub(super) fn submit_frame_commands(
+        &mut self,
+        graphics_complete_signal_semaphores: &[&Semaphore],
+    ) -> Result<(), VulkanError> {
+        let sempahores = [
+            graphics_complete_signal_semaphores,
+            &[&self.release_semaphore],
+        ]
+        .concat();
         self.command_buffer.end_command_buffer()?;
         unsafe {
             self.command_buffer.submit_graphics_commands(
                 &[self.acquire_semaphore.as_ref().unwrap()],
                 &[vk::PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT],
-                &[&self.release_semaphore],
+                &sempahores,
                 Some(&self.queue_submit_fence),
             )
         }

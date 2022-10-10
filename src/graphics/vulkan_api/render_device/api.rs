@@ -898,6 +898,23 @@ impl RenderDevice {
         )
     }
 
+    /// Add a command to copy data between buffers.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - the caller must construct the buffer copy struct
+    ///   - the caller must ensure all referenced buffers are not destroyed
+    ///     until the command buffer finishes executing
+    pub unsafe fn cmd_copy_buffer(
+        &self,
+        command_buffer: &vk::CommandBuffer,
+        copy_buffer_info: &vk::CopyBufferInfo2,
+    ) {
+        self.logical_device
+            .cmd_copy_buffer2(*command_buffer, copy_buffer_info);
+    }
+
     /// Write a pipeline memory barrier into the command buffer.
     ///
     /// # Safety
@@ -983,5 +1000,22 @@ impl RenderDevice {
             group_count_y,
             group_count_z,
         )
+    }
+
+    /// Check if a fence has been signalled.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - this amounts to a race between the CPU and the GPU
+    ///   - if a queue submission is pending, the value returned by this command
+    ///     can be immediately out of date
+    pub unsafe fn get_fence_status(
+        &self,
+        fence: vk::Fence,
+    ) -> Result<bool, VulkanError> {
+        self.logical_device
+            .get_fence_status(fence)
+            .map_err(VulkanError::UnableToGetFenceStatus)
     }
 }

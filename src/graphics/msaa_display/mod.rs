@@ -6,6 +6,7 @@ use std::sync::Arc;
 use anyhow::Result;
 use ash::vk;
 
+use super::vulkan_api::Semaphore;
 use crate::{
     application::GlfwWindow,
     graphics::{
@@ -75,7 +76,7 @@ impl MSAADisplay {
         self.swapchain_frames.wait_for_all_frames_to_complete()?;
         self.framebuffers.clear();
         self.swapchain_frames.rebuild_swapchain(framebuffer_size)?;
-
+        //
         let (msaa_render_target, render_pass, framebuffers) =
             Self::build_swapchain_resources(
                 &self.render_device,
@@ -133,8 +134,25 @@ impl MSAADisplay {
     /// Return the frame to the swapchain for command buffer execution and
     /// presentation.
     pub fn end_frame(&mut self, frame: Frame) -> Result<()> {
-        self.swapchain_frames.present_frame(frame)?;
+        self.end_frame_with_signal(frame, &[])
+    }
+
+    /// Return the frame to the swapchain for command buffer execution and
+    /// presentation.
+    pub fn end_frame_with_signal(
+        &mut self,
+        frame: Frame,
+        graphics_complete_signal_semaphores: &[&Semaphore],
+    ) -> Result<()> {
+        self.swapchain_frames.present_frame_with_signal(
+            frame,
+            graphics_complete_signal_semaphores,
+        )?;
         Ok(())
+    }
+
+    pub fn swapchain_image_count(&self) -> usize {
+        self.swapchain_frames.swapchain_image_count()
     }
 }
 

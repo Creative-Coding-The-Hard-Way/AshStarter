@@ -4,8 +4,9 @@ use std::sync::Arc;
 
 use ash::vk;
 
-use crate::graphics::vulkan_api::{
-    Fence, RenderDevice, Semaphore, VulkanError,
+use crate::{
+    graphics::vulkan_api::{Fence, RenderDevice, Semaphore, VulkanError},
+    logging::PrettyList,
 };
 
 pub enum SwapchainStatus {
@@ -73,6 +74,10 @@ impl Swapchain {
             create_info.image_sharing_mode = vk::SharingMode::CONCURRENT;
             create_info.p_queue_family_indices = indices.as_ptr();
             create_info.queue_family_index_count = indices.len() as u32;
+            log::debug!(
+                "Create CONCURRENT swapchain images for queue families {:?}",
+                PrettyList(&indices)
+            );
         }
 
         let loader = render_device.create_swapchain_loader();

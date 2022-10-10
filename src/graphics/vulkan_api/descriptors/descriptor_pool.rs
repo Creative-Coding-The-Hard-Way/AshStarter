@@ -15,11 +15,8 @@ impl DescriptorPool {
     pub fn new(
         render_device: Arc<RenderDevice>,
         pool_sizes: &[vk::DescriptorPoolSize],
+        max_sets: u32,
     ) -> Result<Self, VulkanError> {
-        let max_sets: u32 = pool_sizes
-            .iter()
-            .map(|descriptor_pool_size| descriptor_pool_size.descriptor_count)
-            .sum();
         let create_info = vk::DescriptorPoolCreateInfo {
             max_sets,
             pool_size_count: pool_sizes.len() as u32,

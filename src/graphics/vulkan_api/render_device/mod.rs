@@ -66,7 +66,7 @@ impl RenderDevice {
         let logical_device = instance.create_logical_device(
             &physical_device,
             &physical_device::required_device_extensions(),
-            &queue_families.as_queue_create_infos(),
+            unsafe { &queue_families.as_queue_create_infos() },
             physical_device_features,
         )?;
         let (graphics_queue, present_queue, compute_queue) =
@@ -143,6 +143,13 @@ impl RenderDevice {
     /// The family index for the graphics queue.
     pub fn graphics_queue_family_index(&self) -> u32 {
         self.graphics_queue.family_index()
+    }
+
+    /// The family index for the compute queue.
+    /// This can be the same as the graphics family index if the device does
+    /// not have a dedicated compute family.
+    pub fn compute_queue_family_index(&self) -> u32 {
+        self.compute_queue.family_index()
     }
 
     /// List all surface formats supported by this render device.

@@ -52,6 +52,17 @@ impl Fence {
     pub fn reset(&self) -> Result<(), VulkanError> {
         self.render_device.reset_fences(&[self.raw])
     }
+
+    /// Check if the fence has been signalled.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - A fence's status can be immediately out of date if a queue is
+    ///     pending submission.
+    pub unsafe fn get_status(&self) -> Result<bool, VulkanError> {
+        self.render_device.get_fence_status(self.raw)
+    }
 }
 
 impl VulkanDebug for Fence {

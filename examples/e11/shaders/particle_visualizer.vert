@@ -4,7 +4,6 @@
 struct Particle {
   vec2 pos;
   vec2 vel;
-  vec4 color;
 };
 
 layout(binding = 0) uniform UniformBufferObject {
@@ -19,7 +18,7 @@ layout(location = 0) out vec4 vertex_color;
 
 void main() {
     Particle particle = sbo.particles[gl_VertexIndex];
-    vertex_color = particle.color;
+    vertex_color = vec4(1.0, 1.0, 1.0, 1.0);
     gl_PointSize = 1.0;
     gl_Position = ubo.projection * vec4(particle.pos, 0.0, 1.0);
 }

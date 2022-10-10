@@ -174,6 +174,7 @@ impl State for Example8Multisampling {
                 ty: vk::DescriptorType::UNIFORM_BUFFER,
                 descriptor_count: 1,
             }],
+            1,
         )?);
         let descriptor_set = {
             DescriptorSet::allocate(

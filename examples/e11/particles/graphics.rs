@@ -7,10 +7,10 @@ use ccthw::{
         msaa_display::MSAADisplay,
         ortho_projection,
         vulkan_api::{
-            Buffer, CommandBuffer, DescriptorPool, DescriptorSet,
-            DescriptorSetLayout, GraphicsPipeline, HostCoherentBuffer,
-            PipelineLayout, RenderDevice,
+            Buffer, DescriptorPool, DescriptorSet, DescriptorSetLayout,
+            GraphicsPipeline, HostCoherentBuffer, PipelineLayout, RenderDevice,
         },
+        Frame,
     },
     math::Mat4,
 };
@@ -26,18 +26,18 @@ struct UniformBufferObject {
 
 /// All of the resources needed to render particles to the screen.
 pub struct Graphics {
-    particles: Arc<dyn Buffer>,
+    simulation_config: SimulationConfig,
     uniform_buffer: HostCoherentBuffer<UniformBufferObject>,
-    descriptor_set: DescriptorSet,
+    descriptor_sets: Vec<DescriptorSet>,
     pipeline_layout: PipelineLayout,
     pipeline: GraphicsPipeline,
+    render_device: Arc<RenderDevice>,
 }
 
 impl Graphics {
     pub fn new(
-        render_device: &Arc<RenderDevice>,
+        render_device: Arc<RenderDevice>,
         msaa_display: &MSAADisplay,
-        particles: Arc<dyn Buffer>,
         config: SimulationConfig,
     ) -> Result<Self> {
         let pipeline_layout = {
@@ -66,28 +66,28 @@ impl Graphics {
                 &[],
             )?
         };
-        let descriptor_set = {
+        let descriptor_sets = {
+            let frame_count = msaa_display.swapchain_image_count() as u32;
             let descriptor_pool = Arc::new(DescriptorPool::new(
                 render_device.clone(),
                 &[
                     vk::DescriptorPoolSize {
                         ty: vk::DescriptorType::UNIFORM_BUFFER,
-                        descriptor_count: 1,
+                        descriptor_count: frame_count,
                     },
                     vk::DescriptorPoolSize {
                         ty: vk::DescriptorType::STORAGE_BUFFER,
-                        descriptor_count: 1,
+                        descriptor_count: frame_count,
                     },
                 ],
+                frame_count,
             )?);
             DescriptorSet::allocate(
-                render_device,
+                &render_device,
                 &descriptor_pool,
                 pipeline_layout.descriptor_set_layout(0),
-                1,
+                frame_count,
             )?
-            .pop()
-            .unwrap()
         };
         let pipeline = msaa_display.create_graphics_pipeline_with_topology(
             include_bytes!("../shaders/particle_visualizer.vert.spv"),
@@ -102,17 +102,32 @@ impl Graphics {
                 projection: config.projection(),
             }],
         )?;
-        unsafe {
-            descriptor_set.write_uniform_buffer(0, &uniform_buffer);
-            descriptor_set.write_storage_buffer(1, &particles);
+        for descriptor_set in &descriptor_sets {
+            unsafe { descriptor_set.write_uniform_buffer(0, &uniform_buffer) };
         }
         Ok(Self {
-            particles,
+            simulation_config: config,
             uniform_buffer,
-            descriptor_set,
+            descriptor_sets,
             pipeline_layout,
             pipeline,
+            render_device,
         })
+    }
+
+    /// Configure the graphics pipeline to read from the given buffer.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - the caller must ensure no in-flight frames still reference the
+    ///     old buffer.
+    pub unsafe fn set_read_buffer(
+        &mut self,
+        frame_index: usize,
+        buffer: &impl Buffer,
+    ) {
+        self.descriptor_sets[frame_index].write_storage_buffer(1, buffer);
     }
 
     /// Rebuild any swapchain-dependent resources.
@@ -126,6 +141,32 @@ impl Graphics {
         &mut self,
         msaa_display: &MSAADisplay,
     ) -> Result<()> {
+        self.descriptor_sets = {
+            let frame_count = msaa_display.swapchain_image_count() as u32;
+            let descriptor_pool = Arc::new(DescriptorPool::new(
+                self.render_device.clone(),
+                &[
+                    vk::DescriptorPoolSize {
+                        ty: vk::DescriptorType::UNIFORM_BUFFER,
+                        descriptor_count: frame_count,
+                    },
+                    vk::DescriptorPoolSize {
+                        ty: vk::DescriptorType::STORAGE_BUFFER,
+                        descriptor_count: frame_count,
+                    },
+                ],
+                frame_count,
+            )?);
+            DescriptorSet::allocate(
+                &self.render_device,
+                &descriptor_pool,
+                self.pipeline_layout.descriptor_set_layout(0),
+                frame_count,
+            )?
+        };
+        for descriptor_set in &self.descriptor_sets {
+            descriptor_set.write_uniform_buffer(0, &self.uniform_buffer)
+        }
         self.pipeline = msaa_display.create_graphics_pipeline_with_topology(
             include_bytes!("../shaders/particle_visualizer.vert.spv"),
             include_bytes!("../shaders/particle_visualizer.frag.spv"),
@@ -147,6 +188,7 @@ impl Graphics {
         &mut self,
         config: &SimulationConfig,
     ) -> Result<()> {
+        self.simulation_config = *config;
         self.uniform_buffer.as_slice_mut()?[0] = UniformBufferObject {
             projection: config.projection(),
         };
@@ -164,18 +206,20 @@ impl Graphics {
     ///     function
     pub unsafe fn draw(
         &self,
-        command_buffer: &mut CommandBuffer,
+        frame: &mut Frame,
         viewport_extent: vk::Extent2D,
     ) -> Result<()> {
-        command_buffer
+        let frame_index = frame.swapchain_image_index();
+        frame
+            .command_buffer()
             .bind_graphics_pipeline(&self.pipeline)
             .set_viewport(viewport_extent)
             .set_scissor(0, 0, viewport_extent)
             .bind_graphics_descriptor_sets(
                 &self.pipeline_layout,
-                &[&self.descriptor_set],
+                &[&self.descriptor_sets[frame_index]],
             )
-            .draw(self.particles.element_count() as u32, 0);
+            .draw(self.simulation_config.particle_count, 0);
         Ok(())
     }
 }
