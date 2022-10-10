@@ -16,6 +16,9 @@ use super::SimulationConfig;
 struct IntegrationConstants {
     /// The integration timestep.
     dt: f32,
+    x: f32,
+    y: f32,
+    pressed: f32,
 }
 
 /// All Vulkan resources needed to run the Particle initialization compute
@@ -29,13 +32,13 @@ pub struct Integrator {
     command_buffer: CommandBuffer,
     pipeline_layout: PipelineLayout,
     descriptor_set: DescriptorSet,
-    pipeline: ComputePipeline,
+    pipelines: Vec<ComputePipeline>,
 }
 
 impl Integrator {
     pub fn new(
         render_device: &Arc<RenderDevice>,
-        compute_shader_bytes: &[u8],
+        compute_shader_sources: &[&[u8]],
         simulation_config: SimulationConfig,
     ) -> Result<Self, VulkanError> {
         let pipeline_layout = {
@@ -99,27 +102,35 @@ impl Integrator {
             .pop()
             .unwrap()
         };
-        let pipeline = {
-            let shader_entry_name = unsafe {
-                std::ffi::CStr::from_bytes_with_nul_unchecked(b"main\0")
-            };
-            let module = ShaderModule::from_spirv_bytes(
-                render_device.clone(),
-                compute_shader_bytes,
-            )?;
-            let stage_create_info = vk::PipelineShaderStageCreateInfo {
-                stage: vk::ShaderStageFlags::COMPUTE,
-                p_name: shader_entry_name.as_ptr(),
-                module: unsafe { module.raw() },
-                ..Default::default()
-            };
-            let create_info = vk::ComputePipelineCreateInfo {
-                layout: unsafe { pipeline_layout.raw() },
-                stage: stage_create_info,
-                ..Default::default()
-            };
-            ComputePipeline::new(render_device.clone(), &create_info)?
+        let pipelines = {
+            let mut pipelines = vec![];
+            for compute_shader_source in compute_shader_sources {
+                let shader_entry_name = unsafe {
+                    std::ffi::CStr::from_bytes_with_nul_unchecked(b"main\0")
+                };
+                let module = ShaderModule::from_spirv_bytes(
+                    render_device.clone(),
+                    compute_shader_source,
+                )?;
+                let stage_create_info = vk::PipelineShaderStageCreateInfo {
+                    stage: vk::ShaderStageFlags::COMPUTE,
+                    p_name: shader_entry_name.as_ptr(),
+                    module: unsafe { module.raw() },
+                    ..Default::default()
+                };
+                let create_info = vk::ComputePipelineCreateInfo {
+                    layout: unsafe { pipeline_layout.raw() },
+                    stage: stage_create_info,
+                    ..Default::default()
+                };
+                pipelines.push(ComputePipeline::new(
+                    render_device.clone(),
+                    &create_info,
+                )?);
+            }
+            pipelines
         };
+
         let command_pool = Arc::new(CommandPool::new(
             render_device.clone(),
             render_device.compute_queue_family_index(),
@@ -151,7 +162,7 @@ impl Integrator {
             command_pool,
             pipeline_layout,
             descriptor_set,
-            pipeline,
+            pipelines,
         })
     }
 
@@ -177,7 +188,23 @@ impl Integrator {
         self.descriptor_set.write_storage_buffer(2, buffer);
     }
 
+    /// Get the time since the last integration update.
+    pub fn time_since_last_update(&self) -> f32 {
+        let now = Instant::now();
+        (now - self.last_submission).as_secs_f32().clamp(0.001, 0.1)
+    }
+
+    /// This is called automatically after every integration. But it can be
+    /// useful to manually reset after a long stall (for example after
+    /// initializing the particle buffer).
+    pub fn reset_start_time(&mut self) {
+        self.last_submission = Instant::now();
+    }
+
     /// Integrate the particle buffer once and wait for the commands to finish.
+    ///
+    /// Shader index indicates which compute shader pipeline to use based on the
+    /// sources provided when buliding the integrator.
     ///
     /// # Safety
     ///
@@ -186,10 +213,14 @@ impl Integrator {
     ///     reading or writing to the particle buffer.
     ///   - the application MUST wait for the last integration submission to
     ///     finish before calling this method again.
-    pub unsafe fn integrate_particles(&mut self) -> Result<(), VulkanError> {
-        let now = Instant::now();
-        let dt = (now - self.last_submission).as_secs_f32().clamp(0.001, 0.1);
-        self.last_submission = now;
+    pub unsafe fn integrate_particles(
+        &mut self,
+        shader_index: usize,
+        mouse_pos: (f32, f32),
+        pressed: bool,
+    ) -> Result<(), VulkanError> {
+        let dt = self.time_since_last_update();
+        self.reset_start_time();
 
         // do 32 particles per thread
         let adjusted_count = self.simulation_config.particle_count / 32;
@@ -199,7 +230,7 @@ impl Integrator {
         self.command_pool.reset()?;
         self.command_buffer.begin_one_time_submit()?;
         self.command_buffer
-            .bind_compute_pipeline(&self.pipeline)
+            .bind_compute_pipeline(&self.pipelines[shader_index])
             .bind_compute_descriptor_sets(
                 &self.pipeline_layout,
                 &[&self.descriptor_set],
@@ -207,7 +238,12 @@ impl Integrator {
             .push_constant(
                 &self.pipeline_layout,
                 vk::ShaderStageFlags::COMPUTE,
-                IntegrationConstants { dt },
+                IntegrationConstants {
+                    dt,
+                    x: mouse_pos.0,
+                    y: mouse_pos.1,
+                    pressed: if pressed { 1.0 } else { 0.0 },
+                },
             )
             .dispatch(group_count_x as u32, 1, 1)
             .end_command_buffer()?;

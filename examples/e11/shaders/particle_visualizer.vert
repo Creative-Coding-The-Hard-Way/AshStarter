@@ -16,9 +16,14 @@ layout(std430, binding = 1) readonly buffer SBO {
 
 layout(location = 0) out vec4 vertex_color;
 
+layout(push_constant) uniform UpdateConstants {
+  float dt;
+} uc;
+
 void main() {
     Particle particle = sbo.particles[gl_VertexIndex];
-    vertex_color = vec4(1.0, 1.0, 1.0, 1.0);
+    vertex_color = vec4(1.0, 1.0, 1.0, 0.01);
     gl_PointSize = 1.0;
-    gl_Position = ubo.projection * vec4(particle.pos, 0.0, 1.0);
+    gl_Position =
+        ubo.projection * vec4(particle.pos + uc.dt*particle.vel, 0.0, 1.0);
 }

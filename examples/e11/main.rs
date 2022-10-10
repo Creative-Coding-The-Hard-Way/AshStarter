@@ -129,8 +129,10 @@ struct Example11GPUParticles {
     simulation_config: SimulationConfig,
     particles: TrippleBufferedParticles,
     graphics: Graphics,
-    initializer: Integrator,
     integrator: Integrator,
+
+    mouse_pos: (f32, f32),
+    pressed: bool,
 
     msaa_display: MSAADisplay,
     render_device: Arc<RenderDevice>,
@@ -139,6 +141,8 @@ struct Example11GPUParticles {
 impl State for Example11GPUParticles {
     fn new(window: &mut GlfwWindow) -> Result<Self> {
         window.window_handle.set_key_polling(true);
+        window.window_handle.set_cursor_pos_polling(true);
+        window.window_handle.set_mouse_button_polling(true);
         let render_device =
             Arc::new(window.create_render_device_with_features(
                 PhysicalDeviceFeatures {
@@ -158,7 +162,7 @@ impl State for Example11GPUParticles {
         let (w, h) = window.window_handle.get_framebuffer_size();
 
         let simulation_config =
-            SimulationConfig::new(100.0, w as f32 / h as f32, 16_000_000);
+            SimulationConfig::new(100.0, w as f32 / h as f32, 8_000_000);
         let particles = TrippleBufferedParticles::new(
             &render_device,
             simulation_config.particle_count() as usize,
@@ -170,15 +174,12 @@ impl State for Example11GPUParticles {
             simulation_config,
         )?;
 
-        let initializer = Integrator::new(
-            &render_device,
-            include_bytes!("./shaders/initialize.comp.spv"),
-            simulation_config,
-        )?;
-
         let integrator = Integrator::new(
             &render_device,
-            include_bytes!("./shaders/integrate.comp.spv"),
+            &[
+                include_bytes!("./shaders/initialize.comp.spv"),
+                include_bytes!("./shaders/integrate.comp.spv"),
+            ],
             simulation_config,
         )?;
 
@@ -188,8 +189,9 @@ impl State for Example11GPUParticles {
             simulation_config,
             particles,
             graphics,
-            initializer,
             integrator,
+            mouse_pos: (0.0, 0.0),
+            pressed: false,
 
             msaa_display,
             render_device,
@@ -201,7 +203,7 @@ impl State for Example11GPUParticles {
         glfw_window: &mut GlfwWindow,
         window_event: glfw::WindowEvent,
     ) -> Result<()> {
-        use glfw::{Action, Key, WindowEvent};
+        use glfw::{Action, Key, MouseButtonLeft, WindowEvent};
         match window_event {
             WindowEvent::Key(Key::Space, _, Action::Release, _) => {
                 glfw_window.toggle_fullscreen()?;
@@ -215,30 +217,28 @@ impl State for Example11GPUParticles {
             WindowEvent::FramebufferSize(_, _) => {
                 self.msaa_display.invalidate_swapchain();
             }
+            WindowEvent::CursorPos(x, y) => {
+                let display_extent = self.msaa_display.swapchain_extent();
+                let unit_x = x as f32 / display_extent.width as f32;
+                let unit_y = y as f32 / display_extent.height as f32;
+                let norm_x = (unit_x * 2.0) - 1.0;
+                let norm_y = (unit_y * -2.0) + 1.0;
+                let x = norm_x * self.simulation_config.width() / 2.0;
+                let y = norm_y * self.simulation_config.height() / 2.0;
+                self.mouse_pos = (x, y);
+            }
+            WindowEvent::MouseButton(MouseButtonLeft, Action::Press, _) => {
+                self.pressed = true;
+            }
+            WindowEvent::MouseButton(MouseButtonLeft, Action::Release, _) => {
+                self.pressed = false;
+            }
             _ => (),
         }
         Ok(())
     }
 
     fn update(&mut self, glfw_window: &mut GlfwWindow) -> Result<()> {
-        if self.needs_initialized {
-            self.integrator.wait_for_integration_to_complete()?;
-            self.initializer.wait_for_integration_to_complete()?;
-
-            self.particles.write_buffer_mut().reserve_write_target();
-            unsafe {
-                self.initializer
-                    .set_read_buffer(&self.particles.read_buffer().buffer);
-                self.initializer
-                    .set_write_buffer(&self.particles.write_buffer().buffer);
-                self.initializer.integrate_particles()?;
-            }
-            self.initializer.wait_for_integration_to_complete()?;
-            self.particles.write_buffer_mut().release_write_target();
-            self.particles.swap_buffers();
-            self.needs_initialized = false;
-        }
-
         if self.integrator.is_integration_finished()?
             && self.particles.write_buffer().is_free()
         {
@@ -251,7 +251,20 @@ impl State for Example11GPUParticles {
                     self.integrator.set_write_buffer(
                         &self.particles.write_buffer().buffer,
                     );
-                    self.integrator.integrate_particles()?;
+                    if self.needs_initialized {
+                        self.integrator.integrate_particles(
+                            0,
+                            self.mouse_pos,
+                            self.pressed,
+                        )?;
+                        self.needs_initialized = false;
+                    } else {
+                        self.integrator.integrate_particles(
+                            1,
+                            self.mouse_pos,
+                            self.pressed,
+                        )?;
+                    }
                 }
             } else {
                 // Integration has finished, but the write buffer is still
@@ -289,8 +302,11 @@ impl State for Example11GPUParticles {
                 frame_index,
                 &self.particles.read_buffer().buffer,
             );
-            self.graphics
-                .draw(&mut frame, self.msaa_display.swapchain_extent())?;
+            self.graphics.draw(
+                &mut frame,
+                self.msaa_display.swapchain_extent(),
+                self.integrator.time_since_last_update() * 0.0,
+            )?;
             frame.command_buffer().end_render_pass();
         }
 
@@ -308,7 +324,6 @@ impl Example11GPUParticles {
         self.msaa_display
             .rebuild_swapchain_resources((width, height))?;
         self.integrator.wait_for_integration_to_complete()?;
-        self.initializer.wait_for_integration_to_complete()?;
 
         self.simulation_config.resize(width as f32 / height as f32);
 
@@ -321,8 +336,6 @@ impl Example11GPUParticles {
             self.graphics
                 .update_simulation_config(&self.simulation_config)?;
             self.integrator
-                .update_simulation_config(&self.simulation_config)?;
-            self.initializer
                 .update_simulation_config(&self.simulation_config)?;
         };
 

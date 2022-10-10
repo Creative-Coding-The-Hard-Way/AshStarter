@@ -38,6 +38,14 @@ impl SimulationConfig {
         self.dimensions[0] = self.dimensions[1] * aspect_ratio;
     }
 
+    pub fn width(&self) -> f32 {
+        self.dimensions[0]
+    }
+
+    pub fn height(&self) -> f32 {
+        self.dimensions[1]
+    }
+
     pub fn particle_count(&self) -> u32 {
         self.particle_count
     }

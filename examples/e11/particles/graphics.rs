@@ -17,6 +17,13 @@ use ccthw::{
 
 use super::SimulationConfig;
 
+#[derive(Debug, Copy, Clone)]
+#[repr(C, packed)]
+struct UpdateConstants {
+    // Time since the last integration update.
+    dt: f32,
+}
+
 /// Used to pass the projection matrix to the vertex shader.
 #[derive(Debug, Copy, Clone)]
 #[repr(C, packed)]
@@ -63,7 +70,11 @@ impl Graphics {
             PipelineLayout::new(
                 render_device.clone(),
                 &[descriptor_set_layout],
-                &[],
+                &[vk::PushConstantRange {
+                    stage_flags: vk::ShaderStageFlags::VERTEX,
+                    offset: 0,
+                    size: std::mem::size_of::<UpdateConstants>() as u32,
+                }],
             )?
         };
         let descriptor_sets = {
@@ -208,6 +219,7 @@ impl Graphics {
         &self,
         frame: &mut Frame,
         viewport_extent: vk::Extent2D,
+        dt: f32,
     ) -> Result<()> {
         let frame_index = frame.swapchain_image_index();
         frame
@@ -218,6 +230,11 @@ impl Graphics {
             .bind_graphics_descriptor_sets(
                 &self.pipeline_layout,
                 &[&self.descriptor_sets[frame_index]],
+            )
+            .push_constant(
+                &self.pipeline_layout,
+                vk::ShaderStageFlags::VERTEX,
+                UpdateConstants { dt },
             )
             .draw(self.simulation_config.particle_count, 0);
         Ok(())

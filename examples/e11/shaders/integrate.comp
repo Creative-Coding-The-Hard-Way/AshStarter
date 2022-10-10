@@ -1,6 +1,6 @@
 #version 460
 #extension GL_ARB_separate_shader_objects: enable
-#define DAMPING 0.99
+#define DAMPING 0.9
 
 layout (constant_id=1) const int execution_sixe_x = 64;
 layout (local_size_x_id = 1) in;
@@ -26,6 +26,9 @@ layout(std430, binding = 2) buffer WriteSBO {
 layout(push_constant) uniform IntegrationConstants {
   // The integration timestep.
   float dt;
+  float x;
+  float y;
+  float pressed;
 } ic;
 
 void main() {
@@ -36,35 +39,49 @@ void main() {
         }
         Particle particle = read_sbo.particles[index];
 
-        // ------------------
-        // Integrate particle position and velocity.
+        // Subdivide the timestep into thirds, and take three small steps
+        // This is worth-while because signalling the async fence takes a long
+        // time. Therefore it's better to take lots of small steps and use more
+        // compute time per dispatch.
+        float dt = ic.dt / 10.0;
+        for (int j = 0; j < 10; j++) {
+            // ------------------
+            // Integrate particle position and velocity.
 
-        particle.pos += ic.dt*particle.vel;
+            if (ic.pressed > 0.0) {
+                vec2 accel = vec2(ic.x, ic.y) - particle.pos;
+                float square_length = dot(accel, accel);
+                vec2 norm_accel = accel / sqrt(square_length);
+                particle.vel += dt * 50.0 * norm_accel / (square_length + 0.01);
+            }
 
-        // ---------------------------
-        // Enforce boundary conditions
+            particle.pos += dt*particle.vel;
 
-        float right = config.dimensions.x / 2.0;
-        float left = -right;
-        if (particle.pos.x >= right) {
-            particle.pos.x = right * 2 - particle.pos.x;
-            particle.vel.x = -particle.vel.x;
-        } else if (particle.pos.x <= left) {
-            particle.pos.x = left * 2 - particle.pos.x;
-            particle.vel.x = -particle.vel.x;
+            // ---------------------------
+            // Enforce boundary conditions
+
+            float right = config.dimensions.x / 2.0;
+            float left = -right;
+            if (particle.pos.x >= right) {
+                particle.pos.x = right * 2 - particle.pos.x;
+                particle.vel.x = -particle.vel.x;
+            } else if (particle.pos.x <= left) {
+                particle.pos.x = left * 2 - particle.pos.x;
+                particle.vel.x = -particle.vel.x;
+            }
+
+            float top = config.dimensions.y / 2.0;
+            float bottom = -top;
+            if (particle.pos.y >= top) {
+                particle.pos.y = top * 2 - particle.pos.y;
+                particle.vel.y = -particle.vel.y;
+            } else if (particle.pos.y <= bottom) {
+                particle.pos.y = bottom * 2 - particle.pos.y;
+                particle.vel.y = -particle.vel.y;
+            }
         }
 
-        float top = config.dimensions.y / 2.0;
-        float bottom = -top;
-        if (particle.pos.y >= top) {
-            particle.pos.y = top * 2 - particle.pos.y;
-            particle.vel.y = -particle.vel.y;
-        } else if (particle.pos.y <= bottom) {
-            particle.pos.y = bottom * 2 - particle.pos.y;
-            particle.vel.y = -particle.vel.y;
-        }
-
-        particle.vel = DAMPING * particle.vel;
+        particle.vel = pow(DAMPING, ic.dt) * particle.vel;
 
         // ------------------------------------------
         // Write the updated particle into the buffer

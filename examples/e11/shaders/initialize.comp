@@ -35,7 +35,7 @@ void main() {
 
         Particle particle;
         particle.pos = radius * vec2(cos(angle), sin(angle));
-        particle.vel = -particle.pos;
+        particle.vel = vec2(0.0, 0.0);
         write_sbo.particles[index] = particle;
     }
 }
