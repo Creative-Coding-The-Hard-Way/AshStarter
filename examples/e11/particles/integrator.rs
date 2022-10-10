@@ -5,7 +5,7 @@ use ash::vk;
 use ccthw::graphics::vulkan_api::{
     Buffer, CommandBuffer, CommandPool, ComputePipeline, DescriptorPool,
     DescriptorSet, DescriptorSetLayout, Fence, HostCoherentBuffer,
-    PipelineLayout, RenderDevice, ShaderModule, VulkanError,
+    PipelineLayout, RenderDevice, ShaderModule, VulkanDebug, VulkanError,
 };
 
 use super::SimulationConfig;
@@ -131,6 +131,7 @@ impl Integrator {
             vk::CommandBufferLevel::PRIMARY,
         )?;
         let fence = Fence::new(render_device.clone())?;
+        fence.set_debug_name("Integrator Fence");
         let uniform_buffer = HostCoherentBuffer::new_with_data(
             render_device.clone(),
             vk::BufferUsageFlags::UNIFORM_BUFFER,

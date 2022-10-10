@@ -66,13 +66,14 @@ impl SynchronizedBuffer {
     }
 }
 
-struct DoubleBufferedParticles {
-    buffers: [SynchronizedBuffer; 2],
+struct TrippleBufferedParticles {
+    buffers: [SynchronizedBuffer; 3],
     read_buffer_index: usize,
     write_buffer_index: usize,
+    scratch_buffer_index: usize,
 }
 
-impl DoubleBufferedParticles {
+impl TrippleBufferedParticles {
     fn new(
         render_device: &Arc<RenderDevice>,
         particle_count: usize,
@@ -81,18 +82,22 @@ impl DoubleBufferedParticles {
             buffers: [
                 SynchronizedBuffer::new(render_device.clone(), particle_count)?,
                 SynchronizedBuffer::new(render_device.clone(), particle_count)?,
+                SynchronizedBuffer::new(render_device.clone(), particle_count)?,
             ],
             read_buffer_index: 0,
             write_buffer_index: 1,
+            scratch_buffer_index: 2,
         })
     }
 
     fn swap_buffers(&mut self) {
         debug_assert!(self.buffers[self.write_buffer_index].is_done_writing());
-        std::mem::swap(
-            &mut self.write_buffer_index,
-            &mut self.read_buffer_index,
-        );
+        let new_read_buffer_index = self.write_buffer_index;
+        let new_write_buffer_index = self.scratch_buffer_index;
+        let new_scratch_buffer_index = self.read_buffer_index;
+        self.read_buffer_index = new_read_buffer_index;
+        self.write_buffer_index = new_write_buffer_index;
+        self.scratch_buffer_index = new_scratch_buffer_index;
     }
 
     fn read_buffer(&self) -> &SynchronizedBuffer {
@@ -110,6 +115,10 @@ impl DoubleBufferedParticles {
     fn write_buffer_mut(&mut self) -> &mut SynchronizedBuffer {
         &mut self.buffers[self.write_buffer_index]
     }
+
+    fn scratch_buffer_mut(&mut self) -> &mut SynchronizedBuffer {
+        &mut self.buffers[self.scratch_buffer_index]
+    }
 }
 
 /// This example renders a gpu driven particle system using async
@@ -118,7 +127,7 @@ struct Example11GPUParticles {
     needs_initialized: bool,
 
     simulation_config: SimulationConfig,
-    particles: DoubleBufferedParticles,
+    particles: TrippleBufferedParticles,
     graphics: Graphics,
     initializer: Integrator,
     integrator: Integrator,
@@ -150,7 +159,7 @@ impl State for Example11GPUParticles {
 
         let simulation_config =
             SimulationConfig::new(100.0, w as f32 / h as f32, 16_000_000);
-        let particles = DoubleBufferedParticles::new(
+        let particles = TrippleBufferedParticles::new(
             &render_device,
             simulation_config.particle_count() as usize,
         )?;
@@ -262,6 +271,9 @@ impl State for Example11GPUParticles {
         };
 
         let frame_index = frame.swapchain_image_index();
+        self.particles
+            .scratch_buffer_mut()
+            .free_for_frame(frame_index);
         self.particles
             .write_buffer_mut()
             .free_for_frame(frame_index);
