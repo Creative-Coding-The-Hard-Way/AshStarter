@@ -280,6 +280,6 @@ impl Drop for Example9MSAADisplay {
 }
 
 fn main() -> Result<()> {
-    logging::setup()?;
+    let _logger = logging::setup()?;
     Application::<Example9MSAADisplay>::new("Example 9 - MSAADisplay")?.run()
 }

@@ -293,7 +293,7 @@ impl Drop for Example8Multisampling {
 }
 
 fn main() -> Result<()> {
-    logging::setup()?;
+    let _logger = logging::setup()?;
     Application::<Example8Multisampling>::new("Example 8 - Multisampling")?
         .run()
 }

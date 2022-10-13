@@ -286,6 +286,6 @@ impl Drop for Example10Compute {
 }
 
 fn main() -> Result<()> {
-    logging::setup()?;
+    let _logger = logging::setup()?;
     Application::<Example10Compute>::new("Example 10 - Compute")?.run()
 }

@@ -2,25 +2,23 @@ mod pretty_list;
 
 use std::fmt::Write as FmtWrite;
 
-use anyhow::Result;
-use flexi_logger::{DeferredNow, Duplicate, Logger, Record};
+use anyhow::{Context, Result};
+use flexi_logger::{
+    DeferredNow, Duplicate, FileSpec, Logger, Record, WriteMode,
+};
 use textwrap::{termwidth, Options};
 
 pub use self::pretty_list::PrettyList;
 
 /// Setup console logging for this application.
-pub fn setup() -> Result<(), anyhow::Error> {
-    Logger::with_env_or_str("info")
-        .log_to_file()
+pub fn setup() -> Result<flexi_logger::LoggerHandle, anyhow::Error> {
+    Logger::try_with_env_or_str("trace")?
+        .log_to_file(FileSpec::default().directory("logs"))
         .format(multiline_format)
-        .duplicate_to_stdout(Duplicate::All)
-        .start()?;
-
-    log::info!(
-        "Adjust the log level by setting RUST_LOG. By default RUST_LOG=info"
-    );
-
-    Ok(())
+        .duplicate_to_stdout(Duplicate::Info)
+        .write_mode(WriteMode::Async)
+        .start()
+        .context("Unable to create application logger")
 }
 
 /// An opinionated formatting function for flexi_logger which automatically

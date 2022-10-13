@@ -3,12 +3,12 @@ use std::{sync::Arc, time::Instant};
 use anyhow::Result;
 use ash::vk;
 use ccthw::graphics::vulkan_api::{
-    Buffer, CommandBuffer, CommandPool, ComputePipeline, DescriptorPool,
-    DescriptorSet, DescriptorSetLayout, Fence, HostCoherentBuffer,
-    PipelineLayout, RenderDevice, ShaderModule, VulkanDebug, VulkanError,
+    Buffer, CommandBuffer, ComputePipeline, DescriptorPool, DescriptorSet,
+    DescriptorSetLayout, DeviceLocalBuffer, HostCoherentBuffer, PipelineLayout,
+    RenderDevice, ShaderModule, VulkanError,
 };
 
-use super::SimulationConfig;
+use super::{Particle, SimulationConfig};
 
 /// Push Constants provided to the integration shader.
 #[derive(Debug, Copy, Clone)]
@@ -18,18 +18,18 @@ struct IntegrationConstants {
     dt: f32,
     x: f32,
     y: f32,
-    pressed: f32,
+    left_pressed: f32,
+    right_pressed: f32,
 }
 
 /// All Vulkan resources needed to run the Particle initialization compute
 /// shader.
 pub struct Integrator {
     last_submission: Instant,
-    fence: Fence,
     simulation_config: SimulationConfig,
+    buffer: Arc<DeviceLocalBuffer<Particle>>,
+
     uniform_buffer: HostCoherentBuffer<SimulationConfig>,
-    command_pool: Arc<CommandPool>,
-    command_buffer: CommandBuffer,
     pipeline_layout: PipelineLayout,
     descriptor_set: DescriptorSet,
     pipelines: Vec<ComputePipeline>,
@@ -40,6 +40,7 @@ impl Integrator {
         render_device: &Arc<RenderDevice>,
         compute_shader_sources: &[&[u8]],
         simulation_config: SimulationConfig,
+        buffer: Arc<DeviceLocalBuffer<Particle>>,
     ) -> Result<Self, VulkanError> {
         let pipeline_layout = {
             let descriptor_set_layout = Arc::new(DescriptorSetLayout::new(
@@ -54,13 +55,6 @@ impl Integrator {
                     },
                     vk::DescriptorSetLayoutBinding {
                         binding: 1,
-                        descriptor_type: vk::DescriptorType::STORAGE_BUFFER,
-                        descriptor_count: 1,
-                        stage_flags: vk::ShaderStageFlags::COMPUTE,
-                        p_immutable_samplers: std::ptr::null(),
-                    },
-                    vk::DescriptorSetLayoutBinding {
-                        binding: 2,
                         descriptor_type: vk::DescriptorType::STORAGE_BUFFER,
                         descriptor_count: 1,
                         stage_flags: vk::ShaderStageFlags::COMPUTE,
@@ -88,7 +82,7 @@ impl Integrator {
                     },
                     vk::DescriptorPoolSize {
                         ty: vk::DescriptorType::STORAGE_BUFFER,
-                        descriptor_count: 2,
+                        descriptor_count: 1,
                     },
                 ],
                 1,
@@ -131,18 +125,6 @@ impl Integrator {
             pipelines
         };
 
-        let command_pool = Arc::new(CommandPool::new(
-            render_device.clone(),
-            render_device.compute_queue_family_index(),
-            vk::CommandPoolCreateFlags::TRANSIENT,
-        )?);
-        let command_buffer = CommandBuffer::new(
-            render_device.clone(),
-            command_pool.clone(),
-            vk::CommandBufferLevel::PRIMARY,
-        )?;
-        let fence = Fence::new(render_device.clone())?;
-        fence.set_debug_name("Integrator Fence");
         let uniform_buffer = HostCoherentBuffer::new_with_data(
             render_device.clone(),
             vk::BufferUsageFlags::UNIFORM_BUFFER,
@@ -151,57 +133,26 @@ impl Integrator {
 
         unsafe {
             descriptor_set.write_uniform_buffer(0, &uniform_buffer);
+            descriptor_set.write_storage_buffer(1, &buffer);
         }
 
         Ok(Integrator {
             last_submission: Instant::now(),
-            fence,
             simulation_config,
+
+            buffer,
             uniform_buffer,
-            command_buffer,
-            command_pool,
             pipeline_layout,
             descriptor_set,
             pipelines,
         })
     }
 
-    /// Configure the graphics pipeline to read from the given buffer.
+    /// Add commands to the provided command buffer to dispatch a compute
+    /// operation for the associated buffer.
     ///
-    /// # Safety
-    ///
-    /// Unsafe because:
-    ///   - the caller must ensure no in-flight frames still reference the
-    ///     old buffer.
-    pub unsafe fn set_read_buffer(&mut self, buffer: &impl Buffer) {
-        self.descriptor_set.write_storage_buffer(1, buffer);
-    }
-
-    /// Configure the graphics pipeline to read from the given buffer.
-    ///
-    /// # Safety
-    ///
-    /// Unsafe because:
-    ///   - the caller must ensure no in-flight frames still reference the
-    ///     old buffer.
-    pub unsafe fn set_write_buffer(&mut self, buffer: &impl Buffer) {
-        self.descriptor_set.write_storage_buffer(2, buffer);
-    }
-
-    /// Get the time since the last integration update.
-    pub fn time_since_last_update(&self) -> f32 {
-        let now = Instant::now();
-        (now - self.last_submission).as_secs_f32().clamp(0.001, 0.1)
-    }
-
-    /// This is called automatically after every integration. But it can be
-    /// useful to manually reset after a long stall (for example after
-    /// initializing the particle buffer).
-    pub fn reset_start_time(&mut self) {
-        self.last_submission = Instant::now();
-    }
-
-    /// Integrate the particle buffer once and wait for the commands to finish.
+    /// Memory barriers are placed around the dispatch call so that the vertex
+    /// shader doesn't read while the compute shader is writing.
     ///
     /// Shader index indicates which compute shader pipeline to use based on the
     /// sources provided when buliding the integrator.
@@ -215,21 +166,23 @@ impl Integrator {
     ///     finish before calling this method again.
     pub unsafe fn integrate_particles(
         &mut self,
+        command_buffer: &CommandBuffer,
         shader_index: usize,
         mouse_pos: (f32, f32),
-        pressed: bool,
+        left_mouse_button_pressed: bool,
+        right_mouse_button_pressed: bool,
     ) -> Result<(), VulkanError> {
-        let dt = self.time_since_last_update();
-        self.reset_start_time();
+        let now = Instant::now();
+        let dt = (now - self.last_submission).as_secs_f32().min(0.01);
+        self.last_submission = now;
 
         // do 32 particles per thread
-        let adjusted_count = self.simulation_config.particle_count / 32;
-        let group_count_x = ((adjusted_count / 64) + 1) * 64;
+        const EXECUTION_SIZE: u32 = 256;
+        let particle_count = self.simulation_config.particle_count;
+        let group_count_x =
+            ((particle_count / EXECUTION_SIZE) + 1) * EXECUTION_SIZE;
 
-        self.fence.reset()?;
-        self.command_pool.reset()?;
-        self.command_buffer.begin_one_time_submit()?;
-        self.command_buffer
+        command_buffer
             .bind_compute_pipeline(&self.pipelines[shader_index])
             .bind_compute_descriptor_sets(
                 &self.pipeline_layout,
@@ -242,28 +195,46 @@ impl Integrator {
                     dt,
                     x: mouse_pos.0,
                     y: mouse_pos.1,
-                    pressed: if pressed { 1.0 } else { 0.0 },
+                    left_pressed: if left_mouse_button_pressed {
+                        1.0
+                    } else {
+                        0.0
+                    },
+                    right_pressed: if right_mouse_button_pressed {
+                        1.0
+                    } else {
+                        0.0
+                    },
                 },
             )
+            .pipeline_buffer_memory_barriers(
+                vk::PipelineStageFlags::VERTEX_SHADER,
+                vk::PipelineStageFlags::COMPUTE_SHADER,
+                &[vk::BufferMemoryBarrier {
+                    src_access_mask: vk::AccessFlags::SHADER_READ,
+                    dst_access_mask: vk::AccessFlags::SHADER_READ
+                        | vk::AccessFlags::SHADER_WRITE,
+                    offset: 0,
+                    buffer: self.buffer.raw(),
+                    size: self.buffer.size_in_bytes() as u64,
+                    ..Default::default()
+                }],
+            )
             .dispatch(group_count_x as u32, 1, 1)
-            .end_command_buffer()?;
-        self.command_buffer.submit_compute_commands(
-            &[],
-            &[],
-            &[],
-            Some(&self.fence),
-        )
-    }
-
-    /// Check if the last integration submission has completed.
-    pub fn is_integration_finished(&self) -> Result<bool, VulkanError> {
-        unsafe { self.fence.get_status() }
-    }
-
-    /// Block until the most recent integration step has finished executing on
-    /// the GPU.
-    pub fn wait_for_integration_to_complete(&self) -> Result<(), VulkanError> {
-        self.fence.wait()
+            .pipeline_buffer_memory_barriers(
+                vk::PipelineStageFlags::COMPUTE_SHADER,
+                vk::PipelineStageFlags::VERTEX_SHADER,
+                &[vk::BufferMemoryBarrier {
+                    src_access_mask: vk::AccessFlags::SHADER_READ
+                        | vk::AccessFlags::SHADER_WRITE,
+                    dst_access_mask: vk::AccessFlags::SHADER_READ,
+                    offset: 0,
+                    buffer: self.buffer.raw(),
+                    size: self.buffer.size_in_bytes() as u64,
+                    ..Default::default()
+                }],
+            );
+        Ok(())
     }
 
     /// Update internal buffers to reflect the current simulation config.

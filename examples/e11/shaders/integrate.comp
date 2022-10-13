@@ -1,6 +1,8 @@
 #version 460
 #extension GL_ARB_separate_shader_objects: enable
-#define DAMPING 0.9
+#define DAMPING 0.50
+#define FAR_STOP 2.0
+#define MAX_VEL 150.0
 
 layout (constant_id=1) const int execution_sixe_x = 64;
 layout (local_size_x_id = 1) in;
@@ -15,76 +17,94 @@ layout(binding = 0) uniform SimulationConfig {
     uint particle_count;
 } config;
 
-layout(std430, binding = 1) readonly buffer ReadSBO {
+layout(std430, binding = 1) buffer SBO {
     Particle particles[];
-} read_sbo;
-
-layout(std430, binding = 2) buffer WriteSBO {
-    Particle particles[];
-} write_sbo;
+} sbo;
 
 layout(push_constant) uniform IntegrationConstants {
   // The integration timestep.
   float dt;
   float x;
   float y;
-  float pressed;
+  float left_pressed;
+  float right_pressed;
 } ic;
 
 void main() {
-    for (int i = 0; i < 32; i++) {
-        uint index = (gl_GlobalInvocationID.x * 32) + i;
-        if (index >= config.particle_count) {
-            return;
-        }
-        Particle particle = read_sbo.particles[index];
-
-        // Subdivide the timestep into thirds, and take three small steps
-        // This is worth-while because signalling the async fence takes a long
-        // time. Therefore it's better to take lots of small steps and use more
-        // compute time per dispatch.
-        float dt = ic.dt / 10.0;
-        for (int j = 0; j < 10; j++) {
-            // ------------------
-            // Integrate particle position and velocity.
-
-            if (ic.pressed > 0.0) {
-                vec2 accel = vec2(ic.x, ic.y) - particle.pos;
-                float square_length = dot(accel, accel);
-                vec2 norm_accel = accel / sqrt(square_length);
-                particle.vel += dt * 50.0 * norm_accel / (square_length + 0.01);
-            }
-
-            particle.pos += dt*particle.vel;
-
-            // ---------------------------
-            // Enforce boundary conditions
-
-            float right = config.dimensions.x / 2.0;
-            float left = -right;
-            if (particle.pos.x >= right) {
-                particle.pos.x = right * 2 - particle.pos.x;
-                particle.vel.x = -particle.vel.x;
-            } else if (particle.pos.x <= left) {
-                particle.pos.x = left * 2 - particle.pos.x;
-                particle.vel.x = -particle.vel.x;
-            }
-
-            float top = config.dimensions.y / 2.0;
-            float bottom = -top;
-            if (particle.pos.y >= top) {
-                particle.pos.y = top * 2 - particle.pos.y;
-                particle.vel.y = -particle.vel.y;
-            } else if (particle.pos.y <= bottom) {
-                particle.pos.y = bottom * 2 - particle.pos.y;
-                particle.vel.y = -particle.vel.y;
-            }
-        }
-
-        particle.vel = pow(DAMPING, ic.dt) * particle.vel;
-
-        // ------------------------------------------
-        // Write the updated particle into the buffer
-        write_sbo.particles[index] = particle;
+    uint index = gl_GlobalInvocationID.x;
+    if (index >= sbo.particles.length()) {
+        return;
     }
+    Particle particle = sbo.particles[index];
+
+    float dt = ic.dt;
+
+    // ------------------
+    // Integrate particle position and velocity.
+
+    if (ic.left_pressed > 0.0) {
+        vec2 accel = vec2(ic.x, ic.y) - particle.pos;
+        float square_length = dot(accel, accel);
+        float length = sqrt(square_length);
+        vec2 norm_accel = accel / length;
+
+        float repel_force = -10000.0;
+        if (length < FAR_STOP) {
+            float force = repel_force / (length + 0.05);
+            particle.vel += dt * force * norm_accel;
+        }
+
+        float attract_force = 10000.0;
+        if (length > FAR_STOP) {
+            particle.vel += dt * (attract_force / (length + 0.05)) * norm_accel;
+        }
+    }
+
+    if (ic.right_pressed > 0.0) {
+        vec2 accel = vec2(ic.x, ic.y) - particle.pos;
+        float square_length = dot(accel, accel);
+        float length = sqrt(square_length);
+        vec2 norm_accel = accel / length;
+
+        float attract_force = 50000.0;
+        if (length > 0.25) {
+            particle.vel += dt * (attract_force / (square_length + 0.05)) * norm_accel;
+        }
+    }
+
+    particle.pos += dt*particle.vel;
+
+    // ---------------------------
+    // Enforce boundary conditions
+
+    float right = config.dimensions.x / 2.0;
+    float left = -right;
+    if (particle.pos.x >= right) {
+        particle.pos.x = right * 2 - particle.pos.x;
+        particle.vel.x = -particle.vel.x;
+    } else if (particle.pos.x <= left) {
+        particle.pos.x = left * 2 - particle.pos.x;
+        particle.vel.x = -particle.vel.x;
+    }
+
+    float top = config.dimensions.y / 2.0;
+    float bottom = -top;
+    if (particle.pos.y >= top) {
+        particle.pos.y = top * 2 - particle.pos.y;
+        particle.vel.y = -particle.vel.y;
+    } else if (particle.pos.y <= bottom) {
+        particle.pos.y = bottom * 2 - particle.pos.y;
+        particle.vel.y = -particle.vel.y;
+    }
+
+    particle.vel *= pow(DAMPING, dt);
+
+    float length = length(particle.vel);
+    if (length > MAX_VEL) {
+        particle.vel *= (MAX_VEL / length);
+    }
+
+    // ------------------------------------------
+    // Write the updated particle into the buffer
+    sbo.particles[index] = particle;
 }

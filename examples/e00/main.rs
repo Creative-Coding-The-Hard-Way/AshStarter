@@ -43,6 +43,6 @@ impl State for Example0AppLifecycle {
 }
 
 fn main() -> Result<()> {
-    logging::setup()?;
+    let _logger = logging::setup()?;
     Application::<Example0AppLifecycle>::new("Example 0 - App Lifecycle")?.run()
 }

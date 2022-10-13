@@ -33,6 +33,7 @@ fn output_file_for_shader_file(shader_file_path: &Path) -> Result<PathBuf> {
 
 fn needs_rebuild(shader_file_path: &Path, output_path: &Path) -> Result<bool> {
     if !output_path.try_exists()? {
+        println!("PATH DOESNT EXIST {}", output_path.to_str().unwrap());
         return Ok(true);
     }
 
@@ -41,17 +42,20 @@ fn needs_rebuild(shader_file_path: &Path, output_path: &Path) -> Result<bool> {
     let output_last_modified_time =
         std::fs::metadata(output_path)?.modified()?;
 
-    Ok(shader_last_modified_time > output_last_modified_time)
+    let result = shader_last_modified_time > output_last_modified_time;
+    Ok(result)
 }
 
 fn compile_shader(shader_file_path: &Path) -> Result<()> {
     let output_path = output_file_for_shader_file(shader_file_path)?;
 
+    let shader_path_str = shader_file_path.to_str().unwrap();
     if !needs_rebuild(shader_file_path, &output_path).unwrap_or(true) {
         println!(
             "cargo:warning=Skip rebuild for {} because it's up to date",
             shader_file_path.to_str().unwrap()
         );
+        println!("cargo:rerun-if-changed={}", shader_path_str);
         return Ok(());
     }
 
@@ -73,7 +77,6 @@ fn compile_shader(shader_file_path: &Path) -> Result<()> {
             shader_file_path,
         )));
     } else {
-        let shader_path_str = shader_file_path.to_str().unwrap();
         println!(
             "cargo:warning={} -> {}",
             shader_path_str,
@@ -86,9 +89,9 @@ fn compile_shader(shader_file_path: &Path) -> Result<()> {
 }
 
 fn main() -> Result<()> {
-    let all_paths = glob::glob("./**/*.vert")?
-        .chain(glob::glob("./**/*.frag")?)
-        .chain(glob::glob("./**/*.comp")?);
+    let all_paths = glob::glob("./examples/**/*.vert")?
+        .chain(glob::glob("./examples/**/*.frag")?)
+        .chain(glob::glob("./examples/**/*.comp")?);
     for path_entry in all_paths {
         compile_shader(path_entry?.as_path())?;
     }

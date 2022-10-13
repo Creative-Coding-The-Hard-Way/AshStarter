@@ -122,7 +122,7 @@ impl Drop for Example3SwapchainFrames {
 }
 
 fn main() -> Result<()> {
-    logging::setup()?;
+    let _logger = logging::setup()?;
     Application::<Example3SwapchainFrames>::new("Example 3- SwapchainFrames")?
         .run()
 }

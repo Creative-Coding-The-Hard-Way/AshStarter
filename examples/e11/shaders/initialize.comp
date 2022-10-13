@@ -15,27 +15,30 @@ layout(binding = 0) uniform SimulationConfig {
     uint particle_count;
 } config;
 
-layout(std430, binding = 1) readonly buffer ReadSBO {
+layout(std430, binding = 1) buffer SBO {
     Particle particles[];
-} read_sbo;
+} sbo;
 
-layout(std430, binding = 2) buffer WriteSBO {
-    Particle particles[];
-} write_sbo;
+layout(push_constant) uniform IntegrationConstants {
+  // The integration timestep.
+  float dt;
+  float x;
+  float y;
+  float pressed;
+} ic;
 
 void main() {
-    for (int i = 0; i < 32; i++) {
-        uint index = (gl_GlobalInvocationID.x * 32) + i;
-        if (index >= config.particle_count) {
-            return;
-        }
-        float index_norm = float(index) / float(config.particle_count);
-        float angle = index_norm * (13.0 * 2.0) * PI;
-        float radius = config.dimensions.y * 0.5 * index_norm;
-
-        Particle particle;
-        particle.pos = radius * vec2(cos(angle), sin(angle));
-        particle.vel = vec2(0.0, 0.0);
-        write_sbo.particles[index] = particle;
+    uint index = gl_GlobalInvocationID.x;
+    if (index >= sbo.particles.length()) {
+        return;
     }
+
+    float index_norm = float(index) / float(config.particle_count);
+    float angle = index_norm * (13.0 * 2.0) * PI;
+    float radius = config.dimensions.y * 0.5 * index_norm;
+
+    Particle particle;
+    particle.pos = radius * vec2(cos(angle), sin(angle));
+    particle.vel = vec2(0.0, 0.0);
+    sbo.particles[index] = particle;
 }

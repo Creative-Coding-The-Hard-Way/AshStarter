@@ -263,6 +263,6 @@ impl Drop for Example5Uniforms {
 }
 
 fn main() -> Result<()> {
-    logging::setup()?;
+    let _logger = logging::setup()?;
     Application::<Example5Uniforms>::new("Example 5 - Uniforms")?.run()
 }

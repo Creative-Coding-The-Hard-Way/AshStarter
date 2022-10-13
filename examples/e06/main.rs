@@ -280,7 +280,7 @@ impl Drop for Example6PushConstants {
 }
 
 fn main() -> Result<()> {
-    logging::setup()?;
+    let _logger = logging::setup()?;
     Application::<Example6PushConstants>::new("Example 6 - Push Constants")?
         .run()
 }

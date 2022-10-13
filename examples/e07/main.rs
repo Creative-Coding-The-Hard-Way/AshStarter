@@ -303,6 +303,6 @@ impl Drop for Example7Textures {
 }
 
 fn main() -> Result<()> {
-    logging::setup()?;
+    let _logger = logging::setup()?;
     Application::<Example7Textures>::new("Example 7 - Textures")?.run()
 }

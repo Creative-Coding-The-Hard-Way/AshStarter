@@ -250,6 +250,6 @@ impl Drop for Example1ClearScreen {
 }
 
 fn main() -> Result<()> {
-    logging::setup()?;
+    let _logger = logging::setup()?;
     Application::<Example1ClearScreen>::new("Example 1 - Clear Screen")?.run()
 }
