@@ -15,11 +15,9 @@ impl State for CreateRenderDevice {
     fn new(window: &mut GlfwWindow) -> Result<Self> {
         window.set_key_polling(true);
         let render_device = unsafe {
-            // SAFE because state owns the instance and calls destroy in it's
-            // Drop impl.
-            window.create_render_device(
-                &[],
-                &[],
+            // SAFE because the render device is destroyed when state is
+            // dropped.
+            window.create_default_render_device(
                 PhysicalDeviceFeatures::default(),
             )?
         };

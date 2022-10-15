@@ -116,6 +116,23 @@ impl GlfwWindow {
         Ok(())
     }
 
+    /// Create a render device with no additional instanc extensions or layers.
+    ///
+    /// # Params
+    ///
+    /// * `features` - The physical device features required by the application.
+    ///
+    /// # Safety
+    ///
+    /// The application is responsible for synchronizing access to all Vulkan
+    /// resources and destroying the render device at exit.
+    pub unsafe fn create_default_render_device(
+        &self,
+        physical_device_features: PhysicalDeviceFeatures,
+    ) -> Result<RenderDevice> {
+        self.create_render_device(&[], &[], physical_device_features)
+    }
+
     /// Create a render device for the application.
     ///
     /// # Params

@@ -65,7 +65,10 @@ impl RenderDevice {
             LogicalDevice::new(
                 &instance,
                 physical_device,
-                &[],
+                &[ash::extensions::khr::Swapchain::name()
+                    .to_owned()
+                    .into_string()
+                    .unwrap()],
                 &queue_finder.queue_family_infos(),
             )?
         };
