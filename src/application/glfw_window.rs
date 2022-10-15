@@ -1,6 +1,7 @@
 use {
     crate::graphics::vulkan_api::RenderDevice,
     anyhow::{bail, Context, Result},
+    ash::{vk, vk::Handle},
     ccthw_ash_instance::{PhysicalDeviceFeatures, VulkanInstance},
     glfw::{ClientApiHint, WindowEvent, WindowHint, WindowMode},
     std::sync::mpsc::Receiver,
@@ -139,7 +140,22 @@ impl GlfwWindow {
     ) -> Result<RenderDevice> {
         let instance =
             self.create_vulkan_instance(instance_extensions, instance_layers)?;
-        RenderDevice::new(instance, features)
+
+        let surface = {
+            let mut surface_handle: u64 = 0;
+            let result =
+                vk::Result::from_raw(self.window_handle.create_window_surface(
+                    instance.ash().handle().as_raw() as usize,
+                    std::ptr::null(),
+                    &mut surface_handle,
+                ) as i32);
+            if result != vk::Result::SUCCESS {
+                bail!("Unable to create a Vulkan SurfaceKHR with GLFW!");
+            }
+            vk::SurfaceKHR::from_raw(surface_handle)
+        };
+
+        RenderDevice::new(instance, features, surface)
             .context("Unable to create the render device!")
     }
 

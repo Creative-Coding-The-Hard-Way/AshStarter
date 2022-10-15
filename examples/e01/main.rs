@@ -50,6 +50,7 @@ impl Drop for CreateRenderDevice {
     fn drop(&mut self) {
         unsafe {
             // SAFE because there are no resources which depend on the instance.
+            self.render_device.device().device_wait_idle().unwrap();
             self.render_device.destroy();
         }
     }
