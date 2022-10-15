@@ -1,16 +1,12 @@
-# Example 10 - Compute Shader
+# Example 11 - GPU Particles
 
-This example is a bare-minimum demonstration of using a compute 
-pipeline to write data from the GPU. 
-
-To that end it is very *over synchronized* in that every compute 
-submission and every draw is followed by a `device.wait_idle` call.
-This destroys the framerate, but makes it trivial to ensure 
-there are no data races.
+This example uses compute shaders to render a GPU-driven particle system.
+Pipeline barriers are used to synchronize access to the storage buffer that
+holds particle data.
 
 ## Commands
 
-From the project root: `cargo run --example e10`
+From the project root: `cargo run --example e11`
 
 ## Screenshot
 

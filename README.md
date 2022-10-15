@@ -16,3 +16,4 @@ for the Vulkan API.
 - [Example 8 - Multisampling](./examples/e08)
 - [Example 9 - MSAADisplay + SSBO](./examples/e09)
 - [Example 10 - Compute Shader](./examples/e10)
+- [Example 11 - GPU Particles](./examples/e11)
