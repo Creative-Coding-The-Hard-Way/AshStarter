@@ -132,6 +132,7 @@ dependencies = [
  "anyhow",
  "aquamarine",
  "ash",
+ "ccthw_ash_instance",
  "flexi_logger",
  "glfw",
  "glob",
@@ -143,6 +144,18 @@ dependencies = [
  "regex",
  "spin_sleep",
  "textwrap",
+ "thiserror",
+]
+
+[[package]]
+name = "ccthw_ash_instance"
+version = "0.1.0"
+source = "git+https://github.com/Creative-Coding-The-Hard-Way/ash_instance.git#267ee9f82c9d82c7a3112d1a41b9771bf21ba970"
+dependencies = [
+ "ash",
+ "indoc",
+ "log",
+ "regex",
  "thiserror",
 ]
 
