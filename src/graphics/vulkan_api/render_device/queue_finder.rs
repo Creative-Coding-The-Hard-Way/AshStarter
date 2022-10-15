@@ -49,21 +49,24 @@ impl QueueFinder {
         device: &PhysicalDevice,
         window_surface: &WindowSurface,
     ) -> Self {
+        let mut families = HashMap::<usize, QueueFamilyInfo>::new();
+
         let graphics_queue_family_index =
             Self::find_graphics_queue_family_index(device).unwrap();
-        let presentation_queue_family_index =
-            Self::find_presentation_queue_family_index(window_surface, device)
-                .unwrap();
-
-        let mut families = HashMap::<usize, QueueFamilyInfo>::new();
         families
             .entry(graphics_queue_family_index)
             .or_insert_with_key(|&index| QueueFamilyInfo::new(index as u32))
             .add_queue_priority(1.0);
-        families
-            .entry(presentation_queue_family_index)
-            .or_insert_with_key(|&index| QueueFamilyInfo::new(index as u32))
-            .add_queue_priority(1.0);
+
+        let presentation_queue_family_index =
+            Self::find_presentation_queue_family_index(window_surface, device)
+                .unwrap();
+        if presentation_queue_family_index != graphics_queue_family_index {
+            families
+                .entry(presentation_queue_family_index)
+                .or_insert_with_key(|&index| QueueFamilyInfo::new(index as u32))
+                .add_queue_priority(1.0)
+        }
 
         Self {
             graphics_queue_family_index,
@@ -98,11 +101,21 @@ impl QueueFinder {
             self.graphics_queue_family_index,
             next_index(self.graphics_queue_family_index),
         );
-        let presentation_queue = Queue::new(
-            logical_device,
-            self.presentation_queue_family_index,
-            next_index(self.presentation_queue_family_index),
-        );
+        let presentation_queue = if self.graphics_queue_family_index
+            != self.presentation_queue_family_index
+        {
+            Queue::new(
+                logical_device,
+                self.presentation_queue_family_index,
+                next_index(self.presentation_queue_family_index),
+            )
+        } else {
+            Queue::new(
+                logical_device,
+                graphics_queue.family_index() as usize,
+                graphics_queue.index() as usize,
+            )
+        };
 
         (graphics_queue, presentation_queue)
     }

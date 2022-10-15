@@ -27,6 +27,13 @@ impl Queue {
     pub fn family_index(&self) -> u32 {
         self.family_index
     }
+
+    /// The index of the queue _within_ the family. This is almost never needed
+    /// by Vulkan APIs, but it can be useful to verify if two queues are the
+    /// same.
+    pub fn index(&self) -> u32 {
+        self.index
+    }
 }
 
 impl std::fmt::Display for Queue {
