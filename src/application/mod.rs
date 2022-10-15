@@ -2,11 +2,10 @@
 
 use {anyhow::Result, glfw::WindowEvent};
 
-mod error;
 mod glfw_window;
 mod logging;
 
-pub use self::{error::ApplicationError, glfw_window::GlfwWindow};
+pub use self::glfw_window::GlfwWindow;
 
 /// Application state can be any type which implements the State trait.
 ///
@@ -15,13 +14,23 @@ pub use self::{error::ApplicationError, glfw_window::GlfwWindow};
 pub trait State {
     /// Create a new instance of this state.
     ///
-    /// State implementations which have resources to destroy must safely
-    /// implement Drop.
+    /// # Params
+    ///
+    /// * `window` - A fully constructed application window. The implementation
+    ///   can use this handle to resize the window, apply GLFW window hints,
+    ///   toggle fullscren, and construct a Vulkan instance which can present
+    ///   surfaces to the window.
     fn new(window: &mut GlfwWindow) -> Result<Self>
     where
         Self: Sized;
 
     /// Handle a GLFW event and update the application state.
+    ///
+    /// # Params
+    ///
+    /// * `window` - The fully constructed application window. The application
+    ///   can exit by calling `set_should_close` on the window.
+    /// * `window_event` - The event currently being processed by the window.
     fn handle_event(
         &mut self,
         _window: &mut GlfwWindow,
@@ -32,13 +41,18 @@ pub trait State {
 
     /// Called each time through the main application loop after all events
     /// have been processed.
+    ///
+    /// Update is not called while an application is paused while minimized.
+    ///
+    /// # Params
+    ///
+    /// * `window` - The fully constructed application window. The application
+    ///   can exit by calling `set_should_close` on the window.
     fn update(&mut self, _window: &mut GlfwWindow) -> Result<()> {
         Ok(())
     }
 }
 
-/// The Application itself.
-///
 /// Every application is comprised of a State type and a GLFW window.
 /// Applications automatically pause if they are minimized or the window is
 /// resized such that there is no drawing area.
