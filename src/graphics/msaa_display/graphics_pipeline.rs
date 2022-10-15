@@ -1,10 +1,10 @@
-use std::ffi::CStr;
-
-use ash::vk;
-
-use super::MSAADisplay;
-use crate::graphics::vulkan_api::{
-    GraphicsPipeline, PipelineLayout, ShaderModule, VulkanError,
+use {
+    super::MSAADisplay,
+    crate::graphics::vulkan_api::{
+        GraphicsPipeline, PipelineLayout, ShaderModule, VulkanError,
+    },
+    ash::vk,
+    std::ffi::CStr,
 };
 
 impl MSAADisplay {

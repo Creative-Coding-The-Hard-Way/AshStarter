@@ -1,12 +1,13 @@
 mod pretty_list;
 
-use std::fmt::Write as FmtWrite;
-
-use anyhow::{Context, Result};
-use flexi_logger::{
-    DeferredNow, Duplicate, FileSpec, Logger, Record, WriteMode,
+use {
+    anyhow::{Context, Result},
+    flexi_logger::{
+        DeferredNow, Duplicate, FileSpec, Logger, Record, WriteMode,
+    },
+    std::fmt::Write as FmtWrite,
+    textwrap::{termwidth, Options},
 };
-use textwrap::{termwidth, Options};
 
 pub use self::pretty_list::PrettyList;
 

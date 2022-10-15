@@ -1,20 +1,21 @@
-use std::{sync::Arc, time::Instant};
-
-use anyhow::Result;
-use ash::vk;
-use ccthw::{
-    application::{Application, GlfwWindow, State},
-    graphics::{
-        msaa_display::MSAADisplay,
-        ortho_projection,
-        vulkan_api::{
-            DescriptorPool, DescriptorSet, DescriptorSetLayout,
-            GraphicsPipeline, HostCoherentBuffer, PipelineLayout, RenderDevice,
-            VulkanDebug,
+use {
+    anyhow::Result,
+    ash::vk,
+    ccthw::{
+        application::{Application, GlfwWindow, State},
+        graphics::{
+            msaa_display::MSAADisplay,
+            ortho_projection,
+            vulkan_api::{
+                DescriptorPool, DescriptorSet, DescriptorSetLayout,
+                GraphicsPipeline, HostCoherentBuffer, PipelineLayout,
+                RenderDevice, VulkanDebug,
+            },
+            AcquiredFrame,
         },
-        AcquiredFrame,
+        logging,
     },
-    logging,
+    std::{sync::Arc, time::Instant},
 };
 
 #[derive(Debug, Copy, Clone)]

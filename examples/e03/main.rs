@@ -1,13 +1,14 @@
-use std::sync::Arc;
-
-use anyhow::Result;
-use ccthw::{
-    application::{Application, GlfwWindow, State},
-    graphics::{
-        vulkan_api::{Framebuffer, RenderDevice, RenderPass},
-        AcquiredFrame, SwapchainFrames,
+use {
+    anyhow::Result,
+    ccthw::{
+        application::{Application, GlfwWindow, State},
+        graphics::{
+            vulkan_api::{Framebuffer, RenderDevice, RenderPass},
+            AcquiredFrame, SwapchainFrames,
+        },
+        logging,
     },
-    logging,
+    std::sync::Arc,
 };
 
 /// This example uses SwapchainFrames type to manage the swapchain and

@@ -1,13 +1,14 @@
-use std::ffi::c_void;
-
-use ash::{extensions::ext::DebugUtils, vk};
+use {
+    crate::{
+        graphics::vulkan_api::{ffi::to_os_ptrs, VulkanError},
+        logging::PrettyList,
+    },
+    ash::{extensions::ext::DebugUtils, vk},
+    std::ffi::c_void,
+};
 
 pub use self::physical_device_features::{
     ArePhysicalDeviceFeaturesSuitableFn, PhysicalDeviceFeatures,
-};
-use crate::{
-    graphics::vulkan_api::{ffi::to_os_ptrs, VulkanError},
-    logging::PrettyList,
 };
 
 mod api;

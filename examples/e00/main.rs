@@ -1,7 +1,9 @@
-use anyhow::Result;
-use ccthw::{
-    application::{Application, GlfwWindow, State},
-    logging,
+use {
+    anyhow::Result,
+    ccthw::{
+        application::{Application, GlfwWindow, State},
+        logging,
+    },
 };
 
 /// The pattern in this project is for an application to be a type which

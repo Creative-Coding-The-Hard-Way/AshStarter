@@ -1,8 +1,9 @@
-use ash::vk;
-
-use crate::{
-    graphics::vulkan_api::{RenderDevice, VulkanError},
-    logging::PrettyList,
+use {
+    crate::{
+        graphics::vulkan_api::{RenderDevice, VulkanError},
+        logging::PrettyList,
+    },
+    ash::vk,
 };
 
 pub fn choose_surface_format(

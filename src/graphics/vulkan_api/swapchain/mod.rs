@@ -1,12 +1,12 @@
 mod selection;
 
-use std::sync::Arc;
-
-use ash::vk;
-
-use crate::{
-    graphics::vulkan_api::{Fence, RenderDevice, Semaphore, VulkanError},
-    logging::PrettyList,
+use {
+    crate::{
+        graphics::vulkan_api::{Fence, RenderDevice, Semaphore, VulkanError},
+        logging::PrettyList,
+    },
+    ash::vk,
+    std::sync::Arc,
 };
 
 pub enum SwapchainStatus {

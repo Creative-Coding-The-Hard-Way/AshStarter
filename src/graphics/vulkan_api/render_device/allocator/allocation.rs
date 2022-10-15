@@ -1,8 +1,8 @@
-use std::ffi::c_void;
-
-use ash::vk;
-
-use crate::graphics::vulkan_api::{RenderDevice, VulkanError};
+use {
+    crate::graphics::vulkan_api::{RenderDevice, VulkanError},
+    ash::vk,
+    std::ffi::c_void,
+};
 
 /// An allocated chunk of GPU memory.
 pub struct Allocation {
@@ -67,9 +67,8 @@ impl Allocation {
     ///  - a call to map() must be made by the application prior to calling this
     ///    function
     ///  - errors if the host-mapped pointer and offset are not correctly
-    ///    aligned for the type T. Use #[repr(C, packed)] on types which will
-    ///    be written into GPU buffers to have maximum control over memory
-    ///    layout.
+    ///    aligned for the type T. Use #[repr(C, packed)] on types which will be
+    ///    written into GPU buffers to have maximum control over memory layout.
     pub unsafe fn as_slice_mut<T>(&mut self) -> Result<&mut [T], VulkanError> {
         let mapped_ptr = self
             .cpu_mapped_ptr
@@ -98,9 +97,8 @@ impl Allocation {
     ///  - a call to map() must be made by the application prior to calling this
     ///    function
     ///  - errors if the host-mapped pointer and offset are not correctly
-    ///    aligned for the type T. Use #[repr(C, packed)] on types which will
-    ///    be written into GPU buffers to have maximum control over memory
-    ///    layout.
+    ///    aligned for the type T. Use #[repr(C, packed)] on types which will be
+    ///    written into GPU buffers to have maximum control over memory layout.
     pub unsafe fn as_slice<T>(&self) -> Result<&[T], VulkanError> {
         let mapped_ptr = self
             .cpu_mapped_ptr

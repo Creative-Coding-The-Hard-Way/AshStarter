@@ -1,9 +1,9 @@
-use std::ffi::c_void;
-
-use ash::vk;
-
-use super::{Allocation, RenderDevice};
-use crate::graphics::vulkan_api::VulkanError;
+use {
+    super::{Allocation, RenderDevice},
+    crate::graphics::vulkan_api::VulkanError,
+    ash::vk,
+    std::ffi::c_void,
+};
 
 impl RenderDevice {
     /// Stall the thread until the GPU is done with all operations.
@@ -267,9 +267,8 @@ impl RenderDevice {
         )
     }
 
-    /// - signal_fence is an optional handle to a fence which will be
-    ///   signaled once all submitted command buffers have finished
-    ///   execution.
+    /// - signal_fence is an optional handle to a fence which will be signaled
+    ///   once all submitted command buffers have finished execution.
     ///
     /// # Safety
     ///
@@ -290,9 +289,8 @@ impl RenderDevice {
             .map_err(VulkanError::UnableToSubmitGraphicsCommands)
     }
 
-    /// - signal_fence is an optional handle to a fence which will be
-    ///   signaled once all submitted command buffers have finished
-    ///   execution.
+    /// - signal_fence is an optional handle to a fence which will be signaled
+    ///   once all submitted command buffers have finished execution.
     ///
     /// # Safety
     ///
@@ -389,8 +387,8 @@ impl RenderDevice {
     /// # Safety
     ///
     /// Unsafe because:
-    ///  - the caller must ensure that the buffer has not previously been
-    ///    freed back to the device.
+    ///  - the caller must ensure that the buffer has not previously been freed
+    ///    back to the device.
     pub unsafe fn get_buffer_memory_requirements(
         &self,
         buffer: &vk::Buffer,
@@ -439,8 +437,8 @@ impl RenderDevice {
     /// # Safety
     ///
     /// Unsafe because:
-    ///  - the caller must destroy the shader module before the render device
-    ///    is dropped.
+    ///  - the caller must destroy the shader module before the render device is
+    ///    dropped.
     pub unsafe fn create_shader_module(
         &self,
         create_info: &vk::ShaderModuleCreateInfo,
@@ -470,8 +468,8 @@ impl RenderDevice {
     /// # Safety
     ///
     /// Unsafe because:
-    ///  - the application is responsible for destroying the pipeline before
-    ///    the render device is dropped.
+    ///  - the application is responsible for destroying the pipeline before the
+    ///    render device is dropped.
     pub unsafe fn create_graphics_pipeline(
         &self,
         create_info: &vk::GraphicsPipelineCreateInfo,
@@ -495,8 +493,8 @@ impl RenderDevice {
     /// # Safety
     ///
     /// Unsafe because:
-    ///  - the application is responsible for destroying the pipeline before
-    ///    the render device is dropped.
+    ///  - the application is responsible for destroying the pipeline before the
+    ///    render device is dropped.
     pub unsafe fn create_compute_pipeline(
         &self,
         create_info: &vk::ComputePipelineCreateInfo,
@@ -520,8 +518,8 @@ impl RenderDevice {
     /// # Safety
     ///
     /// Unsafe because:
-    ///   - the caller must ensure that the pipeline is not being used by
-    ///     the GPU at the time of destruction.
+    ///   - the caller must ensure that the pipeline is not being used by the
+    ///     GPU at the time of destruction.
     pub unsafe fn destroy_pipeline(&self, pipeline: vk::Pipeline) {
         self.logical_device.destroy_pipeline(pipeline, None);
     }
@@ -531,8 +529,8 @@ impl RenderDevice {
     /// # Safety
     ///
     /// Unsafe because:
-    ///   - The caller is responsible for destroying the pipeline layout
-    ///     before the Render Device is destroyed.
+    ///   - The caller is responsible for destroying the pipeline layout before
+    ///     the Render Device is destroyed.
     pub unsafe fn create_pipeline_layout(
         &self,
         create_info: &vk::PipelineLayoutCreateInfo,
@@ -770,8 +768,8 @@ impl RenderDevice {
     /// # Safety
     ///
     /// Unsafe because:
-    ///   - Descriptor sets cannot typically be written while they are bound
-    ///     for rendering.
+    ///   - Descriptor sets cannot typically be written while they are bound for
+    ///     rendering.
     pub unsafe fn cmd_bind_descriptor_sets(
         &self,
         command_buffer: &vk::CommandBuffer,
@@ -837,8 +835,7 @@ impl RenderDevice {
     ///
     /// Unsafe because:
     ///   - the image must not be destroyed if it is in-use by the GPU
-    ///   - an image must not be destroyed if other resources still reference
-    ///     it
+    ///   - an image must not be destroyed if other resources still reference it
     pub unsafe fn destroy_image(&self, image: vk::Image) {
         self.logical_device.destroy_image(image, None)
     }

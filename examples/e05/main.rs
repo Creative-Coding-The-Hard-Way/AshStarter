@@ -1,21 +1,22 @@
 mod pipeline;
 
-use std::sync::Arc;
-
-use anyhow::Result;
-use ash::vk;
-use ccthw::{
-    application::{Application, GlfwWindow, State},
-    graphics::{
-        ortho_projection,
-        vulkan_api::{
-            DescriptorPool, DescriptorSet, Framebuffer, GraphicsPipeline,
-            HostCoherentBuffer, PipelineLayout, RenderDevice, RenderPass,
-            VulkanDebug,
+use {
+    anyhow::Result,
+    ash::vk,
+    ccthw::{
+        application::{Application, GlfwWindow, State},
+        graphics::{
+            ortho_projection,
+            vulkan_api::{
+                DescriptorPool, DescriptorSet, Framebuffer, GraphicsPipeline,
+                HostCoherentBuffer, PipelineLayout, RenderDevice, RenderPass,
+                VulkanDebug,
+            },
+            AcquiredFrame, SwapchainFrames,
         },
-        AcquiredFrame, SwapchainFrames,
+        logging,
     },
-    logging,
+    std::sync::Arc,
 };
 
 #[derive(Debug, Copy, Clone)]

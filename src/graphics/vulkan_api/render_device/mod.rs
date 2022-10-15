@@ -5,21 +5,22 @@ mod physical_device;
 mod queue_families;
 mod window_surface;
 
-use std::sync::Mutex;
-
-use ash::vk;
+use {
+    self::{
+        allocator::{create_system_allocator, Allocator, GPUMemoryAllocator},
+        device_queue::DeviceQueue,
+        queue_families::QueueFamilies,
+        window_surface::WindowSurface,
+    },
+    crate::graphics::vulkan_api::{
+        ArePhysicalDeviceFeaturesSuitableFn, Instance, PhysicalDeviceFeatures,
+        VulkanError,
+    },
+    ash::vk,
+    std::sync::Mutex,
+};
 
 pub use self::allocator::Allocation;
-use self::{
-    allocator::{create_system_allocator, Allocator, GPUMemoryAllocator},
-    device_queue::DeviceQueue,
-    queue_families::QueueFamilies,
-    window_surface::WindowSurface,
-};
-use crate::graphics::vulkan_api::{
-    ArePhysicalDeviceFeaturesSuitableFn, Instance, PhysicalDeviceFeatures,
-    VulkanError,
-};
 
 /// Types which implement this trait can name their Vulkan resources so they
 /// have a friendly name in Vulkan debug logs.
@@ -203,8 +204,8 @@ impl RenderDevice {
     /// # Safety
     ///
     /// Unsafe because:
-    ///  - the caller is responsible for freeing the allocated memory before
-    ///    the device is destroyed
+    ///  - the caller is responsible for freeing the allocated memory before the
+    ///    device is destroyed
     pub unsafe fn allocate_memory(
         &self,
         memory_requirements: vk::MemoryRequirements,
@@ -245,8 +246,8 @@ impl RenderDevice {
     /// # Safety
     ///
     /// Unsafe because:
-    ///  - the caller must ensure that the device is not using the memory in
-    ///    the given allocation any more.
+    ///  - the caller must ensure that the device is not using the memory in the
+    ///    given allocation any more.
     ///  - the caller must ensure that the allocation is not used after being
     ///    freed
     pub unsafe fn free_memory(

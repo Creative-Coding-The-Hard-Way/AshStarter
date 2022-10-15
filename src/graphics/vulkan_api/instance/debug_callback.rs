@@ -1,15 +1,16 @@
-use std::{borrow::Cow, ffi::CStr};
-
-use ash::{
-    extensions::ext::DebugUtils,
-    vk::{
-        self, DebugUtilsMessageSeverityFlagsEXT, DebugUtilsMessageTypeFlagsEXT,
-        DebugUtilsMessengerCallbackDataEXT, DebugUtilsMessengerEXT,
+use {
+    crate::graphics::vulkan_api::VulkanError,
+    ash::{
+        extensions::ext::DebugUtils,
+        vk::{
+            self, DebugUtilsMessageSeverityFlagsEXT,
+            DebugUtilsMessageTypeFlagsEXT, DebugUtilsMessengerCallbackDataEXT,
+            DebugUtilsMessengerEXT,
+        },
+        Entry,
     },
-    Entry,
+    std::{borrow::Cow, ffi::CStr},
 };
-
-use crate::graphics::vulkan_api::VulkanError;
 
 /// Create the vulkan debug callback for validation.
 pub fn create_debug_logger(

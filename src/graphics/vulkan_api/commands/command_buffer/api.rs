@@ -1,9 +1,10 @@
-use ash::vk;
-
-use super::CommandBuffer;
-use crate::graphics::vulkan_api::{
-    Buffer, ComputePipeline, DescriptorSet, Framebuffer, GraphicsPipeline,
-    Image, PipelineLayout, RenderPass, VulkanError,
+use {
+    super::CommandBuffer,
+    crate::graphics::vulkan_api::{
+        Buffer, ComputePipeline, DescriptorSet, Framebuffer, GraphicsPipeline,
+        Image, PipelineLayout, RenderPass, VulkanError,
+    },
+    ash::vk,
 };
 
 impl CommandBuffer {

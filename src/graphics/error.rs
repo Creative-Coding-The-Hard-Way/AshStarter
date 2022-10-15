@@ -1,6 +1,4 @@
-use thiserror::Error;
-
-use crate::graphics::vulkan_api::VulkanError;
+use {crate::graphics::vulkan_api::VulkanError, thiserror::Error};
 
 #[derive(Error, Debug)]
 pub enum GraphicsError {

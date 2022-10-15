@@ -1,9 +1,10 @@
-use std::{
-    path::{Path, PathBuf},
-    process::Command,
+use {
+    anyhow::{Context, Error, Result},
+    std::{
+        path::{Path, PathBuf},
+        process::Command,
+    },
 };
-
-use anyhow::{Context, Error, Result};
 
 fn output_file_for_shader_file(shader_file_path: &Path) -> Result<PathBuf> {
     let parent = shader_file_path.parent().with_context(|| {

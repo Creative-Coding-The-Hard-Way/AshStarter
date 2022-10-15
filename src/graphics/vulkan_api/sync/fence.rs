@@ -1,8 +1,8 @@
-use std::sync::Arc;
-
-use ash::vk;
-
-use crate::graphics::vulkan_api::{RenderDevice, VulkanDebug, VulkanError};
+use {
+    crate::graphics::vulkan_api::{RenderDevice, VulkanDebug, VulkanError},
+    ash::vk,
+    std::sync::Arc,
+};
 
 /// An owned Vulkan fence object which is automatically destroyed when dropped.
 pub struct Fence {

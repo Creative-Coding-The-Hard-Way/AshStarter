@@ -1,14 +1,15 @@
-use std::sync::Arc;
-
-use anyhow::{Error, Result};
-use ash::vk;
-use ccthw::{
-    application::{Application, GlfwWindow, State},
-    graphics::vulkan_api::{
-        CommandBuffer, CommandPool, Fence, Framebuffer, ImageView,
-        RenderDevice, RenderPass, Semaphore, Swapchain, SwapchainStatus,
+use {
+    anyhow::{Error, Result},
+    ash::vk,
+    ccthw::{
+        application::{Application, GlfwWindow, State},
+        graphics::vulkan_api::{
+            CommandBuffer, CommandPool, Fence, Framebuffer, ImageView,
+            RenderDevice, RenderPass, Semaphore, Swapchain, SwapchainStatus,
+        },
+        logging,
     },
-    logging,
+    std::sync::Arc,
 };
 
 /// Example 1 is to use the Vulkan swapchain with a render pass to clear the

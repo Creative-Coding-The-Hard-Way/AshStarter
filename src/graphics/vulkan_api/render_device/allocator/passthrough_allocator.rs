@@ -1,7 +1,8 @@
-use ash::vk;
-
-use super::GPUMemoryAllocator;
-use crate::graphics::vulkan_api::{Allocation, VulkanError};
+use {
+    super::GPUMemoryAllocator,
+    crate::graphics::vulkan_api::{Allocation, VulkanError},
+    ash::vk,
+};
 
 /// A memory allocator which calls directly allocates GPU memory using the
 /// logical device.

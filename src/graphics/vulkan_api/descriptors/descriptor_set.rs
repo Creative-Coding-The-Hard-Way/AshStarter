@@ -1,10 +1,10 @@
-use std::sync::Arc;
-
-use ash::vk;
-
-use crate::graphics::vulkan_api::{
-    Buffer, DescriptorPool, DescriptorSetLayout, ImageView, RenderDevice,
-    Sampler, VulkanDebug, VulkanError,
+use {
+    crate::graphics::vulkan_api::{
+        Buffer, DescriptorPool, DescriptorSetLayout, ImageView, RenderDevice,
+        Sampler, VulkanDebug, VulkanError,
+    },
+    ash::vk,
+    std::sync::Arc,
 };
 
 /// An owned descriptor set.
@@ -58,8 +58,8 @@ impl DescriptorSet {
     /// Unsafe because:
     ///   - device extensions are required if writing to a descriptor set while
     ///     it is bound
-    ///   - the caller must ensure that the buffer lives at least as long as
-    ///     the descriptor set while it's reference.d
+    ///   - the caller must ensure that the buffer lives at least as long as the
+    ///     descriptor set while it's reference.d
     pub unsafe fn write_uniform_buffer(
         &self,
         binding: u32,
@@ -75,8 +75,8 @@ impl DescriptorSet {
     /// Unsafe because:
     ///   - device extensions are required if writing to a descriptor set while
     ///     it is bound
-    ///   - the caller must ensure that the buffer lives at least as long as
-    ///     the descriptor set while it's reference.d
+    ///   - the caller must ensure that the buffer lives at least as long as the
+    ///     descriptor set while it's reference.d
     pub unsafe fn write_storage_buffer(
         &self,
         binding: u32,
@@ -92,8 +92,8 @@ impl DescriptorSet {
     /// Unsafe because:
     ///   - device extensions are required if writing to a descriptor set while
     ///     it is bound
-    ///   - the caller must ensure that the buffer lives at least as long as
-    ///     the descriptor set while it's reference.d
+    ///   - the caller must ensure that the buffer lives at least as long as the
+    ///     descriptor set while it's reference.d
     pub unsafe fn write_buffer(
         &self,
         binding: u32,

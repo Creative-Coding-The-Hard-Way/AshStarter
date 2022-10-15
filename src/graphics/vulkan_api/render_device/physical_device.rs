@@ -1,11 +1,12 @@
-use ash::vk;
-
-use crate::{
-    graphics::vulkan_api::{
-        render_device::{QueueFamilies, WindowSurface},
-        ArePhysicalDeviceFeaturesSuitableFn, Instance, VulkanError,
+use {
+    crate::{
+        graphics::vulkan_api::{
+            render_device::{QueueFamilies, WindowSurface},
+            ArePhysicalDeviceFeaturesSuitableFn, Instance, VulkanError,
+        },
+        logging::PrettyList,
     },
-    logging::PrettyList,
+    ash::vk,
 };
 
 /// Get the set of required device extensions for this application.

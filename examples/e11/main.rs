@@ -1,19 +1,22 @@
 mod particles;
 
-use std::sync::Arc;
-
-use anyhow::Result;
-use ash::vk;
-use ccthw::{
-    application::{Application, GlfwWindow, State},
-    graphics::{
-        msaa_display::MSAADisplay,
-        vulkan_api::{DeviceLocalBuffer, PhysicalDeviceFeatures, RenderDevice},
-        AcquiredFrame,
+use {
+    anyhow::Result,
+    ash::vk,
+    ccthw::{
+        application::{Application, GlfwWindow, State},
+        graphics::{
+            msaa_display::MSAADisplay,
+            vulkan_api::{
+                DeviceLocalBuffer, PhysicalDeviceFeatures, RenderDevice,
+            },
+            AcquiredFrame,
+        },
+        logging,
     },
-    logging,
+    particles::{Graphics, Integrator, SimulationConfig},
+    std::sync::Arc,
 };
-use particles::{Graphics, Integrator, SimulationConfig};
 
 /// This example renders a gpu driven particle system using async
 /// compute shaders to simulate particles.

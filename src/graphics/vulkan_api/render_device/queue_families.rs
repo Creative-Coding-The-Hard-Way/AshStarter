@@ -1,12 +1,12 @@
-use std::collections::HashMap;
-
-use ash::vk;
-use indoc::indoc;
-
-use crate::graphics::vulkan_api::{
-    self,
-    render_device::{DeviceQueue, WindowSurface},
-    VulkanError,
+use {
+    crate::graphics::vulkan_api::{
+        self,
+        render_device::{DeviceQueue, WindowSurface},
+        VulkanError,
+    },
+    ash::vk,
+    indoc::indoc,
+    std::collections::HashMap,
 };
 
 #[derive(Clone, Debug, Default)]
@@ -71,8 +71,9 @@ impl QueueFamilies {
                         present_family = Some(i as u32);
                     }
                     Err(ref error) => {
-                        // This is not necessarily a problem - there could be other
-                        // queues to check - but it's good to know if it's
+                        // This is not necessarily a problem - there could be
+                        // other queues to check - but
+                        // it's good to know if it's
                         // happening.
                         log::warn!(
                         "Error while checking surface support for device: {:?}",
@@ -142,8 +143,8 @@ impl QueueFamilies {
     ///
     /// Unsafe because:
     ///   - the DeviceQueueCreateInfo structs contain pointers back to data
-    ///     contained within this QueueFamilies instance, so this instance
-    ///     must outlive their usage.
+    ///     contained within this QueueFamilies instance, so this instance must
+    ///     outlive their usage.
     pub unsafe fn as_queue_create_infos(
         &self,
     ) -> Vec<vk::DeviceQueueCreateInfo> {

@@ -1,22 +1,22 @@
-use std::sync::Arc;
-
-use anyhow::Result;
-use ash::vk;
-use ccthw::{
-    graphics::{
-        msaa_display::MSAADisplay,
-        ortho_projection,
-        vulkan_api::{
-            DescriptorPool, DescriptorSet, DescriptorSetLayout,
-            DeviceLocalBuffer, GraphicsPipeline, HostCoherentBuffer,
-            PipelineLayout, RenderDevice,
+use {
+    super::{Particle, SimulationConfig},
+    anyhow::Result,
+    ash::vk,
+    ccthw::{
+        graphics::{
+            msaa_display::MSAADisplay,
+            ortho_projection,
+            vulkan_api::{
+                DescriptorPool, DescriptorSet, DescriptorSetLayout,
+                DeviceLocalBuffer, GraphicsPipeline, HostCoherentBuffer,
+                PipelineLayout, RenderDevice,
+            },
+            Frame,
         },
-        Frame,
+        math::Mat4,
     },
-    math::Mat4,
+    std::sync::Arc,
 };
-
-use super::{Particle, SimulationConfig};
 
 /// Used to pass the projection matrix to the vertex shader.
 #[derive(Debug, Copy, Clone)]

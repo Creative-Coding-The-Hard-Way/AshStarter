@@ -1,6 +1,7 @@
-use ash::{extensions::khr, vk};
-
-use crate::graphics::vulkan_api::{Instance, VulkanError};
+use {
+    crate::graphics::vulkan_api::{Instance, VulkanError},
+    ash::{extensions::khr, vk},
+};
 
 /// The KHR Surface and Loader used by this application. These resources must
 /// be dropped before the instance.

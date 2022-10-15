@@ -1,9 +1,9 @@
-use std::sync::Arc;
-
-use ash::vk;
-
-use crate::graphics::vulkan_api::{
-    Allocation, RenderDevice, VulkanDebug, VulkanError,
+use {
+    crate::graphics::vulkan_api::{
+        Allocation, RenderDevice, VulkanDebug, VulkanError,
+    },
+    ash::vk,
+    std::sync::Arc,
 };
 
 /// An owned Vulkan image.

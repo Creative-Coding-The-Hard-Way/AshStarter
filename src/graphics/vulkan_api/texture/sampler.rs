@@ -1,8 +1,8 @@
-use std::sync::Arc;
-
-use ash::vk;
-
-use crate::graphics::vulkan_api::{RenderDevice, VulkanError};
+use {
+    crate::graphics::vulkan_api::{RenderDevice, VulkanError},
+    ash::vk,
+    std::sync::Arc,
+};
 
 /// An owned Vulkan image sampler.
 pub struct Sampler {

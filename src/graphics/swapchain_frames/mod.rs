@@ -1,16 +1,18 @@
 mod frame;
 
-use std::sync::Arc;
+use {
+    super::vulkan_api::Semaphore,
+    crate::graphics::{
+        vulkan_api::{
+            ImageView, RenderDevice, SemaphorePool, Swapchain, SwapchainStatus,
+            VulkanDebug, VulkanError,
+        },
+        GraphicsError,
+    },
+    std::sync::Arc,
+};
 
 pub use self::frame::Frame;
-use super::vulkan_api::Semaphore;
-use crate::graphics::{
-    vulkan_api::{
-        ImageView, RenderDevice, SemaphorePool, Swapchain, SwapchainStatus,
-        VulkanDebug, VulkanError,
-    },
-    GraphicsError,
-};
 
 /// The result of acquiring a swapchain frame.
 pub enum AcquiredFrame {

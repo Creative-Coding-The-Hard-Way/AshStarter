@@ -1,9 +1,9 @@
-use std::sync::Arc;
-
-use ash::vk;
-
-use crate::graphics::vulkan_api::{
-    ImageView, RenderDevice, RenderPass, VulkanDebug, VulkanError,
+use {
+    crate::graphics::vulkan_api::{
+        ImageView, RenderDevice, RenderPass, VulkanDebug, VulkanError,
+    },
+    ash::vk,
+    std::sync::Arc,
 };
 
 pub struct Framebuffer {

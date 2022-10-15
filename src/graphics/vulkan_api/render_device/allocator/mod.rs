@@ -1,12 +1,11 @@
 mod allocation;
 mod passthrough_allocator;
 
-use ash::vk;
+use {crate::graphics::vulkan_api::VulkanError, ash::vk};
 
 pub use self::{
     allocation::Allocation, passthrough_allocator::PassthroughAllocator,
 };
-use crate::graphics::vulkan_api::VulkanError;
 
 pub(super) type Allocator = PassthroughAllocator;
 

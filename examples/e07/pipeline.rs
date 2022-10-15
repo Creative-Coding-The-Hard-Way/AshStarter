@@ -1,13 +1,13 @@
-use std::{ffi::CStr, sync::Arc};
-
-use ash::vk;
-use ccthw::graphics::vulkan_api::{
-    DescriptorSetLayout, GraphicsPipeline, PipelineLayout, RenderDevice,
-    RenderPass, ShaderModule, VulkanDebug, VulkanError,
+use {
+    super::Vertex,
+    ash::vk,
+    ccthw::graphics::vulkan_api::{
+        DescriptorSetLayout, GraphicsPipeline, PipelineLayout, RenderDevice,
+        RenderPass, ShaderModule, VulkanDebug, VulkanError,
+    },
+    memoffset::offset_of,
+    std::{ffi::CStr, sync::Arc},
 };
-use memoffset::offset_of;
-
-use super::Vertex;
 
 pub fn create_pipeline_layout(
     render_device: Arc<RenderDevice>,

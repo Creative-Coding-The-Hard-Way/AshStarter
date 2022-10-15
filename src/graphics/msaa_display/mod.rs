@@ -1,18 +1,18 @@
 mod graphics_pipeline;
 mod render_target;
 
-use std::sync::Arc;
-
-use anyhow::Result;
-use ash::vk;
-
-use super::vulkan_api::Semaphore;
-use crate::{
-    application::GlfwWindow,
-    graphics::{
-        vulkan_api::{Framebuffer, ImageView, RenderDevice, RenderPass},
-        AcquiredFrame, Frame, SwapchainFrames,
+use {
+    super::vulkan_api::Semaphore,
+    crate::{
+        application::GlfwWindow,
+        graphics::{
+            vulkan_api::{Framebuffer, ImageView, RenderDevice, RenderPass},
+            AcquiredFrame, Frame, SwapchainFrames,
+        },
     },
+    anyhow::Result,
+    ash::vk,
+    std::sync::Arc,
 };
 
 /// Owns all of the resources needed to render multisampled frames to the

@@ -1,9 +1,9 @@
-use std::sync::Arc;
-
-use ash::vk;
-
-use crate::graphics::vulkan_api::{
-    DescriptorSetLayout, RenderDevice, VulkanDebug, VulkanError,
+use {
+    crate::graphics::vulkan_api::{
+        DescriptorSetLayout, RenderDevice, VulkanDebug, VulkanError,
+    },
+    ash::vk,
+    std::sync::Arc,
 };
 
 /// An owned Vulkan pipeline which is automatically destroyed when dropped.
@@ -51,8 +51,8 @@ impl PipelineLayout {
     ///
     /// Unsafe because:
     ///   - Ownership is not transferred. The caller is responsible for not
-    ///     retaining any copies of the handle once this PipelineLayout
-    ///     instance is dropped.
+    ///     retaining any copies of the handle once this PipelineLayout instance
+    ///     is dropped.
     pub unsafe fn raw(&self) -> vk::PipelineLayout {
         self.pipeline_layout
     }

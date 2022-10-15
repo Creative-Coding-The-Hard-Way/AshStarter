@@ -1,10 +1,10 @@
-use std::sync::Arc;
-
-use ash::vk;
-
-use crate::graphics::{
-    vulkan_api::{Image, ImageView, RenderDevice, RenderPass, VulkanError},
-    SwapchainFrames,
+use {
+    crate::graphics::{
+        vulkan_api::{Image, ImageView, RenderDevice, RenderPass, VulkanError},
+        SwapchainFrames,
+    },
+    ash::vk,
+    std::sync::Arc,
 };
 
 pub(super) fn create_msaa_render_pass(

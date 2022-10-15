@@ -1,15 +1,15 @@
-use std::sync::mpsc::Receiver;
-
-use anyhow::Result;
-use ash::vk::{self, Handle};
-use glfw::{ClientApiHint, WindowEvent, WindowHint, WindowMode};
-
-use crate::{
-    application::ApplicationError,
-    graphics::vulkan_api::{
-        ArePhysicalDeviceFeaturesSuitableFn, Instance, PhysicalDeviceFeatures,
-        RenderDevice,
+use {
+    crate::{
+        application::ApplicationError,
+        graphics::vulkan_api::{
+            ArePhysicalDeviceFeaturesSuitableFn, Instance,
+            PhysicalDeviceFeatures, RenderDevice,
+        },
     },
+    anyhow::Result,
+    ash::vk::{self, Handle},
+    glfw::{ClientApiHint, WindowEvent, WindowHint, WindowMode},
+    std::sync::mpsc::Receiver,
 };
 
 /// All resources required for running a single-windowed GLFW application which

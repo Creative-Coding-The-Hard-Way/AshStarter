@@ -1,8 +1,8 @@
-use std::sync::Arc;
-
-use ash::vk;
-
-use crate::graphics::vulkan_api::{RenderDevice, VulkanError};
+use {
+    crate::graphics::vulkan_api::{RenderDevice, VulkanError},
+    ash::vk,
+    std::sync::Arc,
+};
 
 /// An owned Vulkan shader module.
 pub struct ShaderModule {
@@ -60,13 +60,14 @@ impl ShaderModule {
     /// Copy a byte slice into a properly-aligned u32 array.
     ///
     /// This is meant to help functions which use `include_bytes!` to load sprv
-    /// because Vulkan expects sprv source to be in u32 words but `include_bytes`
-    /// imports only u8 bytes.
+    /// because Vulkan expects sprv source to be in u32 words but
+    /// `include_bytes` imports only u8 bytes.
     ///
     /// A full copy is leveraged to handle endianess issues and to ensure proper
     /// alignment.
     ///
-    /// Assumes that data is little endian and will break on other architectures.
+    /// Assumes that data is little endian and will break on other
+    /// architectures.
     fn copy_to_u32(bytes: &[u8]) -> Result<Vec<u32>, VulkanError> {
         use std::convert::TryInto;
         const U32_SIZE: usize = std::mem::size_of::<u32>();

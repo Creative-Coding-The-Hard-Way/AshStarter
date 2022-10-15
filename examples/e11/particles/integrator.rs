@@ -1,14 +1,14 @@
-use std::{sync::Arc, time::Instant};
-
-use anyhow::Result;
-use ash::vk;
-use ccthw::graphics::vulkan_api::{
-    Buffer, CommandBuffer, ComputePipeline, DescriptorPool, DescriptorSet,
-    DescriptorSetLayout, DeviceLocalBuffer, HostCoherentBuffer, PipelineLayout,
-    RenderDevice, ShaderModule, VulkanError,
+use {
+    super::{Particle, SimulationConfig},
+    anyhow::Result,
+    ash::vk,
+    ccthw::graphics::vulkan_api::{
+        Buffer, CommandBuffer, ComputePipeline, DescriptorPool, DescriptorSet,
+        DescriptorSetLayout, DeviceLocalBuffer, HostCoherentBuffer,
+        PipelineLayout, RenderDevice, ShaderModule, VulkanError,
+    },
+    std::{sync::Arc, time::Instant},
 };
-
-use super::{Particle, SimulationConfig};
 
 /// Push Constants provided to the integration shader.
 #[derive(Debug, Copy, Clone)]

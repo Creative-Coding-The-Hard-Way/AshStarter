@@ -1,6 +1,4 @@
-use thiserror::Error;
-
-use crate::graphics::vulkan_api::VulkanError;
+use {crate::graphics::vulkan_api::VulkanError, thiserror::Error};
 
 #[derive(Debug, Error)]
 pub enum ApplicationError {

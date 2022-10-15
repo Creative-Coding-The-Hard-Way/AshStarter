@@ -1,7 +1,4 @@
-use std::str::Utf8Error;
-
-use ash::vk;
-use thiserror::Error;
+use {ash::vk, std::str::Utf8Error, thiserror::Error};
 
 #[derive(Debug, Error)]
 pub enum VulkanError {

@@ -1,11 +1,11 @@
 mod api;
 
-use std::sync::Arc;
-
-use ash::vk;
-
-use crate::graphics::vulkan_api::{
-    CommandPool, Fence, RenderDevice, Semaphore, VulkanDebug, VulkanError,
+use {
+    crate::graphics::vulkan_api::{
+        CommandPool, Fence, RenderDevice, Semaphore, VulkanDebug, VulkanError,
+    },
+    ash::vk,
+    std::sync::Arc,
 };
 
 pub struct CommandBuffer {
@@ -43,14 +43,14 @@ impl CommandBuffer {
         &self.command_buffer
     }
 
-    /// - wait_semaphores is a set of semaphores to wait on before
-    ///   executing commands.
-    /// - wait_stage is the graphics pipeline stage to perform the
-    ///   semaphore wait.
-    /// - signal_semaphores the set of semaphores to signal when the
-    ///   command buffer has finished executing
-    /// - signal_fence an optional fence to signal when the command
+    /// - wait_semaphores is a set of semaphores to wait on before executing
+    ///   commands.
+    /// - wait_stage is the graphics pipeline stage to perform the semaphore
+    ///   wait.
+    /// - signal_semaphores the set of semaphores to signal when the command
     ///   buffer has finished executing
+    /// - signal_fence an optional fence to signal when the command buffer has
+    ///   finished executing
     ///
     /// # Safety
     ///
@@ -97,14 +97,14 @@ impl CommandBuffer {
             .submit_graphics_commands(submit_info, &raw_signal_fence)
     }
 
-    /// - wait_semaphores is a set of semaphores to wait on before
-    ///   executing commands.
-    /// - wait_stage is the graphics pipeline stage to perform the
-    ///   semaphore wait.
-    /// - signal_semaphores the set of semaphores to signal when the
-    ///   command buffer has finished executing
-    /// - signal_fence an optional fence to signal when the command
+    /// - wait_semaphores is a set of semaphores to wait on before executing
+    ///   commands.
+    /// - wait_stage is the graphics pipeline stage to perform the semaphore
+    ///   wait.
+    /// - signal_semaphores the set of semaphores to signal when the command
     ///   buffer has finished executing
+    /// - signal_fence an optional fence to signal when the command buffer has
+    ///   finished executing
     ///
     /// # Safety
     ///

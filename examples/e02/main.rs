@@ -1,15 +1,16 @@
-use std::sync::Arc;
-
-use anyhow::{Error, Result};
-use ash::vk;
-use ccthw::{
-    application::{Application, GlfwWindow, State},
-    graphics::vulkan_api::{
-        CommandBuffer, CommandPool, Fence, Framebuffer, ImageView,
-        RenderDevice, RenderPass, Semaphore, SemaphorePool, Swapchain,
-        SwapchainStatus, VulkanError,
+use {
+    anyhow::{Error, Result},
+    ash::vk,
+    ccthw::{
+        application::{Application, GlfwWindow, State},
+        graphics::vulkan_api::{
+            CommandBuffer, CommandPool, Fence, Framebuffer, ImageView,
+            RenderDevice, RenderPass, Semaphore, SemaphorePool, Swapchain,
+            SwapchainStatus, VulkanError,
+        },
+        logging,
     },
-    logging,
+    std::sync::Arc,
 };
 
 /// It's useful and convenient to organize some resources to have a separate

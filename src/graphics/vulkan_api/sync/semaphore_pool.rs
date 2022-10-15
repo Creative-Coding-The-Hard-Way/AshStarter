@@ -1,6 +1,7 @@
-use std::sync::Arc;
-
-use crate::graphics::vulkan_api::{RenderDevice, Semaphore, VulkanError};
+use {
+    crate::graphics::vulkan_api::{RenderDevice, Semaphore, VulkanError},
+    std::sync::Arc,
+};
 
 /// A semaphore pool maintains a collection of binary semaphores which are
 /// available for re-use.

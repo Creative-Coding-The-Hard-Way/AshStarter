@@ -1,12 +1,9 @@
-use anyhow::Result;
-use glfw::WindowEvent;
+use {anyhow::Result, glfw::WindowEvent};
 
 mod error;
 mod glfw_window;
 
-pub use error::ApplicationError;
-
-pub use self::glfw_window::GlfwWindow;
+pub use {self::glfw_window::GlfwWindow, error::ApplicationError};
 
 /// Applications can have state.
 pub trait State {

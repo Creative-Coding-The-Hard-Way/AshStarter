@@ -1,8 +1,8 @@
-use std::sync::Arc;
-
-use ash::vk;
-
-use crate::graphics::vulkan_api::{RenderDevice, VulkanDebug, VulkanError};
+use {
+    crate::graphics::vulkan_api::{RenderDevice, VulkanDebug, VulkanError},
+    ash::vk,
+    std::sync::Arc,
+};
 
 /// A Vulkan compute pipeline and associated information.
 pub struct ComputePipeline {

@@ -1,9 +1,9 @@
-use std::os::raw::c_void;
-
-use ash::vk;
-
-use super::{Instance, PhysicalDeviceFeatures};
-use crate::graphics::vulkan_api::VulkanError;
+use {
+    super::{Instance, PhysicalDeviceFeatures},
+    crate::graphics::vulkan_api::VulkanError,
+    ash::vk,
+    std::os::raw::c_void,
+};
 
 impl Instance {
     /// Get the properties of queues associated with the given physical device.

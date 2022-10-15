@@ -1,10 +1,11 @@
-use std::sync::Arc;
+use {
+    crate::graphics::vulkan_api::{RenderDevice, VulkanDebug, VulkanError},
+    ash::vk,
+    std::sync::Arc,
+};
 
-use ash::vk;
-
-use crate::graphics::vulkan_api::{RenderDevice, VulkanDebug, VulkanError};
-
-/// An owned Vulkan semaphore object which is automatically destroyed when dropped.
+/// An owned Vulkan semaphore object which is automatically destroyed when
+/// dropped.
 pub struct Semaphore {
     /// The raw fence handle.
     raw: vk::Semaphore,

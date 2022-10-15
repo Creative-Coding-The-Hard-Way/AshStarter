@@ -1,10 +1,11 @@
-use std::sync::Arc;
-
-use anyhow::Result;
-use ash::vk;
-use ccthw::graphics::vulkan_api::{
-    CommandBuffer, CommandPool, Fence, HostCoherentBuffer, Image, ImageView,
-    RenderDevice, Sampler,
+use {
+    anyhow::Result,
+    ash::vk,
+    ccthw::graphics::vulkan_api::{
+        CommandBuffer, CommandPool, Fence, HostCoherentBuffer, Image,
+        ImageView, RenderDevice, Sampler,
+    },
+    std::sync::Arc,
 };
 
 pub fn load_texture(

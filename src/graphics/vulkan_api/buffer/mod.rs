@@ -1,9 +1,7 @@
 mod device_local_buffer;
 mod host_coherent_buffer;
 
-use std::sync::Arc;
-
-use ash::vk;
+use {ash::vk, std::sync::Arc};
 
 pub use self::{
     device_local_buffer::DeviceLocalBuffer,

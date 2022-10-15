@@ -1,10 +1,10 @@
-use std::sync::Arc;
-
-use ash::vk;
-
-use crate::graphics::vulkan_api::{
-    CommandBuffer, CommandPool, Fence, ImageView, RenderDevice, Semaphore,
-    SemaphorePool, Swapchain, VulkanDebug, VulkanError,
+use {
+    crate::graphics::vulkan_api::{
+        CommandBuffer, CommandPool, Fence, ImageView, RenderDevice, Semaphore,
+        SemaphorePool, Swapchain, VulkanDebug, VulkanError,
+    },
+    ash::vk,
+    std::sync::Arc,
 };
 
 /// All of the per-frame resources required to synchronize graphics command

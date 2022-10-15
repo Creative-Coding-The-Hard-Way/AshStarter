@@ -1,10 +1,11 @@
-use std::sync::Arc;
-
-use anyhow::Result;
-use ash::vk;
-use ccthw::graphics::{
-    vulkan_api::{Image, ImageView, RenderDevice, RenderPass, VulkanError},
-    SwapchainFrames,
+use {
+    anyhow::Result,
+    ash::vk,
+    ccthw::graphics::{
+        vulkan_api::{Image, ImageView, RenderDevice, RenderPass, VulkanError},
+        SwapchainFrames,
+    },
+    std::sync::Arc,
 };
 
 /// Query the device for MSAA support.

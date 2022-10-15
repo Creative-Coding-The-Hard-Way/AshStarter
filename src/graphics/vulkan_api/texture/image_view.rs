@@ -1,9 +1,9 @@
-use std::sync::Arc;
-
-use ash::vk;
-
-use crate::graphics::vulkan_api::{
-    Image, RenderDevice, Swapchain, VulkanDebug, VulkanError,
+use {
+    crate::graphics::vulkan_api::{
+        Image, RenderDevice, Swapchain, VulkanDebug, VulkanError,
+    },
+    ash::vk,
+    std::sync::Arc,
 };
 
 enum ImageViewResource {

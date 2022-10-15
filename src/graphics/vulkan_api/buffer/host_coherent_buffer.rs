@@ -1,9 +1,9 @@
-use std::{marker::PhantomData, sync::Arc};
-
-use ash::vk;
-
-use crate::graphics::vulkan_api::{
-    Allocation, Buffer, RenderDevice, VulkanDebug, VulkanError,
+use {
+    crate::graphics::vulkan_api::{
+        Allocation, Buffer, RenderDevice, VulkanDebug, VulkanError,
+    },
+    ash::vk,
+    std::{marker::PhantomData, sync::Arc},
 };
 
 /// A Vulkan Device buffer which is mapped to host-coherent memory.

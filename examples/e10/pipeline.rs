@@ -1,16 +1,16 @@
-use std::sync::Arc;
-
-use ash::vk;
-use ccthw::graphics::{
-    msaa_display::MSAADisplay,
-    vulkan_api::{
-        CommandBuffer, CommandPool, ComputePipeline, DescriptorPool,
-        DescriptorSet, DescriptorSetLayout, GraphicsPipeline, PipelineLayout,
-        RenderDevice, ShaderModule, VulkanError,
+use {
+    super::PushConstant,
+    ash::vk,
+    ccthw::graphics::{
+        msaa_display::MSAADisplay,
+        vulkan_api::{
+            CommandBuffer, CommandPool, ComputePipeline, DescriptorPool,
+            DescriptorSet, DescriptorSetLayout, GraphicsPipeline,
+            PipelineLayout, RenderDevice, ShaderModule, VulkanError,
+        },
     },
+    std::sync::Arc,
 };
-
-use super::PushConstant;
 
 pub struct Graphics {
     pub pipeline_layout: PipelineLayout,
