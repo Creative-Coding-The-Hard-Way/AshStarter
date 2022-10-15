@@ -7,7 +7,7 @@ use {
 
 /// The surface targeted by this application and the Ash extension loader which
 /// provides access to KHR surface functions.
-pub struct WindowSurface {
+pub(super) struct WindowSurface {
     surface: vk::SurfaceKHR,
     surface_loader: extensions::khr::Surface,
 }
@@ -84,6 +84,85 @@ impl WindowSurface {
             .context("Error checking for physical device surface support!")?;
         Ok(is_supported)
     }
+
+    /// Get the supported surface formats for the given physical device.
+    ///
+    /// # Params
+    ///
+    /// * `physical_device` - the physical device used to present images to the
+    ///   surface
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - the caller must check that the physical device can present to the
+    ///     window surface before calling this method.
+    pub unsafe fn get_physical_device_surface_formats(
+        &self,
+        physical_device: &PhysicalDevice,
+    ) -> Result<Vec<vk::SurfaceFormatKHR>, GraphicsError> {
+        let formats = self
+            .surface_loader
+            .get_physical_device_surface_formats(
+                *physical_device.raw(),
+                self.surface,
+            )
+            .context("Error while getting device surface formats!")?;
+        Ok(formats)
+    }
+
+    /// Get the supported surface presentation modes for the given physical
+    /// device.
+    ///
+    /// # Params
+    ///
+    /// * `physical_device` - the physical device used to present images to the
+    ///   suface
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - the caller must check that the physical device can present to the
+    ///     window surface before calling this method.
+    pub unsafe fn get_physical_device_surface_present_modes(
+        &self,
+        physical_device: &PhysicalDevice,
+    ) -> Result<Vec<vk::PresentModeKHR>, GraphicsError> {
+        let modes = self
+            .surface_loader
+            .get_physical_device_surface_present_modes(
+                *physical_device.raw(),
+                self.surface,
+            )
+            .context("Error while getting device surface present modes!")?;
+        Ok(modes)
+    }
+
+    /// Get the surface capabilities for a given physical device.
+    ///
+    /// # Params
+    ///
+    /// * `physical_device` - the physical device used to present images to the
+    ///   suface
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - the caller must check that the physical device can present to the
+    ///     window surface before calling this method.
+    pub unsafe fn get_surface_capabilities(
+        &self,
+        physical_device: &PhysicalDevice,
+    ) -> Result<vk::SurfaceCapabilitiesKHR, GraphicsError> {
+        let capabilities = self
+            .surface_loader
+            .get_physical_device_surface_capabilities(
+                *physical_device.raw(),
+                self.surface,
+            )
+            .context("Error getting device surface capabilities!")?;
+        Ok(capabilities)
+    }
 }
 
 impl std::fmt::Debug for WindowSurface {
@@ -94,3 +173,14 @@ impl std::fmt::Debug for WindowSurface {
             .finish()
     }
 }
+
+impl VulkanHandle for WindowSurface {
+    type Handle = vk::SurfaceKHR;
+
+    unsafe fn raw(&self) -> &Self::Handle {
+        &self.surface
+    }
+}
+
+// Private API
+// -----------

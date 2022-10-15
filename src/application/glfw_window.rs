@@ -172,8 +172,12 @@ impl GlfwWindow {
             vk::SurfaceKHR::from_raw(surface_handle)
         };
 
-        RenderDevice::new(instance, features, surface)
-            .context("Unable to create the render device!")
+        let device = RenderDevice::new(instance, features, surface)
+            .context("Unable to create the render device!")?;
+
+        log::debug!("{}", device);
+
+        Ok(device)
     }
 
     /// Create a Vulkan instance with extensions and layers configured to

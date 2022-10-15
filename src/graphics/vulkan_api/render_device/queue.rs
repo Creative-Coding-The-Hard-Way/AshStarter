@@ -38,10 +38,7 @@ impl Queue {
 
 impl std::fmt::Display for Queue {
     fn fmt(&self, format: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        format.write_fmt(format_args!(
-            "Queue {}:{} - {:?}",
-            self.family_index, self.index, self.properties.queue_flags,
-        ))
+        format.write_fmt(format_args!("{:#?}", self))
     }
 }
 

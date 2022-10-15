@@ -8,7 +8,7 @@ use {
 };
 
 /// A helper for picking and creating the device queues for the render device.
-pub struct QueueFinder {
+pub(super) struct QueueFinder {
     graphics_queue_family_index: usize,
     presentation_queue_family_index: usize,
     families: HashMap<usize, QueueFamilyInfo>,

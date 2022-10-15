@@ -4,6 +4,7 @@ use {
     ccthw_ash_instance::{
         LogicalDevice, PhysicalDevice, PhysicalDeviceFeatures, VulkanInstance,
     },
+    indoc::indoc,
 };
 
 mod queue;
@@ -58,7 +59,6 @@ impl RenderDevice {
         let physical_device =
             Self::pick_physical_device(&instance, features, &window_surface)?;
         let queue_finder = QueueFinder::new(&physical_device, &window_surface);
-
         let logical_device = unsafe {
             // SAFE because the RenderDevice takes ownership of the instance
             // along with the LogicalDevice.
@@ -72,17 +72,75 @@ impl RenderDevice {
                 &queue_finder.queue_family_infos(),
             )?
         };
-
         let (graphics_queue, presentation_queue) =
             queue_finder.get_queues_from_device(&logical_device);
 
-        Ok(Self {
+        let render_device = Self {
             graphics_queue,
             presentation_queue,
             window_surface,
             logical_device,
             instance,
-        })
+        };
+        render_device.set_debug_name(
+            *render_device.presentation_queue().raw(),
+            vk::ObjectType::QUEUE,
+            "presentation queue",
+        );
+        render_device.set_debug_name(
+            *render_device.graphics_queue.raw(),
+            vk::ObjectType::QUEUE,
+            "graphics queue",
+        );
+
+        Ok(render_device)
+    }
+
+    /// Set the name that shows up in Vulkan debug logs for a given resource.
+    ///
+    /// # Params
+    ///
+    /// * `handle` - a Vulkan resource represented by the Ash library
+    /// * `object_type` - the Vulkan object type
+    /// * `name` - a human-readable name for the object. This will show up in
+    ///   debug logs if the object is referenced.
+    #[cfg(debug_assertions)]
+    pub fn set_debug_name(
+        &self,
+        handle: impl ash::vk::Handle,
+        object_type: vk::ObjectType,
+        name: impl Into<String>,
+    ) {
+        let owned_name = name.into();
+        let c_name = std::ffi::CString::new(owned_name).unwrap();
+        let name_info = vk::DebugUtilsObjectNameInfoEXT {
+            object_type,
+            object_handle: handle.as_raw(),
+            p_object_name: c_name.as_ptr(),
+            ..Default::default()
+        };
+        self.instance.debug_utils_set_object_name(
+            unsafe { self.logical_device.raw() },
+            &name_info,
+        );
+    }
+
+    /// Set the name that shows up in Vulkan debug logs for a given resource.
+    ///
+    /// # Params
+    ///
+    /// * `handle` - a Vulkan resource represented by the Ash library
+    /// * `object_type` - the Vulkan object type
+    /// * `name` - a human-readable name for the object. This will show up in
+    ///   debug logs if the object is referenced.
+    #[cfg(not(debug_assertions))]
+    pub fn set_debug_name(
+        &self,
+        handle: impl ash::vk::Handle,
+        object_type: vk::ObjectType,
+        name: impl Into<String>,
+    ) {
+        // no-op on release builds
     }
 
     /// The queue this application uses for graphics operations.
@@ -105,8 +163,8 @@ impl RenderDevice {
     /// resources.
     pub unsafe fn destroy(&mut self) {
         self.window_surface.destroy();
-        self.logical_device.raw().destroy_device(None);
-        self.instance.ash().destroy_instance(None);
+        self.logical_device.destroy();
+        self.instance.destroy();
     }
 
     /// The Ash entry used by this RenderDevice.
@@ -129,22 +187,77 @@ impl RenderDevice {
     pub unsafe fn device(&self) -> &ash::Device {
         self.logical_device.raw()
     }
+
+    /// The KHR surface provided by the window system for rendering.
+    ///
+    /// # Safety
+    ///
+    /// The caller must not keep copies of the device handle after any calls
+    /// to `destroy`.
+    pub unsafe fn surface(&self) -> &vk::SurfaceKHR {
+        self.window_surface.raw()
+    }
+
+    /// Get all of the surface formats supported by this device.
+    pub fn get_surface_formats(
+        &self,
+    ) -> Result<Vec<vk::SurfaceFormatKHR>, GraphicsError> {
+        unsafe {
+            // Safe because the physical device is checked for support when
+            // the Render Device is constructed.
+            self.window_surface.get_physical_device_surface_formats(
+                self.logical_device.physical_device(),
+            )
+        }
+    }
+
+    /// Get all of the presentation modes supported by this device.
+    pub fn get_present_modes(
+        &self,
+    ) -> Result<Vec<vk::PresentModeKHR>, GraphicsError> {
+        unsafe {
+            // Safe because the physical device is checked for support when
+            // the Render Device is constructed.
+            self.window_surface
+                .get_physical_device_surface_present_modes(
+                    self.logical_device.physical_device(),
+                )
+        }
+    }
+
+    /// Get the surface capabilities for this device.
+    pub fn get_surface_capabilities(
+        &self,
+    ) -> Result<vk::SurfaceCapabilitiesKHR, GraphicsError> {
+        unsafe {
+            // Safe because the physical device is checked for support when
+            // the Render Device is constructed.
+            self.window_surface
+                .get_surface_capabilities(self.logical_device.physical_device())
+        }
+    }
 }
 
 impl std::fmt::Display for RenderDevice {
     fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        formatter.write_str("RenderDevice\n")?;
-        formatter
-            .write_fmt(format_args!("With {}\n\n", &self.logical_device))?;
         formatter.write_fmt(format_args!(
-            "With graphics {}\n\n",
-            &self.graphics_queue
-        ))?;
-        formatter.write_fmt(format_args!(
-            "With presentation {}",
-            &self.presentation_queue
-        ))?;
-        Ok(())
+            indoc!(
+                "
+                RenderDevice Overview
+
+                {}
+
+                {}
+
+                Graphics {}
+
+                Presentation {}"
+            ),
+            self.instance,
+            self.logical_device,
+            self.graphics_queue(),
+            self.presentation_queue()
+        ))
     }
 }
 
@@ -171,6 +284,14 @@ impl RenderDevice {
                     QueueFinder::device_has_required_queues(
                         device,
                         window_surface,
+                    )
+                })
+                .filter(|device| {
+                    device.available_extension_names().contains(
+                        &ash::extensions::khr::Swapchain::name()
+                            .to_owned()
+                            .into_string()
+                            .unwrap(),
                     )
                 })
                 .collect();

@@ -2,17 +2,20 @@ use {
     anyhow::Result,
     ccthw::{
         application::{Application, GlfwWindow, State},
-        graphics::vulkan_api::RenderDevice,
+        graphics::vulkan_api::{RenderDevice, Swapchain},
     },
     ccthw_ash_instance::PhysicalDeviceFeatures,
 };
 
 struct CreateRenderDevice {
+    swapchain: Swapchain,
     render_device: RenderDevice,
 }
 
 impl State for CreateRenderDevice {
     fn new(window: &mut GlfwWindow) -> Result<Self> {
+        log::info!("IS DEBUG ASSERT ENABLED {}", cfg!(debug_assertions));
+
         window.set_key_polling(true);
         let render_device = unsafe {
             // SAFE because the render device is destroyed when state is
@@ -21,8 +24,15 @@ impl State for CreateRenderDevice {
                 PhysicalDeviceFeatures::default(),
             )?
         };
-        log::info!("Created Render Device: {}", render_device);
-        Ok(Self { render_device })
+        let (w, h) = window.get_framebuffer_size();
+        let swapchain = unsafe {
+            Swapchain::new(&render_device, (w as u32, h as u32), None)?
+        };
+        log::info!("{}", swapchain);
+        Ok(Self {
+            swapchain,
+            render_device,
+        })
     }
 
     fn handle_event(
@@ -47,8 +57,7 @@ impl State for CreateRenderDevice {
 impl Drop for CreateRenderDevice {
     fn drop(&mut self) {
         unsafe {
-            // SAFE because there are no resources which depend on the instance.
-            self.render_device.device().device_wait_idle().unwrap();
+            self.swapchain.destroy();
             self.render_device.destroy();
         }
     }
