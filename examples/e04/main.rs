@@ -12,7 +12,6 @@ use {
             },
             AcquiredFrame, SwapchainFrames,
         },
-        logging,
     },
     std::sync::Arc,
 };
@@ -189,7 +188,6 @@ impl Drop for Example4FirstTriangle {
 }
 
 fn main() -> Result<()> {
-    let _logger = logging::setup()?;
     Application::<Example4FirstTriangle>::new("Example 4 - First Triangle")?
         .run()
 }

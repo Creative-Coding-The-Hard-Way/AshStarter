@@ -15,7 +15,6 @@ use {
             },
             AcquiredFrame, SwapchainFrames,
         },
-        logging,
         math::Mat4,
     },
     std::{sync::Arc, time::Instant},
@@ -294,7 +293,6 @@ impl Drop for Example8Multisampling {
 }
 
 fn main() -> Result<()> {
-    let _logger = logging::setup()?;
     Application::<Example8Multisampling>::new("Example 8 - Multisampling")?
         .run()
 }

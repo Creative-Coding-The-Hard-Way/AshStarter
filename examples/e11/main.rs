@@ -12,7 +12,6 @@ use {
             },
             AcquiredFrame,
         },
-        logging,
     },
     particles::{Graphics, Integrator, SimulationConfig},
     std::sync::Arc,
@@ -219,7 +218,6 @@ impl Drop for Example11GPUParticles {
 }
 
 fn main() -> Result<()> {
-    let _logger = logging::setup()?;
     Application::<Example11GPUParticles>::new("Example 11 - GPU Particles")?
         .run()
 }

@@ -13,7 +13,6 @@ use {
             },
             AcquiredFrame,
         },
-        logging,
     },
     std::{sync::Arc, time::Instant},
 };
@@ -281,6 +280,5 @@ impl Drop for Example9MSAADisplay {
 }
 
 fn main() -> Result<()> {
-    let _logger = logging::setup()?;
     Application::<Example9MSAADisplay>::new("Example 9 - MSAADisplay")?.run()
 }

@@ -140,6 +140,7 @@ dependencies = [
  "log",
  "memoffset",
  "nalgebra",
+ "regex",
  "spin_sleep",
  "textwrap",
  "thiserror",

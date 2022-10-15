@@ -14,7 +14,6 @@ use {
             },
             AcquiredFrame,
         },
-        logging,
     },
     std::{sync::Arc, time::Instant},
 };
@@ -287,6 +286,5 @@ impl Drop for Example10Compute {
 }
 
 fn main() -> Result<()> {
-    let _logger = logging::setup()?;
     Application::<Example10Compute>::new("Example 10 - Compute")?.run()
 }

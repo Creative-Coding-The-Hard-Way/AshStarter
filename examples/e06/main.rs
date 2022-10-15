@@ -14,7 +14,6 @@ use {
             },
             AcquiredFrame, SwapchainFrames,
         },
-        logging,
     },
     std::sync::Arc,
 };
@@ -281,7 +280,6 @@ impl Drop for Example6PushConstants {
 }
 
 fn main() -> Result<()> {
-    let _logger = logging::setup()?;
     Application::<Example6PushConstants>::new("Example 6 - Push Constants")?
         .run()
 }

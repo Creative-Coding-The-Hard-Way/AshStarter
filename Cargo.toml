@@ -8,26 +8,27 @@ edition = "2018"
 opt-level = 1               # Use slightly better optimizations
 
 [dependencies]
-anyhow = "1.0.44"
-flexi_logger = { version = "0.24.0", features = ["async"] }
-log = "0.4.13"
-ash = { version = "0.37.0", features = ["linked"] }
+anyhow = "*"
+flexi_logger = { version = "*", features = ["async"] }
+log = "*"
+ash = { version = "*", features = ["linked"] }
 aquamarine = "*"
 nalgebra = "*"
 memoffset = "*"
-thiserror = "1.0.29"
-spin_sleep = "1.0.0"
-image = "0.24.4"
-indoc = "1.0.7"
+thiserror = "*"
+spin_sleep = "*"
+image = "*"
+indoc = "*"
+regex = "*"
 
 [build-dependencies]
-anyhow = "1.0.44"
-glob = "0.3.0"
+anyhow = "*"
+glob = "*"
 
 [dependencies.glfw]
-version = "0.41.0"
+version = "*"
 features = [ "vulkan" ]
 
 [dependencies.textwrap]
 features = ["terminal_size"]
-version = "0.13.2"
+version = "*"

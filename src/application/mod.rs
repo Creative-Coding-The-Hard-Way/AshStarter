@@ -42,6 +42,8 @@ where
 {
     /// Create a new running application.
     pub fn new(window_title: impl AsRef<str>) -> Result<Self> {
+        crate::logging::setup();
+
         let mut window = GlfwWindow::new(window_title)?;
 
         // Framebuffer polling is required for detecting when the app should be

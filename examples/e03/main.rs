@@ -6,7 +6,6 @@ use {
             vulkan_api::{Framebuffer, RenderDevice, RenderPass},
             AcquiredFrame, SwapchainFrames,
         },
-        logging,
     },
     std::sync::Arc,
 };
@@ -123,7 +122,6 @@ impl Drop for Example3SwapchainFrames {
 }
 
 fn main() -> Result<()> {
-    let _logger = logging::setup()?;
     Application::<Example3SwapchainFrames>::new("Example 3- SwapchainFrames")?
         .run()
 }

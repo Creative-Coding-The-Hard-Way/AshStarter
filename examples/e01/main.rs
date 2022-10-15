@@ -7,7 +7,6 @@ use {
             CommandBuffer, CommandPool, Fence, Framebuffer, ImageView,
             RenderDevice, RenderPass, Semaphore, Swapchain, SwapchainStatus,
         },
-        logging,
     },
     std::sync::Arc,
 };
@@ -251,6 +250,5 @@ impl Drop for Example1ClearScreen {
 }
 
 fn main() -> Result<()> {
-    let _logger = logging::setup()?;
     Application::<Example1ClearScreen>::new("Example 1 - Clear Screen")?.run()
 }

@@ -14,7 +14,6 @@ use {
             },
             AcquiredFrame, SwapchainFrames,
         },
-        logging,
     },
     std::sync::Arc,
 };
@@ -264,6 +263,5 @@ impl Drop for Example5Uniforms {
 }
 
 fn main() -> Result<()> {
-    let _logger = logging::setup()?;
     Application::<Example5Uniforms>::new("Example 5 - Uniforms")?.run()
 }

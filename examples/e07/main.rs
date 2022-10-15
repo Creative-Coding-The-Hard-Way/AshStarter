@@ -15,7 +15,6 @@ use {
             },
             AcquiredFrame, SwapchainFrames,
         },
-        logging,
     },
     load_texture::load_texture,
     std::sync::Arc,
@@ -304,6 +303,5 @@ impl Drop for Example7Textures {
 }
 
 fn main() -> Result<()> {
-    let _logger = logging::setup()?;
     Application::<Example7Textures>::new("Example 7 - Textures")?.run()
 }

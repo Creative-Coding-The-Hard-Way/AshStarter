@@ -8,7 +8,6 @@ use {
             RenderDevice, RenderPass, Semaphore, SemaphorePool, Swapchain,
             SwapchainStatus, VulkanError,
         },
-        logging,
     },
     std::sync::Arc,
 };
@@ -292,7 +291,6 @@ impl Drop for Example2MultipleFrames {
 }
 
 fn main() -> Result<()> {
-    let _logger = logging::setup()?;
     Application::<Example2MultipleFrames>::new("Example 2 - Multiple Frames")?
         .run()
 }

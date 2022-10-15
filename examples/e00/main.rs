@@ -1,9 +1,6 @@
 use {
     anyhow::Result,
-    ccthw::{
-        application::{Application, GlfwWindow, State},
-        logging,
-    },
+    ccthw::application::{Application, GlfwWindow, State},
 };
 
 /// The pattern in this project is for an application to be a type which
@@ -45,6 +42,5 @@ impl State for Example0AppLifecycle {
 }
 
 fn main() -> Result<()> {
-    let _logger = logging::setup()?;
     Application::<Example0AppLifecycle>::new("Example 0 - App Lifecycle")?.run()
 }

@@ -1,4 +1,4 @@
 pub mod application;
 pub mod graphics;
-pub mod logging;
+mod logging;
 pub mod math;
