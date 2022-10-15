@@ -1,5 +1,3 @@
-mod pretty_list;
-
 use {
     anyhow::Result,
     flexi_logger::{
@@ -10,8 +8,6 @@ use {
     std::{fmt::Write as FmtWrite, sync::Once},
     textwrap::{termwidth, Options},
 };
-
-pub use self::pretty_list::PrettyList;
 
 /// A global handle to the initialized flexi_logger.
 ///
@@ -24,7 +20,7 @@ static INIT: Once = Once::new();
 //::new(r"(┃)(.*)$").unwrap();
 static mut LAST_NEWLINE_DELIM_MACHER: Option<Regex> = None;
 
-/// Setup console logging for tests.
+/// Setup pretty console and file logging.
 pub fn setup() {
     INIT.call_once(|| {
         let handle = Logger::try_with_env_or_str("trace")

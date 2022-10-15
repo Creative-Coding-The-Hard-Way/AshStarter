@@ -1,3 +1,5 @@
+//! Mathematical primitives and operations.
+
 use nalgebra::{Matrix4, Vector2, Vector3, Vector4};
 
 pub type Mat4 = Matrix4<f32>;

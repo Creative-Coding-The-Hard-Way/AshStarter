@@ -1,31 +1,39 @@
 use {
-    crate::{
-        application::ApplicationError,
-        graphics::vulkan_api::{
-            ArePhysicalDeviceFeaturesSuitableFn, Instance,
-            PhysicalDeviceFeatures, RenderDevice,
-        },
-    },
+    crate::application::ApplicationError,
     anyhow::Result,
-    ash::vk::{self, Handle},
     glfw::{ClientApiHint, WindowEvent, WindowHint, WindowMode},
     std::sync::mpsc::Receiver,
 };
 
 /// All resources required for running a single-windowed GLFW application which
 /// renders graphics using Vulkan.
+///
+/// GlfwWindow derefs as a raw GLFW window handle so application state can
+/// configure the window however is convenient.
 pub struct GlfwWindow {
     window_pos: (i32, i32),
     window_size: (i32, i32),
+    window_handle: glfw::Window,
 
     /// The receiver for the Window's events.
-    pub event_receiver: Option<Receiver<(f64, WindowEvent)>>,
-
-    /// The GLFW window instance.
-    pub window_handle: glfw::Window,
+    pub(super) event_receiver: Option<Receiver<(f64, WindowEvent)>>,
 
     /// The GLFW library instance.
-    pub glfw: glfw::Glfw,
+    pub(super) glfw: glfw::Glfw,
+}
+
+impl std::ops::Deref for GlfwWindow {
+    type Target = glfw::Window;
+
+    fn deref(&self) -> &Self::Target {
+        &self.window_handle
+    }
+}
+
+impl std::ops::DerefMut for GlfwWindow {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.window_handle
+    }
 }
 
 impl GlfwWindow {
@@ -51,7 +59,7 @@ impl GlfwWindow {
                 window_title.as_ref(),
                 WindowMode::Windowed,
             )
-            .ok_or(ApplicationError::UnableToCreateGLFWWindow)?;
+            .ok_or(ApplicationError::CreateGLFWWindowFailed)?;
 
         Ok(Self {
             window_pos: window_handle.get_pos(),
@@ -108,53 +116,5 @@ impl GlfwWindow {
             )?;
         }
         Ok(())
-    }
-
-    /// Create a render device with default physical device features.
-    pub fn create_render_device(
-        &self,
-    ) -> Result<RenderDevice, ApplicationError> {
-        self.create_render_device_with_features(
-            PhysicalDeviceFeatures::default(),
-            |_features| true,
-        )
-    }
-
-    /// Create a render device with the requested physical device features.
-    pub fn create_render_device_with_features(
-        &self,
-        physical_device_features: PhysicalDeviceFeatures,
-        are_features_suitable: ArePhysicalDeviceFeaturesSuitableFn,
-    ) -> Result<RenderDevice, ApplicationError> {
-        let instance = self.create_vulkan_instance()?;
-
-        let mut surface_handle: u64 = 0;
-        let result =
-            vk::Result::from_raw(self.window_handle.create_window_surface(
-                unsafe { instance.vulkan_instance_handle().as_raw() as usize },
-                std::ptr::null(),
-                &mut surface_handle,
-            ) as i32);
-        if result != vk::Result::SUCCESS {
-            return Err(ApplicationError::UnableToCreateSurface(result));
-        }
-
-        let render_device = RenderDevice::new(
-            instance,
-            vk::SurfaceKHR::from_raw(surface_handle),
-            physical_device_features,
-            are_features_suitable,
-        )?;
-
-        Ok(render_device)
-    }
-
-    fn create_vulkan_instance(&self) -> Result<Instance, ApplicationError> {
-        let required_extensions = self
-            .glfw
-            .get_required_instance_extensions()
-            .ok_or(ApplicationError::UnableToGetGLFWInstanceExtensions)?;
-        let instance = Instance::new(&required_extensions)?;
-        Ok(instance)
     }
 }
