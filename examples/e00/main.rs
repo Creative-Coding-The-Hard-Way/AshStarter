@@ -3,9 +3,9 @@ use {
     ccthw::application::{Application, GlfwWindow, State},
 };
 
-struct AppLifecycle;
+struct AppLifecycleExample;
 
-impl State for AppLifecycle {
+impl State for AppLifecycleExample {
     fn new(window: &mut GlfwWindow) -> Result<Self> {
         window.set_key_polling(true);
         Ok(Self)
@@ -31,5 +31,5 @@ impl State for AppLifecycle {
 }
 
 fn main() -> Result<()> {
-    Application::<AppLifecycle>::run()
+    Application::<AppLifecycleExample>::run()
 }

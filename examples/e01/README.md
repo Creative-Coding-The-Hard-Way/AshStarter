@@ -1,7 +1,7 @@
 # Example 01 - Render Device
 
-This example create a Vulkan instance and logical device which are able to
-present swapchain images to the screen.
+This example shows how to create the Render Device which is used to create and
+destroy vulkan resources.
 
 ## Commands
 
