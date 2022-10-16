@@ -57,7 +57,7 @@ impl State for CreateRenderDevice {
 impl Drop for CreateRenderDevice {
     fn drop(&mut self) {
         unsafe {
-            self.swapchain.destroy();
+            self.swapchain.destroy(&self.render_device);
             self.render_device.destroy();
         }
     }

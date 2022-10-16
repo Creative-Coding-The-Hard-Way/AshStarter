@@ -5,13 +5,16 @@ use {
     ccthw_ash_instance::VulkanHandle,
 };
 
+mod selection;
+
 /// The Vulkan swapchain, loader, images, image views, and related data.
 ///
 /// It's often useful to keep the raw Vulkan swapchain together with all of
 /// it's related information. It's also helpful to have a newtype which can
 /// define some helper functions for working with swapchain resources.
 pub struct Swapchain {
-    image_count: u32,
+    image_views: Vec<vk::ImageView>,
+    images: Vec<vk::Image>,
     extent: vk::Extent2D,
     format: vk::SurfaceFormatKHR,
     present_mode: vk::PresentModeKHR,
@@ -30,12 +33,19 @@ impl Swapchain {
     /// * `render_device` - the device used to create vulkan resources
     /// * `framebuffer_size` - the size of the window's framebuffer in device
     ///   pixels.
+    /// * `previous_swapchain` - the previous swapchain (if any). This is
+    ///   provided to the new swapchain and will be destroyed inside this
+    ///   method.
     ///
     /// # Safety
     ///
     /// Unsafe because:
     ///   - the application must destroy the swapchain before the render device
     ///   - the application must synchronize access to GPU resources
+    ///   - the application is responsible for ensuring no GPU resources still
+    ///     reference the previous swapchain when it is provided to this method.
+    ///     The previous swapchain will be destroyed when the new swapchain is
+    ///     constructed.
     pub unsafe fn new(
         render_device: &RenderDevice,
         framebuffer_size: (u32, u32),
@@ -95,17 +105,93 @@ impl Swapchain {
             render_device.ash(),
             render_device.device(),
         );
-        let swapchain =
-            unsafe { swapchain_loader.create_swapchain(&create_info, None)? };
+        let swapchain = unsafe {
+            swapchain_loader
+                .create_swapchain(&create_info, None)
+                .context("Error creating the swapchain!")?
+        };
+        if let Some(mut swapchain) = previous_swapchain {
+            // SAFE because nothing references the swapchain now that the
+            // new one has been constructed.
+            unsafe { swapchain.destroy(render_device) };
+        }
+
+        let images = unsafe {
+            swapchain_loader
+                .get_swapchain_images(swapchain)
+                .context("Error getting swapchain images!")?
+        };
+
+        let mut image_views = vec![];
+        for (i, image) in images.iter().enumerate() {
+            let create_info = vk::ImageViewCreateInfo {
+                image: *image,
+                view_type: vk::ImageViewType::TYPE_2D,
+                format: format.format,
+                components: vk::ComponentMapping::default(),
+                subresource_range: vk::ImageSubresourceRange {
+                    aspect_mask: vk::ImageAspectFlags::COLOR,
+                    base_mip_level: 0,
+                    level_count: 1,
+                    base_array_layer: 0,
+                    layer_count: 1,
+                },
+                ..Default::default()
+            };
+            let view = unsafe {
+                render_device
+                    .device()
+                    .create_image_view(&create_info, None)
+                    .context("unable to create swapchain image view")?
+            };
+            render_device.set_debug_name(
+                *image,
+                vk::ObjectType::IMAGE,
+                format!("Swapchain Image {}", i),
+            );
+            render_device.set_debug_name(
+                view,
+                vk::ObjectType::IMAGE_VIEW,
+                format!("Swapchain Image View {}", i),
+            );
+            image_views.push(view);
+        }
 
         Ok(Self {
-            image_count: min_image_count,
+            image_views,
+            images,
             extent,
             format,
             present_mode,
             swapchain,
             swapchain_loader,
         })
+    }
+
+    /// Access the raw Swapchain images.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - the application must synchronize access to swapchain images
+    ///   - the images are destroyed when the swapchain is replaced, the
+    ///     application must ensure the image handles are not referenced after
+    ///     any calls to destroy.
+    pub unsafe fn images(&self) -> &[vk::Image] {
+        &self.images
+    }
+
+    /// Access the raw Swapchain image views.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - the application must synchronize access to swapchain images
+    ///   - the images are destroyed when the swapchain is replaced, the
+    ///     application must ensure the image handles are not referenced after
+    ///     any calls to destroy.
+    pub unsafe fn image_views(&self) -> &[vk::ImageView] {
+        &self.image_views
     }
 
     /// The format used by images in the swapchain.
@@ -125,6 +211,10 @@ impl Swapchain {
 
     /// Destroy all swapchain resources.
     ///
+    /// # Params
+    ///
+    /// * `render_device` - the device used to create the swapchain.
+    ///
     /// # Safety
     ///
     /// Unsafe because:
@@ -133,7 +223,10 @@ impl Swapchain {
     ///   - the application must synchronize access to GPU resources and ensure
     ///     no pending operations still depend on the swapchain
     ///   - it is invalid to use this instance after calling `destroy`
-    pub unsafe fn destroy(&mut self) {
+    pub unsafe fn destroy(&mut self, render_device: &RenderDevice) {
+        for view in &self.image_views {
+            render_device.device().destroy_image_view(*view, None)
+        }
         self.swapchain_loader
             .destroy_swapchain(self.swapchain, None);
     }
@@ -142,7 +235,8 @@ impl Swapchain {
 impl std::fmt::Debug for Swapchain {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Swapchain")
-            .field("image_count", &self.image_count)
+            .field("image_views", &self.image_views)
+            .field("images", &self.images)
             .field("extent", &self.extent)
             .field("format", &self.format)
             .field("present_mode", &self.present_mode)
@@ -161,115 +255,5 @@ impl VulkanHandle for Swapchain {
 
     unsafe fn raw(&self) -> &Self::Handle {
         &self.swapchain
-    }
-}
-
-// Private API
-// -----------
-
-impl Swapchain {
-    /// Chose the swapchain image format given a slice of available formats.
-    ///
-    /// # Params
-    ///
-    /// * `available_formats` - the formats available for presentation on the
-    ///   device and surface
-    fn choose_surface_format(
-        available_formats: &[vk::SurfaceFormatKHR],
-    ) -> Result<vk::SurfaceFormatKHR, GraphicsError> {
-        log::trace!("Available surface formats: {:#?}", available_formats);
-
-        let preferred_format = available_formats.iter().find(|format| {
-            format.color_space == vk::ColorSpaceKHR::SRGB_NONLINEAR
-                && format.format == vk::Format::B8G8R8A8_SRGB
-        });
-
-        if let Some(&format) = preferred_format {
-            log::trace!("Using preferred swapchain format {:#?}", format);
-            return Ok(format);
-        }
-
-        let backup_format = available_formats
-            .first()
-            .context("No swapchain formats available!")?;
-
-        log::trace!("Fall back to swapchain format {:#?}", backup_format);
-
-        Ok(*backup_format)
-    }
-
-    /// Chose the swapchain presentation mode given the set of available modes.
-    ///
-    /// # Params
-    ///
-    /// * `available_modes` - the presentation modes supported by the device and
-    ///   surface.
-    fn choose_presentation_mode(
-        available_modes: &[vk::PresentModeKHR],
-    ) -> vk::PresentModeKHR {
-        let preferred_mode = vk::PresentModeKHR::MAILBOX;
-        if available_modes.contains(&preferred_mode) {
-            log::trace!(
-                "Using preferred swapchain present mode {:?}",
-                preferred_mode
-            );
-            return preferred_mode;
-        }
-
-        // guaranteed to be available by the Vulkan spec
-        let fallback_mode = vk::PresentModeKHR::FIFO;
-        log::trace!("Fall back to swapchain present mode {:?}", fallback_mode);
-
-        fallback_mode
-    }
-
-    /// Chose the swapchain size given the swapchain limits on framebuffer size.
-    ///
-    /// # Params
-    ///
-    /// * `capabilities` - the available surface capabilities for the device
-    /// * `framebuffer_size` - the raw framebuffer size in pixels
-    fn choose_swapchain_extent(
-        capabilities: vk::SurfaceCapabilitiesKHR,
-        framebuffer_size: (u32, u32),
-    ) -> vk::Extent2D {
-        let (width, height) = framebuffer_size;
-
-        if capabilities.current_extent.width != u32::MAX {
-            // u32::MAX indicates that the surface size will be controlled
-            // entirely by the size of the swapchain targeting the
-            // surface.
-            vk::Extent2D { width, height }
-        } else {
-            // Otherwise we have to make sure the swapchain size is within the
-            // allowed min/max values.
-            vk::Extent2D {
-                width: width.clamp(
-                    capabilities.min_image_extent.width,
-                    capabilities.max_image_extent.width,
-                ),
-                height: height.clamp(
-                    capabilities.min_image_extent.height,
-                    capabilities.max_image_extent.height,
-                ),
-            }
-        }
-    }
-
-    /// Chose the number of swapchain images to use.
-    ///
-    /// # Params
-    ///
-    /// * `capabilities` - the available surface capabilities for the device
-    fn choose_image_count(capabilities: vk::SurfaceCapabilitiesKHR) -> u32 {
-        let proposed_image_count = 3;
-        if capabilities.max_image_count > 0 {
-            proposed_image_count.clamp(
-                capabilities.min_image_count,
-                capabilities.max_image_count,
-            )
-        } else {
-            proposed_image_count.max(capabilities.min_image_count)
-        }
     }
 }
