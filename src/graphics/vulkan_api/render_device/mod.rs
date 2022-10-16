@@ -32,6 +32,16 @@ pub struct RenderDevice {
 // Public Api
 // ----------
 
+impl std::ops::Deref for RenderDevice {
+    type Target = ash::Device;
+
+    /// The RenderDevice can be deref'd as an ash device because that's
+    /// overwhelmingly often the main usecase for the RenderDevice.
+    fn deref(&self) -> &Self::Target {
+        unsafe { self.logical_device.raw() }
+    }
+}
+
 impl RenderDevice {
     /// Create a new render device.
     ///

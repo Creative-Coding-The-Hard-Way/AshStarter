@@ -5,7 +5,10 @@ use {
     ccthw_ash_instance::VulkanHandle,
 };
 
+mod acquire_present;
 mod selection;
+
+pub use self::acquire_present::SwapchainStatus;
 
 /// The Vulkan swapchain, loader, images, image views, and related data.
 ///
@@ -13,7 +16,6 @@ mod selection;
 /// it's related information. It's also helpful to have a newtype which can
 /// define some helper functions for working with swapchain resources.
 pub struct Swapchain {
-    image_views: Vec<vk::ImageView>,
     images: Vec<vk::Image>,
     extent: vk::Extent2D,
     format: vk::SurfaceFormatKHR,
@@ -113,7 +115,7 @@ impl Swapchain {
         if let Some(mut swapchain) = previous_swapchain {
             // SAFE because nothing references the swapchain now that the
             // new one has been constructed.
-            unsafe { swapchain.destroy(render_device) };
+            unsafe { swapchain.destroy() };
         }
 
         let images = unsafe {
@@ -122,43 +124,7 @@ impl Swapchain {
                 .context("Error getting swapchain images!")?
         };
 
-        let mut image_views = vec![];
-        for (i, image) in images.iter().enumerate() {
-            let create_info = vk::ImageViewCreateInfo {
-                image: *image,
-                view_type: vk::ImageViewType::TYPE_2D,
-                format: format.format,
-                components: vk::ComponentMapping::default(),
-                subresource_range: vk::ImageSubresourceRange {
-                    aspect_mask: vk::ImageAspectFlags::COLOR,
-                    base_mip_level: 0,
-                    level_count: 1,
-                    base_array_layer: 0,
-                    layer_count: 1,
-                },
-                ..Default::default()
-            };
-            let view = unsafe {
-                render_device
-                    .device()
-                    .create_image_view(&create_info, None)
-                    .context("unable to create swapchain image view")?
-            };
-            render_device.set_debug_name(
-                *image,
-                vk::ObjectType::IMAGE,
-                format!("Swapchain Image {}", i),
-            );
-            render_device.set_debug_name(
-                view,
-                vk::ObjectType::IMAGE_VIEW,
-                format!("Swapchain Image View {}", i),
-            );
-            image_views.push(view);
-        }
-
         Ok(Self {
-            image_views,
             images,
             extent,
             format,
@@ -179,19 +145,6 @@ impl Swapchain {
     ///     any calls to destroy.
     pub unsafe fn images(&self) -> &[vk::Image] {
         &self.images
-    }
-
-    /// Access the raw Swapchain image views.
-    ///
-    /// # Safety
-    ///
-    /// Unsafe because:
-    ///   - the application must synchronize access to swapchain images
-    ///   - the images are destroyed when the swapchain is replaced, the
-    ///     application must ensure the image handles are not referenced after
-    ///     any calls to destroy.
-    pub unsafe fn image_views(&self) -> &[vk::ImageView] {
-        &self.image_views
     }
 
     /// The format used by images in the swapchain.
@@ -223,10 +176,7 @@ impl Swapchain {
     ///   - the application must synchronize access to GPU resources and ensure
     ///     no pending operations still depend on the swapchain
     ///   - it is invalid to use this instance after calling `destroy`
-    pub unsafe fn destroy(&mut self, render_device: &RenderDevice) {
-        for view in &self.image_views {
-            render_device.device().destroy_image_view(*view, None)
-        }
+    pub unsafe fn destroy(&mut self) {
         self.swapchain_loader
             .destroy_swapchain(self.swapchain, None);
     }
@@ -235,7 +185,6 @@ impl Swapchain {
 impl std::fmt::Debug for Swapchain {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Swapchain")
-            .field("image_views", &self.image_views)
             .field("images", &self.images)
             .field("extent", &self.extent)
             .field("format", &self.format)
