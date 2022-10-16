@@ -10,13 +10,13 @@ use {
     ccthw_ash_instance::PhysicalDeviceFeatures,
 };
 
-struct FramesInFlightExample {
+struct RenderPassExample {
     color_pass: ColorPass,
     frames_in_flight: FramesInFlight,
     render_device: RenderDevice,
 }
 
-impl State for FramesInFlightExample {
+impl State for RenderPassExample {
     fn new(window: &mut GlfwWindow) -> Result<Self> {
         window.set_key_polling(true);
 
@@ -104,7 +104,7 @@ impl State for FramesInFlightExample {
     }
 }
 
-impl FramesInFlightExample {
+impl RenderPassExample {
     /// Rebuild the swapchain (typically because the current swapchain is
     /// out of date.
     fn rebuild_swapchain(&mut self, window: &GlfwWindow) -> Result<()> {
@@ -127,7 +127,7 @@ impl FramesInFlightExample {
     }
 }
 
-impl Drop for FramesInFlightExample {
+impl Drop for RenderPassExample {
     fn drop(&mut self) {
         unsafe {
             self.frames_in_flight
@@ -141,5 +141,5 @@ impl Drop for FramesInFlightExample {
 }
 
 fn main() -> Result<()> {
-    Application::<FramesInFlightExample>::run()
+    Application::<RenderPassExample>::run()
 }

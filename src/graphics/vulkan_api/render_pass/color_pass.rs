@@ -1,6 +1,9 @@
 use {crate::graphics::GraphicsError, anyhow::Context, ash::vk};
 
-/// A utility for setting up and starting a render pass for swapchain images.
+/// A utility for managing a render pass and framebuffers which target a given
+/// set of images.
+///
+/// The color pass is single-sampled and does not have a depth/stencil buffer.
 #[derive(Debug)]
 pub struct ColorPass {
     extent: vk::Extent2D,

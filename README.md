@@ -9,3 +9,4 @@ for the Vulkan API.
 - [Example 1 - Render Device](./examples/e01)
 - [Example 2 - Swapchain](./examples/e02)
 - [Example 3 - Frames In Flight](./examples/e03)
+- [Example 4 - Render Pass](./examples/e04)
