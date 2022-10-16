@@ -142,6 +142,7 @@ dependencies = [
  "memoffset",
  "nalgebra",
  "regex",
+ "scopeguard",
  "spin_sleep",
  "textwrap",
  "thiserror",
