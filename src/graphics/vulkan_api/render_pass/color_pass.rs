@@ -91,6 +91,18 @@ impl ColorPass {
         self.format
     }
 
+    /// The current render pass.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - ownership is not transeferred
+    ///   - the given RenderPass will be destroyed when the ColorPass is
+    ///     destroyed
+    pub unsafe fn render_pass(&self) -> vk::RenderPass {
+        self.render_pass
+    }
+
     /// Begin a render pass for the given image index.
     ///
     /// # Params
