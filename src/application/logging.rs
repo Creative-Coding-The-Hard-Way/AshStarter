@@ -77,5 +77,5 @@ pub fn multiline_format(
             .replace(&wrapped, "┗$2")
     };
 
-    writeln!(w, "{}", formatted)
+    writeln!(w, "{formatted}")
 }

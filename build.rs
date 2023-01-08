@@ -8,27 +8,24 @@ use {
 
 fn output_file_for_shader_file(shader_file_path: &Path) -> Result<PathBuf> {
     let parent = shader_file_path.parent().with_context(|| {
-        format!(
-            "unable to get parent dir for shader at {:?}",
-            shader_file_path
-        )
+        format!("unable to get parent dir for shader at {shader_file_path:?}")
     })?;
     let shader_file_name = shader_file_path
         .file_name()
         .with_context(|| {
             format!(
-                "Unable to get file name for shader at path {:#?}",
-                shader_file_path,
+                "Unable to get file name for shader at
+                path {shader_file_path:#?}",
             )
         })?
         .to_str()
         .with_context(|| {
             format!(
-                "Unable to get str representation of file name at path {:#?}",
-                shader_file_path
+                "Unable to get str representation of file
+                name at path {shader_file_path:#?}"
             )
         })?;
-    let output_file_name = format!("{}.spv", shader_file_name);
+    let output_file_name = format!("{shader_file_name}.spv");
     Ok(parent.join(Path::new(&output_file_name)))
 }
 
@@ -56,7 +53,7 @@ fn compile_shader(shader_file_path: &Path) -> Result<()> {
             "cargo:warning=Skip rebuild for {} because it's up to date",
             shader_file_path.to_str().unwrap()
         );
-        println!("cargo:rerun-if-changed={}", shader_path_str);
+        println!("cargo:rerun-if-changed={shader_path_str}");
         return Ok(());
     }
 
@@ -71,11 +68,10 @@ fn compile_shader(shader_file_path: &Path) -> Result<()> {
     if !output.status.success() {
         let stdout = String::from_utf8(output.stdout).unwrap();
         let stderr = String::from_utf8(output.stderr).unwrap();
-        eprintln!("{}", stdout);
-        eprintln!("{}", stderr);
+        eprintln!("{stdout}");
+        eprintln!("{stderr}");
         return Err(Error::msg(format!(
-            "Error running glslc for shader at {:#?}",
-            shader_file_path,
+            "Error running glslc for shader at {shader_file_path:#?}",
         )));
     } else {
         println!(
@@ -83,7 +79,7 @@ fn compile_shader(shader_file_path: &Path) -> Result<()> {
             shader_path_str,
             output_path.to_str().unwrap()
         );
-        println!("cargo:rerun-if-changed={}", shader_path_str);
+        println!("cargo:rerun-if-changed={shader_path_str}");
     }
 
     Ok(())

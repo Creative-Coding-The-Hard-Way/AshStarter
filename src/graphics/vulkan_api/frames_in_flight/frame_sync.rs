@@ -39,7 +39,7 @@ impl FrameSync {
         render_device.set_debug_name(
             swapchain_image_acquired_semaphore,
             vk::ObjectType::SEMAPHORE,
-            format!("Frame {} Swapchain Image Acquired", index),
+            format!("Frame {index} Swapchain Image Acquired"),
         );
 
         let graphics_commands_completed_semaphore = unsafe {
@@ -49,7 +49,7 @@ impl FrameSync {
         render_device.set_debug_name(
             graphics_commands_completed_semaphore,
             vk::ObjectType::SEMAPHORE,
-            format!("Frame {} Graphics Commands Completed", index),
+            format!("Frame {index} Graphics Commands Completed"),
         );
 
         let graphics_commands_completed_fence = unsafe {
@@ -62,7 +62,7 @@ impl FrameSync {
         render_device.set_debug_name(
             graphics_commands_completed_fence,
             vk::ObjectType::FENCE,
-            format!("Frame {} Graphics Commands Completed", index),
+            format!("Frame {index} Graphics Commands Completed"),
         );
 
         let command_pool = unsafe {
@@ -75,7 +75,7 @@ impl FrameSync {
         render_device.set_debug_name(
             command_pool,
             vk::ObjectType::COMMAND_POOL,
-            format!("Frame {} Command Pool", index),
+            format!("Frame {index} Command Pool"),
         );
 
         let command_buffer = unsafe {
@@ -93,7 +93,7 @@ impl FrameSync {
         render_device.set_debug_name(
             command_buffer,
             vk::ObjectType::COMMAND_BUFFER,
-            format!("Frame {} Command Buffer", index),
+            format!("Frame {index} Command Buffer"),
         );
 
         Ok(Self {

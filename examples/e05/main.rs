@@ -4,18 +4,16 @@ use {
     ccthw::{
         application::{Application, GlfwWindow, State},
         graphics::vulkan_api::{
-            ColorPass, FrameStatus, FramesInFlight, RenderDevice,
+            create_descriptor_set_layout, create_pipeline_layout, ColorPass,
+            FrameStatus, FramesInFlight, RenderDevice,
         },
     },
     ccthw_ash_instance::PhysicalDeviceFeatures,
 };
 
 mod pipeline;
-mod shader_module;
 
-use self::pipeline::{
-    create_descriptor_set_layout, create_pipeline, create_pipeline_layout,
-};
+use self::pipeline::create_pipeline;
 
 struct FirstTriangleExample {
     descriptor_set_layout: vk::DescriptorSetLayout,

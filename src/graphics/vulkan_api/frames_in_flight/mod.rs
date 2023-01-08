@@ -97,8 +97,7 @@ impl FramesInFlight {
                 .wait_for_graphics_commands_to_complete(render_device)
                 .with_context(|| {
                     format!(
-                        "Error waiting for frame {}'s commands to complete",
-                        index
+                        "Error waiting for frame {index}'s commands to complete"
                     )
                 })?;
         }
