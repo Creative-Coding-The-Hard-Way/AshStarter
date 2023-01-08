@@ -10,3 +10,4 @@ for the Vulkan API.
 - [Example 2 - Swapchain](./examples/e02)
 - [Example 3 - Frames In Flight](./examples/e03)
 - [Example 4 - Render Pass](./examples/e04)
+- [Example 5 - First Triangle](./examples/e05)
