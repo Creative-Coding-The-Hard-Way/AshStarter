@@ -40,16 +40,22 @@ impl State for CreateSwapchainExample {
 
         let acquire_semaphore = unsafe {
             let create_info = vk::SemaphoreCreateInfo::default();
-            render_device.create_semaphore(&create_info, None)?
+            render_device
+                .device()
+                .create_semaphore(&create_info, None)?
         };
         let release_semaphore = unsafe {
             let create_info = vk::SemaphoreCreateInfo::default();
-            render_device.create_semaphore(&create_info, None)?
+            render_device
+                .device()
+                .create_semaphore(&create_info, None)?
         };
 
         let command_pool = unsafe {
             let create_info = vk::CommandPoolCreateInfo::default();
-            render_device.create_command_pool(&create_info, None)?
+            render_device
+                .device()
+                .create_command_pool(&create_info, None)?
         };
         let command_buffer = unsafe {
             let create_info = vk::CommandBufferAllocateInfo {
@@ -59,6 +65,7 @@ impl State for CreateSwapchainExample {
                 ..Default::default()
             };
             render_device
+                .device()
                 .allocate_command_buffers(&create_info)?
                 .pop()
                 .unwrap()
@@ -120,7 +127,7 @@ impl State for CreateSwapchainExample {
 
         // Reset the command pool (and therefore the buffer)
         unsafe {
-            self.render_device.reset_command_pool(
+            self.render_device.device().reset_command_pool(
                 self.command_pool,
                 vk::CommandPoolResetFlags::empty(),
             )?
@@ -130,6 +137,7 @@ impl State for CreateSwapchainExample {
         unsafe {
             let begin_info = vk::CommandBufferBeginInfo::default();
             self.render_device
+                .device()
                 .begin_command_buffer(self.command_buffer, &begin_info)?
         };
 
@@ -159,12 +167,15 @@ impl State for CreateSwapchainExample {
                 ..Default::default()
             };
             self.render_device
+                .device()
                 .cmd_pipeline_barrier2(self.command_buffer, &dependency_info);
         };
 
         // end the command buffer and submit
         unsafe {
-            self.render_device.end_command_buffer(self.command_buffer)?;
+            self.render_device
+                .device()
+                .end_command_buffer(self.command_buffer)?;
             let command_buffer_infos = [vk::CommandBufferSubmitInfo {
                 command_buffer: self.command_buffer,
                 ..Default::default()
@@ -188,7 +199,7 @@ impl State for CreateSwapchainExample {
                 signal_semaphore_info_count: signal_infos.len() as u32,
                 ..Default::default()
             };
-            self.render_device.queue_submit2(
+            self.render_device.device().queue_submit2(
                 *self.render_device.graphics_queue().raw(),
                 &[submit_info],
                 vk::Fence::null(),
@@ -211,7 +222,7 @@ impl State for CreateSwapchainExample {
 
         // Stall the GPU every frame. This is excessively slow, but makes
         // synchronization trivial.
-        unsafe { self.render_device.device_wait_idle()? };
+        unsafe { self.render_device.device().device_wait_idle()? };
 
         Ok(())
     }
@@ -228,7 +239,7 @@ impl CreateSwapchainExample {
     fn rebuild_swapchain(&mut self, window: &GlfwWindow) -> Result<()> {
         // Wait for all pending operations to complete before rebuilding the
         // swapchain.
-        unsafe { self.render_device.device_wait_idle()? };
+        unsafe { self.render_device.device().device_wait_idle()? };
 
         let (w, h) = window.get_framebuffer_size();
         self.swapchain = unsafe {
@@ -250,18 +261,16 @@ impl CreateSwapchainExample {
 impl Drop for CreateSwapchainExample {
     fn drop(&mut self) {
         unsafe {
+            let device = self.render_device.device();
             // Wait for all pending operations to complete before destroying
             // anything.
-            self.render_device.device_wait_idle().expect(
+            device.device_wait_idle().expect(
                 "Error waiting for pending graphics operations to complete!",
             );
 
-            self.render_device
-                .destroy_command_pool(self.command_pool, None);
-            self.render_device
-                .destroy_semaphore(self.release_semaphore, None);
-            self.render_device
-                .destroy_semaphore(self.acquire_semaphore, None);
+            device.destroy_command_pool(self.command_pool, None);
+            device.destroy_semaphore(self.release_semaphore, None);
+            device.destroy_semaphore(self.acquire_semaphore, None);
             self.swapchain.take().unwrap().destroy();
             self.render_device.destroy();
         }

@@ -49,25 +49,26 @@ impl State for FirstTriangleExample {
 
         let color_pass = unsafe {
             ColorPass::new(
-                &render_device,
+                render_device.device(),
                 frames_in_flight.swapchain().images(),
                 frames_in_flight.swapchain().image_format(),
                 frames_in_flight.swapchain().extent(),
             )?
         };
 
-        let descriptor_set_layout =
-            unsafe { create_descriptor_set_layout(&render_device, &[])? };
+        let descriptor_set_layout = unsafe {
+            create_descriptor_set_layout(render_device.device(), &[])?
+        };
         let pipeline_layout = unsafe {
             create_pipeline_layout(
-                &render_device,
+                render_device.device(),
                 &[descriptor_set_layout],
                 &[],
             )?
         };
         let pipeline = unsafe {
             create_pipeline(
-                &render_device,
+                render_device.device(),
                 include_bytes!("./shaders/static_triangle.vert.spv"),
                 include_bytes!("./shaders/static_triangle.frag.spv"),
                 pipeline_layout,
@@ -114,7 +115,7 @@ impl State for FirstTriangleExample {
 
         unsafe {
             self.color_pass.begin_render_pass(
-                &self.render_device,
+                self.render_device.device(),
                 frame.command_buffer(),
                 vk::SubpassContents::INLINE,
                 frame.swapchain_image_index(),
@@ -122,14 +123,14 @@ impl State for FirstTriangleExample {
             );
 
             // draw commands go here
-            self.render_device.cmd_bind_pipeline(
+            self.render_device.device().cmd_bind_pipeline(
                 frame.command_buffer(),
                 vk::PipelineBindPoint::GRAPHICS,
                 self.pipeline,
             );
             let vk::Extent2D { width, height } =
                 self.frames_in_flight.swapchain().extent();
-            self.render_device.cmd_set_viewport(
+            self.render_device.device().cmd_set_viewport(
                 frame.command_buffer(),
                 0,
                 &[vk::Viewport {
@@ -141,7 +142,7 @@ impl State for FirstTriangleExample {
                     max_depth: 1.0,
                 }],
             );
-            self.render_device.cmd_set_scissor(
+            self.render_device.device().cmd_set_scissor(
                 frame.command_buffer(),
                 0,
                 &[vk::Rect2D {
@@ -149,10 +150,16 @@ impl State for FirstTriangleExample {
                     extent: vk::Extent2D { width, height },
                 }],
             );
-            self.render_device
-                .cmd_draw(frame.command_buffer(), 3, 1, 0, 0);
+            self.render_device.device().cmd_draw(
+                frame.command_buffer(),
+                3,
+                1,
+                0,
+                0,
+            );
 
             self.render_device
+                .device()
                 .cmd_end_render_pass(frame.command_buffer());
         }
 
@@ -173,18 +180,20 @@ impl FirstTriangleExample {
                 window.get_framebuffer_size(),
             )?;
 
-            self.color_pass.destroy(&self.render_device);
+            self.color_pass.destroy(self.render_device.device());
             self.color_pass = ColorPass::new(
-                &self.render_device,
+                self.render_device.device(),
                 self.frames_in_flight.swapchain().images(),
                 self.frames_in_flight.swapchain().image_format(),
                 self.frames_in_flight.swapchain().extent(),
             )?;
 
-            self.render_device.destroy_pipeline(self.pipeline, None);
+            self.render_device
+                .device()
+                .destroy_pipeline(self.pipeline, None);
 
             self.pipeline = create_pipeline(
-                &self.render_device,
+                self.render_device.device(),
                 include_bytes!("./shaders/static_triangle.vert.spv"),
                 include_bytes!("./shaders/static_triangle.frag.spv"),
                 self.pipeline_layout,
@@ -202,14 +211,17 @@ impl Drop for FirstTriangleExample {
             self.frames_in_flight
                 .wait_for_all_frames_to_complete(&self.render_device)
                 .expect("Error waiting for all frame operations to complete");
-            self.render_device.destroy_pipeline(self.pipeline, None);
             self.render_device
+                .device()
+                .destroy_pipeline(self.pipeline, None);
+            self.render_device
+                .device()
                 .destroy_pipeline_layout(self.pipeline_layout, None);
-            self.render_device.destroy_descriptor_set_layout(
+            self.render_device.device().destroy_descriptor_set_layout(
                 self.descriptor_set_layout,
                 None,
             );
-            self.color_pass.destroy(&self.render_device);
+            self.color_pass.destroy(self.render_device.device());
             self.frames_in_flight.destroy(&self.render_device);
             self.render_device.destroy();
         }

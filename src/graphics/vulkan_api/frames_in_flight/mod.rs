@@ -243,6 +243,7 @@ impl FramesInFlight {
         // end the command buffer and submit
         unsafe {
             render_device
+                .device()
                 .end_command_buffer(sync.command_buffer)
                 .with_context(|| {
                     format!(
@@ -274,7 +275,7 @@ impl FramesInFlight {
                 signal_semaphore_info_count: signal_infos.len() as u32,
                 ..Default::default()
             };
-            render_device.queue_submit2(
+            render_device.device().queue_submit2(
                 *render_device.graphics_queue().raw(),
                 &[submit_info],
                 sync.graphics_commands_completed_fence,

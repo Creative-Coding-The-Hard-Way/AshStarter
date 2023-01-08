@@ -41,7 +41,7 @@ impl State for RenderPassExample {
 
         let color_pass = unsafe {
             ColorPass::new(
-                &render_device,
+                render_device.device(),
                 frames_in_flight.swapchain().images(),
                 frames_in_flight.swapchain().image_format(),
                 frames_in_flight.swapchain().extent(),
@@ -84,7 +84,7 @@ impl State for RenderPassExample {
 
         unsafe {
             self.color_pass.begin_render_pass(
-                &self.render_device,
+                self.render_device.device(),
                 frame.command_buffer(),
                 vk::SubpassContents::INLINE,
                 frame.swapchain_image_index(),
@@ -94,6 +94,7 @@ impl State for RenderPassExample {
             // draw commands go here
 
             self.render_device
+                .device()
                 .cmd_end_render_pass(frame.command_buffer());
         }
 
@@ -114,9 +115,9 @@ impl RenderPassExample {
                 window.get_framebuffer_size(),
             )?;
 
-            self.color_pass.destroy(&self.render_device);
+            self.color_pass.destroy(self.render_device.device());
             self.color_pass = ColorPass::new(
-                &self.render_device,
+                self.render_device.device(),
                 self.frames_in_flight.swapchain().images(),
                 self.frames_in_flight.swapchain().image_format(),
                 self.frames_in_flight.swapchain().extent(),
@@ -133,7 +134,7 @@ impl Drop for RenderPassExample {
             self.frames_in_flight
                 .wait_for_all_frames_to_complete(&self.render_device)
                 .expect("Error waiting for all frame operations to complete");
-            self.color_pass.destroy(&self.render_device);
+            self.color_pass.destroy(self.render_device.device());
             self.frames_in_flight.destroy(&self.render_device);
             self.render_device.destroy();
         }

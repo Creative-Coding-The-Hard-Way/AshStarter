@@ -34,7 +34,9 @@ impl FrameSync {
     ) -> Result<Self, GraphicsError> {
         let swapchain_image_acquired_semaphore = unsafe {
             let create_info = vk::SemaphoreCreateInfo::default();
-            render_device.create_semaphore(&create_info, None)?
+            render_device
+                .device()
+                .create_semaphore(&create_info, None)?
         };
         render_device.set_debug_name(
             swapchain_image_acquired_semaphore,
@@ -44,7 +46,9 @@ impl FrameSync {
 
         let graphics_commands_completed_semaphore = unsafe {
             let create_info = vk::SemaphoreCreateInfo::default();
-            render_device.create_semaphore(&create_info, None)?
+            render_device
+                .device()
+                .create_semaphore(&create_info, None)?
         };
         render_device.set_debug_name(
             graphics_commands_completed_semaphore,
@@ -57,7 +61,7 @@ impl FrameSync {
                 flags: vk::FenceCreateFlags::SIGNALED,
                 ..Default::default()
             };
-            render_device.create_fence(&create_info, None)?
+            render_device.device().create_fence(&create_info, None)?
         };
         render_device.set_debug_name(
             graphics_commands_completed_fence,
@@ -70,7 +74,9 @@ impl FrameSync {
                 flags: vk::CommandPoolCreateFlags::TRANSIENT,
                 ..Default::default()
             };
-            render_device.create_command_pool(&create_info, None)?
+            render_device
+                .device()
+                .create_command_pool(&create_info, None)?
         };
         render_device.set_debug_name(
             command_pool,
@@ -86,6 +92,7 @@ impl FrameSync {
                 ..Default::default()
             };
             render_device
+                .device()
                 .allocate_command_buffers(&create_info)?
                 .pop()
                 .unwrap()
@@ -117,6 +124,7 @@ impl FrameSync {
     ) -> Result<(), GraphicsError> {
         unsafe {
             render_device
+                .device()
                 .wait_for_fences(
                     &[self.graphics_commands_completed_fence],
                     true,
@@ -143,6 +151,7 @@ impl FrameSync {
             // SAFE because we wait for the previous submission's commands to
             // complete before resetting and restarting resources.
             render_device
+                .device()
                 .reset_fences(&[self.graphics_commands_completed_fence])
                 .with_context(|| {
                     format!(
@@ -151,6 +160,7 @@ impl FrameSync {
                     )
                 })?;
             render_device
+                .device()
                 .reset_command_pool(
                     self.command_pool,
                     vk::CommandPoolResetFlags::empty(),
@@ -166,6 +176,7 @@ impl FrameSync {
                 ..Default::default()
             };
             render_device
+                .device()
                 .begin_command_buffer(self.command_buffer, &begin_info)
                 .with_context(|| {
                     format!(
@@ -189,14 +200,18 @@ impl FrameSync {
     ///  - the caller should wait for all graphics commands which referenc this
     ///    frame to complete before calling this function.
     pub unsafe fn destroy(&mut self, render_device: &RenderDevice) {
-        render_device.destroy_command_pool(self.command_pool, None);
         render_device
+            .device()
+            .destroy_command_pool(self.command_pool, None);
+        render_device
+            .device()
             .destroy_semaphore(self.swapchain_image_acquired_semaphore, None);
-        render_device.destroy_semaphore(
+        render_device.device().destroy_semaphore(
             self.graphics_commands_completed_semaphore,
             None,
         );
         render_device
+            .device()
             .destroy_fence(self.graphics_commands_completed_fence, None);
     }
 }

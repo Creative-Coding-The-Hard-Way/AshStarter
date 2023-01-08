@@ -96,7 +96,7 @@ impl State for FramesInFlightExample {
                 image_memory_barrier_count: image_memory_barriers.len() as u32,
                 ..Default::default()
             };
-            self.render_device.cmd_pipeline_barrier2(
+            self.render_device.device().cmd_pipeline_barrier2(
                 frame.command_buffer(),
                 &dependency_info,
             );
