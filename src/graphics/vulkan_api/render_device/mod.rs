@@ -12,8 +12,8 @@ mod queue_finder;
 mod window_surface;
 
 use {
-    self::queue_finder::QueueFinder, ccthw_ash_instance::VulkanHandle,
-    window_surface::WindowSurface,
+    self::queue_finder::QueueFinder, ccthw_ash_allocator::MemoryAllocator,
+    ccthw_ash_instance::VulkanHandle, window_surface::WindowSurface,
 };
 
 pub use self::queue::Queue;
@@ -27,6 +27,7 @@ pub struct RenderDevice {
     window_surface: WindowSurface,
     logical_device: LogicalDevice,
     instance: VulkanInstance,
+    allocator: MemoryAllocator,
 }
 
 // Public Api
@@ -64,7 +65,7 @@ impl RenderDevice {
             // along with the LogicalDevice.
             LogicalDevice::new(
                 &instance,
-                physical_device,
+                physical_device.clone(),
                 &[ash::extensions::khr::Swapchain::name()
                     .to_owned()
                     .into_string()
@@ -75,12 +76,19 @@ impl RenderDevice {
         let (graphics_queue, presentation_queue) =
             queue_finder.get_queues_from_device(&logical_device);
 
+        let allocator = ccthw_ash_allocator::create_system_allocator(
+            instance.ash(),
+            logical_device.raw().clone(),
+            *physical_device.raw(),
+        );
+
         let render_device = Self {
             graphics_queue,
             presentation_queue,
             window_surface,
             logical_device,
             instance,
+            allocator,
         };
         render_device.set_debug_name(
             *render_device.presentation_queue().raw(),
@@ -94,6 +102,11 @@ impl RenderDevice {
         );
 
         Ok(render_device)
+    }
+
+    /// Borrow the device memory allocator.
+    pub fn memory(&mut self) -> &mut MemoryAllocator {
+        &mut self.allocator
     }
 
     /// Set the name that shows up in Vulkan debug logs for a given resource.

@@ -21,6 +21,7 @@ image = "*"
 indoc = "*"
 regex = "*"
 ccthw_ash_instance = { git = "https://github.com/Creative-Coding-The-Hard-Way/ash_instance.git" }
+ccthw_ash_allocator = { git = "https://github.com/Creative-Coding-The-Hard-Way/ash_allocator.git" }
 scopeguard = "*"
 
 [build-dependencies]
