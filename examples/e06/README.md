@@ -1,12 +1,13 @@
-# Example 05 - Triangle
+# Example 06 - SBO Triangle
 
 This example creates a graphics pipeline and uses it to render a triangle.
 
-NOTE: no buffers or dynamic memory allocations are used.
+NOTE: Unlike Example 05, this example stores Vertex data in a storage buffer
+object which is read by the shader.
 
 ## Commands
 
-From the project root: `cargo run --example e05`
+From the project root: `cargo run --example e06`
 
 ## Screenshot
 
