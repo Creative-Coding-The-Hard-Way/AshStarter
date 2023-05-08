@@ -111,13 +111,13 @@ impl State for SBOTriangleExample {
         let ptr = unsafe { allocation.map(render_device.device())? };
         let vertices = [
             Vertex {
-                pos: [-1.0, -1.0, 0.0, 1.0],
+                pos: [-0.7, -0.7, 0.0, 1.0],
             },
             Vertex {
-                pos: [0.0, 1.0, 0.0, 1.0],
+                pos: [0.0, 0.7, 0.0, 1.0],
             },
             Vertex {
-                pos: [1.0, -1.0, 0.0, 1.0],
+                pos: [0.7, -0.7, 0.0, 1.0],
             },
         ];
         unsafe {
