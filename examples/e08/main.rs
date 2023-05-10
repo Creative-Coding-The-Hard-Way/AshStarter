@@ -5,8 +5,8 @@ use {
         application::{Application, GlfwWindow, State},
         graphics::vulkan_api::{
             create_descriptor_set_layout, create_pipeline_layout, ColorPass,
-            FrameStatus, FramesInFlight, OneTimeSubmitCommandBuffer,
-            RenderDevice,
+            FrameStatus, FramesInFlight, RenderDevice, Texture2D,
+            TextureLoader,
         },
     },
     ccthw_ash_instance::PhysicalDeviceFeatures,
@@ -25,9 +25,7 @@ pub struct Vertex {
 
 struct TextureExample {
     // Image resources
-    image: vk::Image,
-    image_view: vk::ImageView,
-    image_allocation: Allocation,
+    texture: Texture2D,
     sampler: vk::Sampler,
 
     // Vertex resources
@@ -164,85 +162,17 @@ impl State for TextureExample {
             std::ptr::write_unaligned(ptr as *mut [Vertex; 6], vertices);
         };
 
-        let img =
-            image::io::Reader::open("examples/e07/my_example_texture.png")?
-                .decode()?
-                .into_rgba8();
+        let texture = unsafe {
+            let mut loader = TextureLoader::new(&mut render_device)?;
 
-        let (staging_buffer, staging_allocation) = unsafe {
-            let index = render_device.graphics_queue().family_index();
-            let create_info = vk::BufferCreateInfo {
-                size: (std::mem::size_of::<u8>() * img.as_raw().len()) as u64,
-                sharing_mode: vk::SharingMode::EXCLUSIVE,
-                queue_family_index_count: 1,
-                p_queue_family_indices: &index,
-                usage: vk::BufferUsageFlags::TRANSFER_SRC,
-                ..Default::default()
-            };
-            render_device.memory().allocate_buffer(
-                &create_info,
-                vk::MemoryPropertyFlags::HOST_VISIBLE
-                    | vk::MemoryPropertyFlags::HOST_COHERENT,
-            )?
-        };
+            let texture = loader.load_texture_2d(
+                &mut render_device,
+                "examples/e08/my_example_texture.png",
+            )?;
 
-        unsafe {
-            let ptr = staging_allocation.map(render_device.device())?;
-            assert!(ptr as usize % std::mem::align_of::<u8>() == 0);
-            let data = std::slice::from_raw_parts_mut(
-                ptr as *mut u8,
-                img.as_raw().len(),
-            );
-            data.copy_from_slice(img.as_raw());
-        };
+            loader.destroy(&mut render_device);
 
-        let (image, image_allocation) = unsafe {
-            let queue_family_index =
-                render_device.graphics_queue().family_index();
-            let create_info = vk::ImageCreateInfo {
-                image_type: vk::ImageType::TYPE_2D,
-                format: vk::Format::R8G8B8A8_UNORM,
-                mip_levels: 1,
-                array_layers: 1,
-                initial_layout: vk::ImageLayout::UNDEFINED,
-                samples: vk::SampleCountFlags::TYPE_1,
-                sharing_mode: vk::SharingMode::EXCLUSIVE,
-                queue_family_index_count: 1,
-                p_queue_family_indices: &queue_family_index,
-                tiling: vk::ImageTiling::OPTIMAL,
-                usage: vk::ImageUsageFlags::TRANSFER_DST
-                    | vk::ImageUsageFlags::SAMPLED,
-                flags: vk::ImageCreateFlags::empty(),
-                extent: vk::Extent3D {
-                    width: img.width(),
-                    height: img.height(),
-                    depth: 1,
-                },
-                ..vk::ImageCreateInfo::default()
-            };
-            render_device.memory().allocate_image(
-                &create_info,
-                vk::MemoryPropertyFlags::DEVICE_LOCAL,
-            )?
-        };
-
-        let image_view = unsafe {
-            let create_info = vk::ImageViewCreateInfo {
-                image,
-                view_type: vk::ImageViewType::TYPE_2D,
-                format: vk::Format::R8G8B8A8_UNORM,
-                subresource_range: vk::ImageSubresourceRange {
-                    aspect_mask: vk::ImageAspectFlags::COLOR,
-                    level_count: 1,
-                    layer_count: 1,
-                    base_array_layer: 0,
-                    base_mip_level: 0,
-                },
-                ..Default::default()
-            };
-            render_device
-                .device()
-                .create_image_view(&create_info, None)?
+            texture
         };
 
         let sampler = unsafe {
@@ -253,118 +183,6 @@ impl State for TextureExample {
                 ..Default::default()
             };
             render_device.device().create_sampler(&create_info, None)?
-        };
-
-        let mut one_time_submit = unsafe {
-            OneTimeSubmitCommandBuffer::new(
-                &render_device,
-                render_device.graphics_queue().clone(),
-            )?
-        };
-
-        unsafe {
-            let image_memory_barrier_before = vk::ImageMemoryBarrier2 {
-                src_stage_mask: vk::PipelineStageFlags2::TOP_OF_PIPE,
-                src_access_mask: vk::AccessFlags2::NONE,
-                dst_stage_mask: vk::PipelineStageFlags2::TRANSFER,
-                dst_access_mask: vk::AccessFlags2::TRANSFER_WRITE,
-                old_layout: vk::ImageLayout::UNDEFINED,
-                new_layout: vk::ImageLayout::TRANSFER_DST_OPTIMAL,
-                image,
-                subresource_range: vk::ImageSubresourceRange {
-                    aspect_mask: vk::ImageAspectFlags::COLOR,
-                    base_mip_level: 0,
-                    level_count: 1,
-                    base_array_layer: 0,
-                    layer_count: 1,
-                },
-                ..Default::default()
-            };
-            let dependency_info_before = vk::DependencyInfo {
-                dependency_flags: vk::DependencyFlags::empty(),
-                memory_barrier_count: 0,
-                buffer_memory_barrier_count: 0,
-                image_memory_barrier_count: 1,
-                p_image_memory_barriers: &image_memory_barrier_before,
-                ..Default::default()
-            };
-            render_device.device().cmd_pipeline_barrier2(
-                one_time_submit.command_buffer(),
-                &dependency_info_before,
-            );
-
-            let regions = vk::BufferImageCopy2 {
-                buffer_offset: 0,
-                buffer_row_length: 0,
-                buffer_image_height: 0,
-                image_subresource: vk::ImageSubresourceLayers {
-                    aspect_mask: vk::ImageAspectFlags::COLOR,
-                    mip_level: 0,
-                    base_array_layer: 0,
-                    layer_count: 1,
-                },
-                image_offset: vk::Offset3D::default(),
-                image_extent: vk::Extent3D {
-                    width: img.width(),
-                    height: img.height(),
-                    depth: 1,
-                },
-                ..Default::default()
-            };
-            let copy_buffer_to_image_info2 = vk::CopyBufferToImageInfo2 {
-                src_buffer: staging_buffer,
-                dst_image: image,
-                dst_image_layout: vk::ImageLayout::TRANSFER_DST_OPTIMAL,
-                region_count: 1,
-                p_regions: &regions,
-                ..Default::default()
-            };
-            render_device.device().cmd_copy_buffer_to_image2(
-                one_time_submit.command_buffer(),
-                &copy_buffer_to_image_info2,
-            );
-
-            let image_memory_barrier_after = vk::ImageMemoryBarrier2 {
-                src_stage_mask: vk::PipelineStageFlags2::TRANSFER,
-                src_access_mask: vk::AccessFlags2::TRANSFER_WRITE,
-                dst_stage_mask: vk::PipelineStageFlags2::FRAGMENT_SHADER,
-                dst_access_mask: vk::AccessFlags2::SHADER_SAMPLED_READ,
-                old_layout: vk::ImageLayout::TRANSFER_DST_OPTIMAL,
-                new_layout: vk::ImageLayout::SHADER_READ_ONLY_OPTIMAL,
-                image,
-                subresource_range: vk::ImageSubresourceRange {
-                    aspect_mask: vk::ImageAspectFlags::COLOR,
-                    base_mip_level: 0,
-                    level_count: 1,
-                    base_array_layer: 0,
-                    layer_count: 1,
-                },
-                ..Default::default()
-            };
-            let dependency_info_after = vk::DependencyInfo {
-                dependency_flags: vk::DependencyFlags::empty(),
-                memory_barrier_count: 0,
-                buffer_memory_barrier_count: 0,
-                image_memory_barrier_count: 1,
-                p_image_memory_barriers: &image_memory_barrier_after,
-                ..Default::default()
-            };
-            render_device.device().cmd_pipeline_barrier2(
-                one_time_submit.command_buffer(),
-                &dependency_info_after,
-            );
-        };
-
-        // Queue Submission
-        unsafe {
-            one_time_submit.sync_submit_and_reset(&render_device)?;
-            one_time_submit.destroy(&render_device);
-        };
-
-        unsafe {
-            render_device
-                .memory()
-                .free_buffer(staging_buffer, staging_allocation);
         };
 
         let descriptor_pool = unsafe {
@@ -409,7 +227,7 @@ impl State for TextureExample {
             };
             let image_info = vk::DescriptorImageInfo {
                 sampler,
-                image_view,
+                image_view: texture.image_view,
                 image_layout: vk::ImageLayout::SHADER_READ_ONLY_OPTIMAL,
             };
             render_device.device().update_descriptor_sets(
@@ -441,9 +259,7 @@ impl State for TextureExample {
         };
 
         Ok(Self {
-            image,
-            image_view,
-            image_allocation,
+            texture,
             sampler,
 
             buffer,
@@ -595,13 +411,8 @@ impl Drop for TextureExample {
 
             self.render_device
                 .device()
-                .destroy_image_view(self.image_view, None);
-            self.render_device
-                .device()
                 .destroy_sampler(self.sampler, None);
-            self.render_device
-                .memory()
-                .free_image(self.image, self.image_allocation.clone());
+            self.texture.destroy(&mut self.render_device);
 
             self.render_device
                 .device()

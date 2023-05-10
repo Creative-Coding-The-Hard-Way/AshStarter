@@ -1,4 +1,7 @@
-use {ash::vk, ccthw_ash_instance::InstanceError, thiserror::Error};
+use {
+    ash::vk, ccthw_ash_allocator::AllocatorError,
+    ccthw_ash_instance::InstanceError, thiserror::Error,
+};
 
 #[derive(Debug, Error)]
 pub enum GraphicsError {
@@ -10,6 +13,9 @@ pub enum GraphicsError {
 
     #[error(transparent)]
     InstanceError(#[from] InstanceError),
+
+    #[error(transparent)]
+    AllocatorError(#[from] AllocatorError),
 
     #[error(transparent)]
     VulkanError(#[from] vk::Result),

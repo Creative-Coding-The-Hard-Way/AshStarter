@@ -6,7 +6,7 @@ use {
 /// A Vulkan device queue.
 ///
 /// The raw Ash Queue handle can be acquired through the VulkanHandle trait.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Queue {
     properties: vk::QueueFamilyProperties,
     family_index: u32,
