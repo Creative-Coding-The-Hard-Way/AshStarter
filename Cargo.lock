@@ -165,7 +165,7 @@ dependencies = [
 [[package]]
 name = "ccthw_ash_instance"
 version = "0.1.0"
-source = "git+https://github.com/Creative-Coding-The-Hard-Way/ash_instance.git#35d29f2028dbb983050c521eb529f387af5d2728"
+source = "git+https://github.com/Creative-Coding-The-Hard-Way/ash_instance.git#e3cbf12cb86db929284a8ae8483020bf1a0c593d"
 dependencies = [
  "ash",
  "indoc",

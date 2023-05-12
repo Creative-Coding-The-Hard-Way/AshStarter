@@ -176,8 +176,6 @@ impl RenderDevice {
     /// resources.
     pub unsafe fn destroy(&mut self) {
         self.window_surface.destroy();
-        self.logical_device.destroy();
-        self.instance.destroy();
     }
 
     /// The Ash entry used by this RenderDevice.
