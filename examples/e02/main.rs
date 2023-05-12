@@ -36,7 +36,7 @@ impl State for CreateSwapchainExample {
 
         let (w, h) = window.get_framebuffer_size();
         let swapchain = unsafe {
-            Swapchain::new(&render_device, (w as u32, h as u32), None)?
+            Swapchain::new(render_device.clone(), (w as u32, h as u32), None)?
         };
         log::info!("{}", swapchain);
 
@@ -195,7 +195,6 @@ impl State for CreateSwapchainExample {
 
         unsafe {
             let status = self.swapchain().present_swapchain_image(
-                &self.render_device,
                 index,
                 &[self.release_semaphore.raw()],
             )?;
@@ -228,7 +227,7 @@ impl CreateSwapchainExample {
         let (w, h) = window.get_framebuffer_size();
         self.swapchain = unsafe {
             Some(Swapchain::new(
-                &self.render_device,
+                self.render_device.clone(),
                 (w as u32, h as u32),
                 self.swapchain.take(),
             )?)

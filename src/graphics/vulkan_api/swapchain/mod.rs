@@ -3,6 +3,7 @@ use {
     anyhow::Context,
     ash::{extensions, vk},
     ccthw_ash_instance::VulkanHandle,
+    std::sync::Arc,
 };
 
 mod acquire_present;
@@ -22,6 +23,7 @@ pub struct Swapchain {
     present_mode: vk::PresentModeKHR,
     swapchain: vk::SwapchainKHR,
     swapchain_loader: extensions::khr::Swapchain,
+    render_device: Arc<RenderDevice>,
 }
 
 // Public API
@@ -49,7 +51,7 @@ impl Swapchain {
     ///     The previous swapchain will be destroyed when the new swapchain is
     ///     constructed.
     pub unsafe fn new(
-        render_device: &RenderDevice,
+        render_device: Arc<RenderDevice>,
         framebuffer_size: (u32, u32),
         previous_swapchain: Option<Self>,
     ) -> Result<Self, GraphicsError> {
@@ -126,6 +128,7 @@ impl Swapchain {
             present_mode,
             swapchain,
             swapchain_loader,
+            render_device,
         })
     }
 

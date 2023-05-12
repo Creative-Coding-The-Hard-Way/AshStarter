@@ -8,11 +8,12 @@ use {
         },
     },
     ccthw_ash_instance::PhysicalDeviceFeatures,
+    std::sync::Arc,
 };
 
 struct FramesInFlightExample {
     frames_in_flight: FramesInFlight,
-    render_device: RenderDevice,
+    render_device: Arc<RenderDevice>,
 }
 
 impl State for FramesInFlightExample {
@@ -26,13 +27,13 @@ impl State for FramesInFlightExample {
             // enable synchronization2 for queue_submit2
             device_features.vulkan_13_features_mut().synchronization2 =
                 vk::TRUE;
-            window.create_default_render_device(device_features)?
+            Arc::new(window.create_default_render_device(device_features)?)
         };
 
         let frames_in_flight = unsafe {
             // SAFE because the render device is destroyed when state is dropped
             FramesInFlight::new(
-                &render_device,
+                render_device.clone(),
                 window.get_framebuffer_size(),
                 3,
             )?
@@ -63,13 +64,12 @@ impl State for FramesInFlightExample {
     }
 
     fn update(&mut self, window: &mut GlfwWindow) -> Result<()> {
-        let frame =
-            match self.frames_in_flight.acquire_frame(&self.render_device)? {
-                FrameStatus::FrameAcquired(frame) => frame,
-                FrameStatus::SwapchainNeedsRebuild => {
-                    return self.rebuild_swapchain(window);
-                }
-            };
+        let frame = match self.frames_in_flight.acquire_frame()? {
+            FrameStatus::FrameAcquired(frame) => frame,
+            FrameStatus::SwapchainNeedsRebuild => {
+                return self.rebuild_swapchain(window);
+            }
+        };
 
         // use a image memory barrier to transition the swapchain image layout
         // to present_src_khr
@@ -102,8 +102,7 @@ impl State for FramesInFlightExample {
             );
         };
 
-        self.frames_in_flight
-            .present_frame(&self.render_device, frame)?;
+        self.frames_in_flight.present_frame(frame)?;
 
         Ok(())
     }
@@ -119,23 +118,10 @@ impl FramesInFlightExample {
     /// out of date.
     fn rebuild_swapchain(&mut self, window: &GlfwWindow) -> Result<()> {
         unsafe {
-            self.frames_in_flight.stall_and_rebuild_swapchain(
-                &self.render_device,
-                window.get_framebuffer_size(),
-            )?
+            self.frames_in_flight
+                .stall_and_rebuild_swapchain(window.get_framebuffer_size())?
         };
         Ok(())
-    }
-}
-
-impl Drop for FramesInFlightExample {
-    fn drop(&mut self) {
-        unsafe {
-            self.frames_in_flight
-                .wait_for_all_frames_to_complete(&self.render_device)
-                .expect("Error waiting for all frame operations to complete");
-            self.frames_in_flight.destroy(&self.render_device);
-        }
     }
 }
 

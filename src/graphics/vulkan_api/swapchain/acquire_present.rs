@@ -4,10 +4,7 @@
 //! exposed on the public api - because it ends up being so verbose.
 
 use {
-    super::Swapchain,
-    crate::graphics::{vulkan_api::RenderDevice, GraphicsError},
-    anyhow::Context,
-    ash::vk,
+    super::Swapchain, crate::graphics::GraphicsError, anyhow::Context, ash::vk,
     ccthw_ash_instance::VulkanHandle,
 };
 
@@ -88,7 +85,6 @@ impl Swapchain {
     ///     image layout. Typically this is done with a Render Pass.
     pub unsafe fn present_swapchain_image(
         &self,
-        render_device: &RenderDevice,
         index: usize,
         wait_semaphores: &[vk::Semaphore],
     ) -> Result<SwapchainStatus, GraphicsError> {
@@ -102,7 +98,7 @@ impl Swapchain {
             ..Default::default()
         };
         let result = self.swapchain_loader.queue_present(
-            *render_device.presentation_queue().raw(),
+            *self.render_device.presentation_queue().raw(),
             &present_info,
         );
         match result {

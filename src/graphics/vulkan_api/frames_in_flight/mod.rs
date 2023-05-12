@@ -8,6 +8,7 @@ use {
     anyhow::Context,
     ash::vk,
     ccthw_ash_instance::VulkanHandle,
+    std::sync::Arc,
 };
 
 pub use self::frame::Frame;
@@ -26,8 +27,9 @@ pub enum FrameStatus {
 pub struct FramesInFlight {
     swapchain_needs_rebuild: bool,
     current_frame: usize,
-    frames: Vec<FrameSync>,
+    frames: Vec<Option<FrameSync>>,
     swapchain: Option<Swapchain>,
+    render_device: Arc<RenderDevice>,
 }
 
 impl FramesInFlight {
@@ -49,7 +51,7 @@ impl FramesInFlight {
     /// by in-flight frames should be delayed until all frames have finished
     /// executing or until the device is idle.
     pub unsafe fn new(
-        render_device: &RenderDevice,
+        render_device: Arc<RenderDevice>,
         framebuffer_size: (i32, i32),
         frame_count: usize,
     ) -> Result<Self, GraphicsError> {
@@ -58,14 +60,14 @@ impl FramesInFlight {
             frames.push(unsafe {
                 // SAFE because all frames are kept and destroyed by this
                 // struct.
-                FrameSync::new(render_device, i)?
+                Some(FrameSync::new(render_device.clone(), i)?)
             });
         }
 
         let (w, h) = framebuffer_size;
         let swapchain = unsafe {
             // SAFE because the swapchain is kept and destroyed by this struct.
-            Swapchain::new(render_device, (w as u32, h as u32), None)?
+            Swapchain::new(render_device.clone(), (w as u32, h as u32), None)?
         };
 
         Ok(Self {
@@ -73,6 +75,7 @@ impl FramesInFlight {
             current_frame: 0,
             frames,
             swapchain: Some(swapchain),
+            render_device,
         })
     }
 
@@ -90,11 +93,13 @@ impl FramesInFlight {
     /// `present_frame`.
     pub unsafe fn wait_for_all_frames_to_complete(
         &self,
-        render_device: &RenderDevice,
     ) -> Result<(), GraphicsError> {
         for (index, frame_sync) in self.frames.iter().enumerate() {
             frame_sync
-                .wait_for_graphics_commands_to_complete(render_device)
+                .as_ref()
+                .with_context(|| {
+                    format!("Unable to acquire frame {} while waiting for frames to complete!", index)})?
+                .wait_for_graphics_commands_to_complete()
                 .with_context(|| {
                     format!(
                         "Error waiting for frame {index}'s commands to complete"
@@ -106,11 +111,6 @@ impl FramesInFlight {
 
     /// Wait for every frame to finish executing then rebuild the swapchain.
     ///
-    /// # Params
-    ///
-    /// * `render_device` - the render device used to create the frames in
-    ///   flight.
-    ///
     /// # Safety
     ///
     /// Unsafe because:
@@ -119,46 +119,22 @@ impl FramesInFlight {
     ///    `acquire_frame` and before returning that frame with `present_frame`.
     pub unsafe fn stall_and_rebuild_swapchain(
         &mut self,
-        render_device: &RenderDevice,
         framebuffer_size: (i32, i32),
     ) -> Result<(), GraphicsError> {
-        self.wait_for_all_frames_to_complete(render_device)?;
+        self.wait_for_all_frames_to_complete()?;
 
         let old_swapchain = self.swapchain.take();
         let (w, h) = framebuffer_size;
-        let new_swapchain =
-            Swapchain::new(render_device, (w as u32, h as u32), old_swapchain)?;
+        let new_swapchain = Swapchain::new(
+            self.render_device.clone(),
+            (w as u32, h as u32),
+            old_swapchain,
+        )?;
         self.swapchain = Some(new_swapchain);
 
         self.swapchain_needs_rebuild = false;
 
         Ok(())
-    }
-
-    /// Destroy all frame resources.
-    ///
-    /// # Params
-    ///
-    /// * `render_device` - the render device used to create the frames in
-    ///   flight.
-    ///
-    /// # Safety
-    ///
-    /// Unsafe because:
-    ///   - it is incorrect for the application to use any frame resources after
-    ///     calling destroy
-    ///   - the application must synchronize the call to this method by waiting
-    ///     for all frames to complete or the device to idle
-    ///
-    /// # Panic
-    ///
-    /// Panics if there are missing frame resources. This should never happen if
-    /// wait_for_all_frames_to_complete has been called prior to invoking this
-    /// function.
-    pub unsafe fn destroy(&mut self, render_device: &RenderDevice) {
-        for frame_sync in self.frames.iter_mut() {
-            frame_sync.destroy(render_device);
-        }
     }
 
     /// Get the current swapchain.
@@ -186,10 +162,7 @@ impl FramesInFlight {
     ///
     /// * `render_device` - the render device used to create the frames in
     ///   flight.
-    pub fn acquire_frame(
-        &mut self,
-        render_device: &RenderDevice,
-    ) -> Result<FrameStatus, GraphicsError> {
+    pub fn acquire_frame(&mut self) -> Result<FrameStatus, GraphicsError> {
         if self.swapchain_needs_rebuild {
             return Ok(FrameStatus::SwapchainNeedsRebuild);
         }
@@ -198,11 +171,14 @@ impl FramesInFlight {
         self.current_frame = (self.current_frame + 1) % self.frames.len();
 
         // grab the synchronization resources for the current in-flight frame.
-        let frame_sync = self.frames[self.current_frame];
+        let frame_sync =
+            self.frames[self.current_frame].take().with_context(|| {
+                format!("Unable to acquire frame {}", self.current_frame)
+            })?;
 
         let result = unsafe {
             self.swapchain().acquire_swapchain_image(
-                frame_sync.swapchain_image_acquired_semaphore,
+                frame_sync.swapchain_image_acquired_semaphore.raw(),
                 vk::Fence::null(),
             )?
         };
@@ -216,7 +192,7 @@ impl FramesInFlight {
 
         // wait for the previous submission's commands to finish, then restart
         // the command buffer.
-        frame_sync.wait_and_restart_command_buffer(render_device)?;
+        frame_sync.wait_and_restart_command_buffer()?;
 
         let frame = Frame::new(frame_sync, swapchain_image_index);
         Ok(FrameStatus::FrameAcquired(frame))
@@ -230,20 +206,20 @@ impl FramesInFlight {
     /// * `render_device` - the render device used to create the frames in
     ///   flight.
     /// * `frame` - the frame to present
-    pub fn present_frame(
-        &mut self,
-        render_device: &RenderDevice,
-        frame: Frame,
-    ) -> Result<(), GraphicsError> {
+    pub fn present_frame(&mut self, frame: Frame) -> Result<(), GraphicsError> {
         debug_assert!(frame.frame_index() == self.current_frame);
 
-        let sync = self.frames[self.current_frame];
+        let frame_index = frame.frame_index();
+        let swapchain_image_index = frame.swapchain_image_index();
+        self.frames[frame_index] = Some(frame.take_sync());
+        let sync = self.frames[frame_index].as_ref().unwrap();
+        let command_buffer = sync.command_pool.primary_command_buffer(0);
 
         // end the command buffer and submit
         unsafe {
-            render_device
+            self.render_device
                 .device()
-                .end_command_buffer(sync.command_buffer)
+                .end_command_buffer(command_buffer)
                 .with_context(|| {
                     format!(
                         "Error ending graphics command buffer for frame {}",
@@ -252,16 +228,16 @@ impl FramesInFlight {
                 })?;
 
             let command_buffer_infos = [vk::CommandBufferSubmitInfo {
-                command_buffer: sync.command_buffer,
+                command_buffer,
                 ..Default::default()
             }];
             let wait_infos = [vk::SemaphoreSubmitInfo {
-                semaphore: sync.swapchain_image_acquired_semaphore,
+                semaphore: sync.swapchain_image_acquired_semaphore.raw(),
                 stage_mask: vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT,
                 ..Default::default()
             }];
             let signal_infos = [vk::SemaphoreSubmitInfo {
-                semaphore: sync.graphics_commands_completed_semaphore,
+                semaphore: sync.graphics_commands_completed_semaphore.raw(),
                 stage_mask: vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT,
                 ..Default::default()
             }];
@@ -274,10 +250,10 @@ impl FramesInFlight {
                 signal_semaphore_info_count: signal_infos.len() as u32,
                 ..Default::default()
             };
-            render_device.device().queue_submit2(
-                *render_device.graphics_queue().raw(),
+            self.render_device.device().queue_submit2(
+                *self.render_device.graphics_queue().raw(),
                 &[submit_info],
-                sync.graphics_commands_completed_fence,
+                sync.graphics_commands_completed_fence.raw(),
             )?;
         }
 
@@ -285,14 +261,13 @@ impl FramesInFlight {
             let status = self
                 .swapchain()
                 .present_swapchain_image(
-                    render_device,
-                    frame.swapchain_image_index(),
-                    &[sync.graphics_commands_completed_semaphore],
+                    swapchain_image_index,
+                    &[sync.graphics_commands_completed_semaphore.raw()],
                 )
                 .with_context(|| {
                     format!(
                     "Error while presenting swapchain image {} for frame {}",
-                    frame.swapchain_image_index(), self.current_frame,
+                    swapchain_image_index, self.current_frame,
                 )
                 })?;
             if status == SwapchainStatus::NeedsRebuild {
@@ -300,5 +275,21 @@ impl FramesInFlight {
             }
         };
         Ok(())
+    }
+}
+
+impl Drop for FramesInFlight {
+    /// Destroy all frame resources.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - The application should drop this before any resources which are used
+    ///     by any frames.
+    fn drop(&mut self) {
+        unsafe {
+            self.wait_for_all_frames_to_complete()
+                .expect("Error while waiting for frames to complete!");
+        }
     }
 }

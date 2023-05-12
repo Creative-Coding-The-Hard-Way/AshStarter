@@ -22,7 +22,7 @@ impl Frame {
     /// The buffer is submitted automatically when the frame is returned for
     /// presentation.
     pub fn command_buffer(&self) -> vk::CommandBuffer {
-        self.sync.command_buffer
+        self.sync.command_pool.primary_command_buffer(0)
     }
 
     /// The current frame's index. Always in the range [0-N) where N is the
@@ -48,5 +48,9 @@ impl Frame {
             sync,
             swapchain_image_index,
         }
+    }
+
+    pub(super) fn take_sync(self) -> FrameSync {
+        self.sync
     }
 }
