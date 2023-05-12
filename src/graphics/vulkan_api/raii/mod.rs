@@ -1,4 +1,5 @@
 mod command_pool;
+mod descriptor_pool;
 mod descriptor_set_layout;
 mod pipeline;
 mod pipeline_layout;
@@ -11,9 +12,9 @@ use {
 };
 
 pub use self::{
-    command_pool::CommandPool, descriptor_set_layout::DescriptorSetLayout,
-    pipeline::Pipeline, pipeline_layout::PipelineLayout,
-    shader_module::ShaderModule,
+    command_pool::CommandPool, descriptor_pool::DescriptorPool,
+    descriptor_set_layout::DescriptorSetLayout, pipeline::Pipeline,
+    pipeline_layout::PipelineLayout, shader_module::ShaderModule,
 };
 
 macro_rules! raii_wrapper {

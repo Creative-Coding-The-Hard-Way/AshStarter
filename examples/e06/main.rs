@@ -25,8 +25,7 @@ struct SBOTriangleExample {
     frames_in_flight: FramesInFlight,
     buffer: vk::Buffer,
     allocation: Allocation,
-    descriptor_set: vk::DescriptorSet,
-    descriptor_pool: vk::DescriptorPool,
+    descriptor_pool: raii::DescriptorPool,
     _descriptor_set_layout: raii::DescriptorSetLayout,
     pipeline_layout: raii::PipelineLayout,
     pipeline: raii::Pipeline,
@@ -124,34 +123,18 @@ impl State for SBOTriangleExample {
             std::ptr::write_unaligned(ptr as *mut [Vertex; 3], vertices);
         };
 
-        let descriptor_pool = unsafe {
-            let pool_sizes = [vk::DescriptorPoolSize {
-                ty: vk::DescriptorType::STORAGE_BUFFER,
-                descriptor_count: 1,
-            }];
-            let create_info = vk::DescriptorPoolCreateInfo {
-                max_sets: 1,
-                pool_size_count: pool_sizes.len() as u32,
-                p_pool_sizes: pool_sizes.as_ptr(),
-                ..vk::DescriptorPoolCreateInfo::default()
-            };
-            render_device
-                .device()
-                .create_descriptor_pool(&create_info, None)?
+        let mut descriptor_pool = unsafe {
+            raii::DescriptorPool::new_with_sizes(
+                render_device.clone(),
+                1,
+                &[vk::DescriptorPoolSize {
+                    ty: vk::DescriptorType::STORAGE_BUFFER,
+                    descriptor_count: 1,
+                }],
+            )?
         };
-
-        let descriptor_set = unsafe {
-            let layout = descriptor_set_layout.raw();
-            let create_info = vk::DescriptorSetAllocateInfo {
-                descriptor_pool,
-                descriptor_set_count: 1,
-                p_set_layouts: &layout,
-                ..vk::DescriptorSetAllocateInfo::default()
-            };
-            render_device
-                .device()
-                .allocate_descriptor_sets(&create_info)?[0]
-        };
+        let _ = descriptor_pool
+            .allocate_descriptor_sets(&[&descriptor_set_layout])?;
 
         unsafe {
             let buffer_info = vk::DescriptorBufferInfo {
@@ -161,7 +144,7 @@ impl State for SBOTriangleExample {
             };
             render_device.device().update_descriptor_sets(
                 &[vk::WriteDescriptorSet {
-                    dst_set: descriptor_set,
+                    dst_set: descriptor_pool.descriptor_set(0),
                     dst_binding: 0,
                     dst_array_element: 0,
                     descriptor_type: vk::DescriptorType::STORAGE_BUFFER,
@@ -178,7 +161,6 @@ impl State for SBOTriangleExample {
         Ok(Self {
             buffer,
             allocation,
-            descriptor_set,
             descriptor_pool,
             _descriptor_set_layout: descriptor_set_layout,
             pipeline_layout,
@@ -257,7 +239,7 @@ impl State for SBOTriangleExample {
                 vk::PipelineBindPoint::GRAPHICS,
                 self.pipeline_layout.raw(),
                 0,
-                &[self.descriptor_set],
+                &[self.descriptor_pool.descriptor_set(0)],
                 &[],
             );
             self.render_device.device().cmd_draw(
@@ -313,10 +295,6 @@ impl Drop for SBOTriangleExample {
             self.frames_in_flight
                 .wait_for_all_frames_to_complete()
                 .expect("Error waiting for all frame operations to complete");
-
-            self.render_device
-                .device()
-                .destroy_descriptor_pool(self.descriptor_pool, None);
 
             self.render_device
                 .memory()
