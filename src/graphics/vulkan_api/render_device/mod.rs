@@ -5,6 +5,7 @@ use {
         LogicalDevice, PhysicalDevice, PhysicalDeviceFeatures, VulkanInstance,
     },
     indoc::indoc,
+    std::sync::Mutex,
 };
 
 mod queue;
@@ -27,7 +28,7 @@ pub struct RenderDevice {
     window_surface: WindowSurface,
     logical_device: LogicalDevice,
     instance: VulkanInstance,
-    allocator: MemoryAllocator,
+    allocator: Mutex<MemoryAllocator>,
 }
 
 // Public Api
@@ -88,7 +89,7 @@ impl RenderDevice {
             window_surface,
             logical_device,
             instance,
-            allocator,
+            allocator: Mutex::new(allocator),
         };
         render_device.set_debug_name(
             *render_device.presentation_queue().raw(),
@@ -105,8 +106,8 @@ impl RenderDevice {
     }
 
     /// Borrow the device memory allocator.
-    pub fn memory(&mut self) -> &mut MemoryAllocator {
-        &mut self.allocator
+    pub fn memory(&self) -> std::sync::MutexGuard<MemoryAllocator> {
+        self.allocator.lock().unwrap()
     }
 
     /// Set the name that shows up in Vulkan debug logs for a given resource.
