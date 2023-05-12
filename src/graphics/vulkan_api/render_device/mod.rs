@@ -181,8 +181,8 @@ impl RenderDevice {
     ///
     /// # Safety
     ///
-    /// The caller must not keep copies of the device handle after any calls
-    /// to `destroy`.
+    /// The caller must not keep copies of the device handle after the render
+    /// device is dropped.
     pub unsafe fn device(&self) -> &ash::Device {
         self.logical_device.raw()
     }
@@ -191,8 +191,8 @@ impl RenderDevice {
     ///
     /// # Safety
     ///
-    /// The caller must not keep copies of the device handle after any calls
-    /// to `destroy`.
+    /// The caller must not keep copies of the device handle after the render
+    /// device is dropped.
     pub unsafe fn surface(&self) -> &vk::SurfaceKHR {
         self.window_surface.raw()
     }
@@ -233,6 +233,16 @@ impl RenderDevice {
             // the Render Device is constructed.
             self.window_surface
                 .get_surface_capabilities(self.logical_device.physical_device())
+        }
+    }
+}
+
+impl Drop for RenderDevice {
+    fn drop(&mut self) {
+        unsafe {
+            self.device().device_wait_idle().expect(
+                "Error waiting for pending graphics operations to complete!",
+            );
         }
     }
 }

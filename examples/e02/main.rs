@@ -3,19 +3,21 @@ use {
     ash::vk,
     ccthw::{
         application::{Application, GlfwWindow, State},
-        graphics::vulkan_api::{RenderDevice, Swapchain, SwapchainStatus},
+        graphics::vulkan_api::{
+            raii, RenderDevice, Swapchain, SwapchainStatus,
+        },
     },
     ccthw_ash_instance::{PhysicalDeviceFeatures, VulkanHandle},
+    std::sync::Arc,
 };
 
 struct CreateSwapchainExample {
     swapchain_needs_rebuild: bool,
-    command_buffer: vk::CommandBuffer,
-    command_pool: vk::CommandPool,
-    acquire_semaphore: vk::Semaphore,
-    release_semaphore: vk::Semaphore,
+    command_pool: raii::CommandPool,
+    acquire_semaphore: raii::Semaphore,
+    release_semaphore: raii::Semaphore,
     swapchain: Option<Swapchain>,
-    render_device: RenderDevice,
+    render_device: Arc<RenderDevice>,
 }
 
 impl State for CreateSwapchainExample {
@@ -29,7 +31,7 @@ impl State for CreateSwapchainExample {
             // enable synchronization2 for queue_submit2
             device_features.vulkan_13_features_mut().synchronization2 =
                 vk::TRUE;
-            window.create_default_render_device(device_features)?
+            Arc::new(window.create_default_render_device(device_features)?)
         };
 
         let (w, h) = window.get_framebuffer_size();
@@ -38,42 +40,24 @@ impl State for CreateSwapchainExample {
         };
         log::info!("{}", swapchain);
 
-        let acquire_semaphore = unsafe {
-            let create_info = vk::SemaphoreCreateInfo::default();
-            render_device
-                .device()
-                .create_semaphore(&create_info, None)?
-        };
-        let release_semaphore = unsafe {
-            let create_info = vk::SemaphoreCreateInfo::default();
-            render_device
-                .device()
-                .create_semaphore(&create_info, None)?
-        };
+        let acquire_semaphore =
+            unsafe { raii::Semaphore::new(render_device.clone())? };
+        let release_semaphore =
+            unsafe { raii::Semaphore::new(render_device.clone())? };
 
-        let command_pool = unsafe {
-            let create_info = vk::CommandPoolCreateInfo::default();
-            render_device
-                .device()
-                .create_command_pool(&create_info, None)?
-        };
-        let command_buffer = unsafe {
-            let create_info = vk::CommandBufferAllocateInfo {
-                command_pool,
-                level: vk::CommandBufferLevel::PRIMARY,
-                command_buffer_count: 1,
+        let mut command_pool = unsafe {
+            let create_info = vk::CommandPoolCreateInfo {
+                queue_family_index: render_device
+                    .graphics_queue()
+                    .family_index(),
                 ..Default::default()
             };
-            render_device
-                .device()
-                .allocate_command_buffers(&create_info)?
-                .pop()
-                .unwrap()
+            raii::CommandPool::new(render_device.clone(), &create_info)?
         };
+        command_pool.allocate_primary_command_buffers(1)?;
 
         Ok(Self {
             swapchain_needs_rebuild: false,
-            command_buffer,
             command_pool,
             acquire_semaphore,
             release_semaphore,
@@ -110,7 +94,7 @@ impl State for CreateSwapchainExample {
 
         let index = unsafe {
             let result = self.swapchain().acquire_swapchain_image(
-                self.acquire_semaphore,
+                self.acquire_semaphore.raw(),
                 vk::Fence::null(),
             )?;
             match result {
@@ -125,20 +109,20 @@ impl State for CreateSwapchainExample {
         // Build frame command buffer
         // --------------------------
 
-        // Reset the command pool (and therefore the buffer)
         unsafe {
             self.render_device.device().reset_command_pool(
-                self.command_pool,
+                self.command_pool.raw(),
                 vk::CommandPoolResetFlags::empty(),
-            )?
-        };
+            )?;
+        }
 
         // begin the command buffer
+        let command_buffer = self.command_pool.primary_command_buffer(0);
         unsafe {
             let begin_info = vk::CommandBufferBeginInfo::default();
             self.render_device
                 .device()
-                .begin_command_buffer(self.command_buffer, &begin_info)?
+                .begin_command_buffer(command_buffer, &begin_info)?
         };
 
         // use a image memory barrier to transition the swapchain image layout
@@ -168,25 +152,25 @@ impl State for CreateSwapchainExample {
             };
             self.render_device
                 .device()
-                .cmd_pipeline_barrier2(self.command_buffer, &dependency_info);
+                .cmd_pipeline_barrier2(command_buffer, &dependency_info);
         };
 
         // end the command buffer and submit
         unsafe {
             self.render_device
                 .device()
-                .end_command_buffer(self.command_buffer)?;
+                .end_command_buffer(command_buffer)?;
             let command_buffer_infos = [vk::CommandBufferSubmitInfo {
-                command_buffer: self.command_buffer,
+                command_buffer,
                 ..Default::default()
             }];
             let wait_infos = [vk::SemaphoreSubmitInfo {
-                semaphore: self.acquire_semaphore,
+                semaphore: self.acquire_semaphore.raw(),
                 stage_mask: vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT,
                 ..Default::default()
             }];
             let signal_infos = [vk::SemaphoreSubmitInfo {
-                semaphore: self.release_semaphore,
+                semaphore: self.release_semaphore.raw(),
                 stage_mask: vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT,
                 ..Default::default()
             }];
@@ -213,7 +197,7 @@ impl State for CreateSwapchainExample {
             let status = self.swapchain().present_swapchain_image(
                 &self.render_device,
                 index,
-                &[self.release_semaphore],
+                &[self.release_semaphore.raw()],
             )?;
             if status == SwapchainStatus::NeedsRebuild {
                 self.swapchain_needs_rebuild = true;
@@ -268,9 +252,6 @@ impl Drop for CreateSwapchainExample {
                 "Error waiting for pending graphics operations to complete!",
             );
 
-            device.destroy_command_pool(self.command_pool, None);
-            device.destroy_semaphore(self.release_semaphore, None);
-            device.destroy_semaphore(self.acquire_semaphore, None);
             self.swapchain.take().unwrap().destroy();
         }
     }

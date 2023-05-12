@@ -6,6 +6,7 @@ mod render_pass;
 mod swapchain;
 mod texture;
 
+pub mod raii;
 pub use self::{
     command_buffer::OneTimeSubmitCommandBuffer,
     frames_in_flight::{Frame, FrameStatus, FramesInFlight},
