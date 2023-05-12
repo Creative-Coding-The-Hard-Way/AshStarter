@@ -159,7 +159,6 @@ impl FramesInFlight {
         for frame_sync in self.frames.iter_mut() {
             frame_sync.destroy(render_device);
         }
-        self.swapchain.as_mut().unwrap().destroy();
     }
 
     /// Get the current swapchain.

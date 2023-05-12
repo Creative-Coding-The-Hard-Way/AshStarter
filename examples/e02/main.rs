@@ -251,8 +251,6 @@ impl Drop for CreateSwapchainExample {
             device.device_wait_idle().expect(
                 "Error waiting for pending graphics operations to complete!",
             );
-
-            self.swapchain.take().unwrap().destroy();
         }
     }
 }

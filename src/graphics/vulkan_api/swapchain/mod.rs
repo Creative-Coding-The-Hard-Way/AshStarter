@@ -112,11 +112,6 @@ impl Swapchain {
                 .create_swapchain(&create_info, None)
                 .context("Error creating the swapchain!")?
         };
-        if let Some(mut swapchain) = previous_swapchain {
-            // SAFE because nothing references the swapchain now that the
-            // new one has been constructed.
-            unsafe { swapchain.destroy() };
-        }
 
         let images = unsafe {
             swapchain_loader
@@ -161,24 +156,23 @@ impl Swapchain {
     pub fn present_mode(&self) -> vk::PresentModeKHR {
         self.present_mode
     }
+}
 
-    /// Destroy all swapchain resources.
-    ///
-    /// # Params
-    ///
-    /// * `render_device` - the device used to create the swapchain.
+impl Drop for Swapchain {
+    /// Destroy the swapchain.
     ///
     /// # Safety
     ///
     /// Unsafe because:
-    ///   - the application must destroy the swapchain before the logical device
+    ///   - the application must drop the swapchain before the logical device
     ///     and vulkan instance
     ///   - the application must synchronize access to GPU resources and ensure
     ///     no pending operations still depend on the swapchain
-    ///   - it is invalid to use this instance after calling `destroy`
-    pub unsafe fn destroy(&mut self) {
-        self.swapchain_loader
-            .destroy_swapchain(self.swapchain, None);
+    fn drop(&mut self) {
+        unsafe {
+            self.swapchain_loader
+                .destroy_swapchain(self.swapchain, None);
+        }
     }
 }
 
