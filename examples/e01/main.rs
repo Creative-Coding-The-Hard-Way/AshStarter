@@ -8,7 +8,7 @@ use {
 };
 
 struct RenderDeviceExample {
-    render_device: RenderDevice,
+    _render_device: RenderDevice,
 }
 
 impl State for RenderDeviceExample {
@@ -22,7 +22,9 @@ impl State for RenderDeviceExample {
 
         log::info!("Created render device: {}", render_device);
 
-        Ok(Self { render_device })
+        Ok(Self {
+            _render_device: render_device,
+        })
     }
 
     fn handle_event(
@@ -41,14 +43,6 @@ impl State for RenderDeviceExample {
             _ => (),
         }
         Ok(())
-    }
-}
-
-impl Drop for RenderDeviceExample {
-    fn drop(&mut self) {
-        unsafe {
-            self.render_device.destroy();
-        }
     }
 }
 

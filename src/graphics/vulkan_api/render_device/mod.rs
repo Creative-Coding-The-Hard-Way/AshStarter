@@ -166,18 +166,6 @@ impl RenderDevice {
         &self.graphics_queue
     }
 
-    /// Destroy the logical device and ash instance.
-    ///
-    /// # Safety
-    ///
-    /// The application must call this prior to exit. All resources created
-    /// using the logical device must be destroyed prior to calling this method.
-    /// The application is responsible for synchronizing access to GPU
-    /// resources.
-    pub unsafe fn destroy(&mut self) {
-        self.window_surface.destroy();
-    }
-
     /// The Ash entry used by this RenderDevice.
     pub fn entry(&self) -> &ash::Entry {
         self.instance.entry()

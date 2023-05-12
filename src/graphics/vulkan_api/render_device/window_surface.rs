@@ -41,20 +41,6 @@ impl WindowSurface {
         }
     }
 
-    /// Destroy the surface.
-    ///
-    /// # Safety
-    ///
-    /// Unsafe because:
-    ///   - It is undefined behavior to use this type after calling destroy.
-    ///   - The application must synchronize GPU resources to ensure no pending
-    ///     GPU operations still depend on the surface when it's destroyed.
-    ///   - The application must destroy the surface before destroying the
-    ///     Vulkan instance.
-    pub unsafe fn destroy(&mut self) {
-        self.surface_loader.destroy_surface(self.surface, None);
-    }
-
     /// Check that a physical device can present swapchain images to the window
     /// surface.
     ///
@@ -162,6 +148,24 @@ impl WindowSurface {
             )
             .context("Error getting device surface capabilities!")?;
         Ok(capabilities)
+    }
+}
+
+impl Drop for WindowSurface {
+    /// Destroy the surface.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe because:
+    ///   - It is undefined behavior to use this type after calling destroy.
+    ///   - The application must synchronize GPU resources to ensure no pending
+    ///     GPU operations still depend on the surface when it's destroyed.
+    ///   - The application must destroy the surface before destroying the
+    ///     Vulkan instance.
+    fn drop(&mut self) {
+        unsafe {
+            self.surface_loader.destroy_surface(self.surface, None);
+        }
     }
 }
 

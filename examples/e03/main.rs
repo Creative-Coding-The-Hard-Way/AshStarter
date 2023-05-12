@@ -135,7 +135,6 @@ impl Drop for FramesInFlightExample {
                 .wait_for_all_frames_to_complete(&self.render_device)
                 .expect("Error waiting for all frame operations to complete");
             self.frames_in_flight.destroy(&self.render_device);
-            self.render_device.destroy();
         }
     }
 }

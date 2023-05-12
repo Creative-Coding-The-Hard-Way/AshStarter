@@ -272,7 +272,6 @@ impl Drop for CreateSwapchainExample {
             device.destroy_semaphore(self.release_semaphore, None);
             device.destroy_semaphore(self.acquire_semaphore, None);
             self.swapchain.take().unwrap().destroy();
-            self.render_device.destroy();
         }
     }
 }

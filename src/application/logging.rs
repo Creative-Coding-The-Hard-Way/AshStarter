@@ -27,7 +27,7 @@ pub fn setup() {
             .unwrap()
             .log_to_file(FileSpec::default().directory("logs"))
             .format(multiline_format)
-            .duplicate_to_stdout(Duplicate::Debug)
+            .duplicate_to_stdout(Duplicate::Warn)
             .write_mode(WriteMode::Async)
             .start()
             .expect("Unable to start the logger!");

@@ -136,7 +136,6 @@ impl Drop for RenderPassExample {
                 .expect("Error waiting for all frame operations to complete");
             self.color_pass.destroy(self.render_device.device());
             self.frames_in_flight.destroy(&self.render_device);
-            self.render_device.destroy();
         }
     }
 }

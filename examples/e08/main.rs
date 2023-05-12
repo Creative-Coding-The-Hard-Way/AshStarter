@@ -434,7 +434,6 @@ impl Drop for TextureExample {
             );
             self.color_pass.destroy(self.render_device.device());
             self.frames_in_flight.destroy(&self.render_device);
-            self.render_device.destroy();
         }
     }
 }
