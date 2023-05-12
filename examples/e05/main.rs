@@ -19,7 +19,7 @@ struct FirstTriangleExample {
     frames_in_flight: FramesInFlight,
     _descriptor_set_layout: raii::DescriptorSetLayout,
     pipeline_layout: raii::PipelineLayout,
-    pipeline: vk::Pipeline,
+    pipeline: raii::Pipeline,
     color_pass: ColorPass,
     render_device: Arc<RenderDevice>,
 }
@@ -74,7 +74,7 @@ impl State for FirstTriangleExample {
                 render_device.clone(),
                 include_bytes!("./shaders/static_triangle.vert.spv"),
                 include_bytes!("./shaders/static_triangle.frag.spv"),
-                pipeline_layout.raw(),
+                &pipeline_layout,
                 color_pass.render_pass(),
             )?
         };
@@ -128,7 +128,7 @@ impl State for FirstTriangleExample {
             self.render_device.device().cmd_bind_pipeline(
                 frame.command_buffer(),
                 vk::PipelineBindPoint::GRAPHICS,
-                self.pipeline,
+                self.pipeline.raw(),
             );
             let vk::Extent2D { width, height } =
                 self.frames_in_flight.swapchain().extent();
@@ -186,33 +186,16 @@ impl FirstTriangleExample {
                 self.frames_in_flight.swapchain().extent(),
             )?;
 
-            self.render_device
-                .device()
-                .destroy_pipeline(self.pipeline, None);
-
             self.pipeline = create_pipeline(
                 self.render_device.clone(),
                 include_bytes!("./shaders/static_triangle.vert.spv"),
                 include_bytes!("./shaders/static_triangle.frag.spv"),
-                self.pipeline_layout.raw(),
+                &self.pipeline_layout,
                 self.color_pass.render_pass(),
             )?;
         };
 
         Ok(())
-    }
-}
-
-impl Drop for FirstTriangleExample {
-    fn drop(&mut self) {
-        unsafe {
-            self.frames_in_flight
-                .wait_for_all_frames_to_complete()
-                .expect("Error waiting for all frame operations to complete");
-            self.render_device
-                .device()
-                .destroy_pipeline(self.pipeline, None);
-        }
     }
 }
 

@@ -1,5 +1,4 @@
 use {
-    anyhow::Context,
     ash::vk,
     ccthw::graphics::{
         vulkan_api::{raii, RenderDevice},
@@ -13,9 +12,9 @@ pub unsafe fn create_pipeline(
     render_device: Arc<RenderDevice>,
     vertex_source: &[u8],
     fragment_source: &[u8],
-    layout: vk::PipelineLayout,
-    render_pass: vk::RenderPass,
-) -> Result<vk::Pipeline, GraphicsError> {
+    layout: &raii::PipelineLayout,
+    render_pass: &raii::RenderPass,
+) -> Result<raii::Pipeline, GraphicsError> {
     let vertex_shader_module = raii::ShaderModule::new_from_bytes(
         render_device.clone(),
         vertex_source,
@@ -116,25 +115,13 @@ pub unsafe fn create_pipeline(
         p_tessellation_state: std::ptr::null(),
         p_viewport_state: &viewport_state,
         p_depth_stencil_state: std::ptr::null(),
-        render_pass,
-        layout,
+        render_pass: render_pass.raw(),
+        layout: layout.raw(),
         subpass: 0,
 
         base_pipeline_handle: vk::Pipeline::null(),
         base_pipeline_index: 0,
         ..Default::default()
     };
-    let result = render_device.device().create_graphics_pipelines(
-        vk::PipelineCache::null(),
-        &[create_info],
-        None,
-    );
-    let pipeline = match result {
-        Ok(mut pipelines) => pipelines.pop().unwrap(),
-        Err((_, result)) => {
-            return Err(GraphicsError::VulkanError(result))
-                .context("Error creating graphics pipeline")?;
-        }
-    };
-    Ok(pipeline)
+    raii::Pipeline::new_graphics_pipeline(render_device, create_info)
 }
