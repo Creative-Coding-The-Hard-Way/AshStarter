@@ -1,4 +1,12 @@
-use {crate::graphics::GraphicsError, anyhow::Context, ash::vk};
+use {
+    crate::graphics::{
+        vulkan_api::{raii, RenderDevice},
+        GraphicsError,
+    },
+    anyhow::Context,
+    ash::vk,
+    std::sync::Arc,
+};
 
 /// A utility for managing a render pass and framebuffers which target a given
 /// set of images.
@@ -8,9 +16,9 @@ use {crate::graphics::GraphicsError, anyhow::Context, ash::vk};
 pub struct ColorPass {
     extent: vk::Extent2D,
     format: vk::Format,
-    render_pass: vk::RenderPass,
-    framebuffers: Vec<vk::Framebuffer>,
-    image_views: Vec<vk::ImageView>,
+    render_pass: raii::RenderPass,
+    framebuffers: Vec<raii::Framebuffer>,
+    _image_views: Vec<raii::ImageView>,
 }
 
 // Public API
@@ -35,17 +43,19 @@ impl ColorPass {
     ///    rebuilt too
     ///  - the targeted images MUST outlive the ColorPass.
     pub unsafe fn new(
-        device: &ash::Device,
+        render_device: Arc<RenderDevice>,
         images: &[vk::Image],
         format: vk::Format,
         extent: vk::Extent2D,
     ) -> Result<Self, GraphicsError> {
-        let render_pass = Self::create_render_pass(device, format)?;
-        let image_views = Self::create_image_views(device, format, images)?;
+        let render_pass =
+            Self::create_render_pass(render_device.clone(), format)?;
+        let image_views =
+            Self::create_image_views(render_device.clone(), format, images)?;
 
         let framebuffers = Self::create_framebuffers(
-            device,
-            render_pass,
+            render_device,
+            render_pass.raw(),
             extent,
             &image_views,
         )?;
@@ -55,30 +65,8 @@ impl ColorPass {
             format,
             render_pass,
             framebuffers,
-            image_views,
+            _image_views: image_views,
         })
-    }
-
-    /// Destroy all framebuffers and image views.
-    ///
-    /// # Params
-    ///
-    /// * `device` - the render device used to create Vulkan resources
-    ///
-    /// # Safety
-    ///
-    /// Unsafe because:
-    ///   - the application must ensure that no pending command buffers still
-    ///     reference the framebuffers or image views in this object
-    ///   - the application must call `destry()` before exit
-    pub unsafe fn destroy(&mut self, device: &ash::Device) {
-        for &framebuffer in &self.framebuffers {
-            device.destroy_framebuffer(framebuffer, None);
-        }
-        for &image_view in &self.image_views {
-            device.destroy_image_view(image_view, None);
-        }
-        device.destroy_render_pass(self.render_pass, None);
     }
 
     /// The current extent.
@@ -100,7 +88,7 @@ impl ColorPass {
     ///   - the given RenderPass will be destroyed when the ColorPass is
     ///     destroyed
     pub unsafe fn render_pass(&self) -> vk::RenderPass {
-        self.render_pass
+        self.render_pass.raw()
     }
 
     /// Begin a render pass for the given image index.
@@ -131,8 +119,8 @@ impl ColorPass {
             },
         }];
         let begin_info = vk::RenderPassBeginInfo {
-            render_pass: self.render_pass,
-            framebuffer: self.framebuffers[image_index],
+            render_pass: self.render_pass.raw(),
+            framebuffer: self.framebuffers[image_index].raw(),
             render_area: vk::Rect2D {
                 offset: vk::Offset2D { x: 0, y: 0 },
                 extent: self.extent(),
@@ -164,14 +152,15 @@ impl ColorPass {
     /// # Safety
     ///
     /// Unsafe because:
-    ///  - the caller is responsible for destroying the viwes
-    ///  - the caller must ensure that no pending command buffers still
-    ///    reference the views when they are destroyed
+    ///  - The caller is responsible for destroying the views before the images
+    ///    are destroyed.
+    ///  - The caller must not destroy the image views while they are in use by
+    ///    the GPU.
     unsafe fn create_image_views(
-        device: &ash::Device,
+        render_device: Arc<RenderDevice>,
         format: vk::Format,
         images: &[vk::Image],
-    ) -> Result<Vec<vk::ImageView>, GraphicsError> {
+    ) -> Result<Vec<raii::ImageView>, GraphicsError> {
         let mut image_views = vec![];
 
         for image in images {
@@ -189,9 +178,7 @@ impl ColorPass {
                     },
                     ..Default::default()
                 };
-                device
-                    .create_image_view(&create_info, None)
-                    .context("Error creating image view!")?
+                raii::ImageView::new(render_device.clone(), &create_info)?
             };
             image_views.push(image_view);
         }
@@ -218,28 +205,26 @@ impl ColorPass {
     ///  - the caller must ensure that no pending command buffers still
     ///    reference the framebuffers when they are destroyed
     unsafe fn create_framebuffers(
-        device: &ash::Device,
+        render_device: Arc<RenderDevice>,
         render_pass: vk::RenderPass,
         extent: vk::Extent2D,
-        image_views: &[vk::ImageView],
-    ) -> Result<Vec<vk::Framebuffer>, GraphicsError> {
+        image_views: &[raii::ImageView],
+    ) -> Result<Vec<raii::Framebuffer>, GraphicsError> {
         let mut framebuffers = vec![];
-
         let vk::Extent2D { width, height } = extent;
         for image_view in image_views {
+            let raw_image_view = image_view.raw();
             let framebuffer = {
                 let create_info = vk::FramebufferCreateInfo {
                     render_pass,
                     attachment_count: 1,
-                    p_attachments: image_view,
+                    p_attachments: &raw_image_view,
                     width,
                     height,
                     layers: 1,
                     ..Default::default()
                 };
-                device
-                    .create_framebuffer(&create_info, None)
-                    .context("Error creating framebuffer!")?
+                raii::Framebuffer::new(render_device.clone(), &create_info)?
             };
             framebuffers.push(framebuffer);
         }
@@ -262,9 +247,9 @@ impl ColorPass {
     ///     Vulkan instance
     ///   - access to the renderpass must be externally synchronized.
     unsafe fn create_render_pass(
-        device: &ash::Device,
+        render_device: Arc<RenderDevice>,
         format: vk::Format,
-    ) -> Result<vk::RenderPass, GraphicsError> {
+    ) -> Result<raii::RenderPass, GraphicsError> {
         let attachments = [
             // The color attachment
             vk::AttachmentDescription {
@@ -327,11 +312,7 @@ impl ColorPass {
             flags: vk::RenderPassCreateFlags::empty(),
             ..Default::default()
         };
-        let render_pass = unsafe {
-            device
-                .create_render_pass(&create_info, None)
-                .context("Unexpected creating a single pass render pass!")?
-        };
-        Ok(render_pass)
+        Ok(raii::RenderPass::new(render_device, &create_info)
+            .context("Unexpected creating a single pass render pass!")?)
     }
 }

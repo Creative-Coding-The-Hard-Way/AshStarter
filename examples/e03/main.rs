@@ -27,7 +27,7 @@ impl State for FramesInFlightExample {
             // enable synchronization2 for queue_submit2
             device_features.vulkan_13_features_mut().synchronization2 =
                 vk::TRUE;
-            Arc::new(window.create_default_render_device(device_features)?)
+            window.create_default_render_device(device_features)?
         };
 
         let frames_in_flight = unsafe {

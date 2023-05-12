@@ -4,7 +4,7 @@ use {
     ash::{vk, vk::Handle},
     ccthw_ash_instance::{PhysicalDeviceFeatures, VulkanInstance},
     glfw::{ClientApiHint, WindowEvent, WindowHint, WindowMode},
-    std::sync::mpsc::Receiver,
+    std::sync::{mpsc::Receiver, Arc},
 };
 
 /// All resources required for running a single-windowed GLFW application which
@@ -129,7 +129,7 @@ impl GlfwWindow {
     pub unsafe fn create_default_render_device(
         &self,
         physical_device_features: PhysicalDeviceFeatures,
-    ) -> Result<RenderDevice> {
+    ) -> Result<Arc<RenderDevice>> {
         self.create_render_device(&[], &[], physical_device_features)
     }
 
@@ -154,7 +154,7 @@ impl GlfwWindow {
         instance_extensions: &[String],
         instance_layers: &[String],
         features: PhysicalDeviceFeatures,
-    ) -> Result<RenderDevice> {
+    ) -> Result<Arc<RenderDevice>> {
         let instance =
             self.create_vulkan_instance(instance_extensions, instance_layers)?;
 
@@ -177,7 +177,7 @@ impl GlfwWindow {
 
         log::debug!("{}", device);
 
-        Ok(device)
+        Ok(Arc::new(device))
     }
 
     /// Create a Vulkan instance with extensions and layers configured to

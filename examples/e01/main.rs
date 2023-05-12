@@ -5,10 +5,11 @@ use {
         graphics::vulkan_api::RenderDevice,
     },
     ccthw_ash_instance::PhysicalDeviceFeatures,
+    std::sync::Arc,
 };
 
 struct RenderDeviceExample {
-    _render_device: RenderDevice,
+    _render_device: Arc<RenderDevice>,
 }
 
 impl State for RenderDeviceExample {

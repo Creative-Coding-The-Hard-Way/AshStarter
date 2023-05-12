@@ -286,27 +286,45 @@ impl RenderDevice {
         features: PhysicalDeviceFeatures,
         window_surface: &WindowSurface,
     ) -> Result<PhysicalDevice, GraphicsError> {
-        let devices: Vec<PhysicalDevice> =
-            PhysicalDevice::enumerate_supported_devices(instance, &features)?
-                .into_iter()
-                .filter(|device| {
+        let all_devices =
+            PhysicalDevice::enumerate_supported_devices(instance, &features)?;
+
+        log::trace!("All available physical devices: {:?}", all_devices);
+
+        let usable_devices: Vec<PhysicalDevice> = all_devices
+            .into_iter()
+            .filter(|device| {
+                let has_required_queues =
                     QueueFinder::device_has_required_queues(
                         device,
                         window_surface,
-                    )
-                })
-                .filter(|device| {
+                    );
+                log::trace!(
+                    "{} has required queues? {}",
+                    device,
+                    has_required_queues
+                );
+                has_required_queues
+            })
+            .filter(|device| {
+                let has_extensions =
                     device.available_extension_names().contains(
                         &ash::extensions::khr::Swapchain::name()
                             .to_owned()
                             .into_string()
                             .unwrap(),
-                    )
-                })
-                .collect();
+                    );
+                log::trace!(
+                    "{} has required extensions? {}",
+                    device,
+                    has_extensions
+                );
+                has_extensions
+            })
+            .collect();
         let find_device_type =
             |device_type: vk::PhysicalDeviceType| -> Option<&PhysicalDevice> {
-                devices.iter().find(|device| {
+                usable_devices.iter().find(|device| {
                     device.properties().properties().device_type == device_type
                 })
             };
@@ -323,7 +341,7 @@ impl RenderDevice {
             return Ok(device.clone());
         }
 
-        let device = devices
+        let device = usable_devices
             .first()
             .ok_or(GraphicsError::NoSuitablePhysicalDevice)?;
         Ok(device.clone())

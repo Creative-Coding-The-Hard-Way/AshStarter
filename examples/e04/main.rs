@@ -8,12 +8,13 @@ use {
         },
     },
     ccthw_ash_instance::PhysicalDeviceFeatures,
+    std::sync::Arc,
 };
 
 struct RenderPassExample {
     color_pass: ColorPass,
     frames_in_flight: FramesInFlight,
-    render_device: RenderDevice,
+    render_device: Arc<RenderDevice>,
 }
 
 impl State for RenderPassExample {
@@ -33,7 +34,7 @@ impl State for RenderPassExample {
         let frames_in_flight = unsafe {
             // SAFE because the render device is destroyed when state is dropped
             FramesInFlight::new(
-                &render_device,
+                render_device.clone(),
                 window.get_framebuffer_size(),
                 3,
             )?
@@ -41,7 +42,7 @@ impl State for RenderPassExample {
 
         let color_pass = unsafe {
             ColorPass::new(
-                render_device.device(),
+                render_device.clone(),
                 frames_in_flight.swapchain().images(),
                 frames_in_flight.swapchain().image_format(),
                 frames_in_flight.swapchain().extent(),
@@ -74,13 +75,12 @@ impl State for RenderPassExample {
     }
 
     fn update(&mut self, window: &mut GlfwWindow) -> Result<()> {
-        let frame =
-            match self.frames_in_flight.acquire_frame(&self.render_device)? {
-                FrameStatus::FrameAcquired(frame) => frame,
-                FrameStatus::SwapchainNeedsRebuild => {
-                    return self.rebuild_swapchain(window);
-                }
-            };
+        let frame = match self.frames_in_flight.acquire_frame()? {
+            FrameStatus::FrameAcquired(frame) => frame,
+            FrameStatus::SwapchainNeedsRebuild => {
+                return self.rebuild_swapchain(window);
+            }
+        };
 
         unsafe {
             self.color_pass.begin_render_pass(
@@ -98,8 +98,7 @@ impl State for RenderPassExample {
                 .cmd_end_render_pass(frame.command_buffer());
         }
 
-        self.frames_in_flight
-            .present_frame(&self.render_device, frame)?;
+        self.frames_in_flight.present_frame(frame)?;
 
         Ok(())
     }
@@ -110,14 +109,11 @@ impl RenderPassExample {
     /// out of date.
     fn rebuild_swapchain(&mut self, window: &GlfwWindow) -> Result<()> {
         unsafe {
-            self.frames_in_flight.stall_and_rebuild_swapchain(
-                &self.render_device,
-                window.get_framebuffer_size(),
-            )?;
+            self.frames_in_flight
+                .stall_and_rebuild_swapchain(window.get_framebuffer_size())?;
 
-            self.color_pass.destroy(self.render_device.device());
             self.color_pass = ColorPass::new(
-                self.render_device.device(),
+                self.render_device.clone(),
                 self.frames_in_flight.swapchain().images(),
                 self.frames_in_flight.swapchain().image_format(),
                 self.frames_in_flight.swapchain().extent(),
@@ -125,18 +121,6 @@ impl RenderPassExample {
         };
 
         Ok(())
-    }
-}
-
-impl Drop for RenderPassExample {
-    fn drop(&mut self) {
-        unsafe {
-            self.frames_in_flight
-                .wait_for_all_frames_to_complete(&self.render_device)
-                .expect("Error waiting for all frame operations to complete");
-            self.color_pass.destroy(self.render_device.device());
-            self.frames_in_flight.destroy(&self.render_device);
-        }
     }
 }
 
