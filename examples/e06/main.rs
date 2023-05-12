@@ -1,4 +1,7 @@
+mod pipeline;
+
 use {
+    self::pipeline::create_pipeline,
     anyhow::Result,
     ash::vk,
     ccthw::{
@@ -11,10 +14,6 @@ use {
     std::sync::Arc,
 };
 
-mod pipeline;
-
-use {self::pipeline::create_pipeline, ccthw_ash_allocator::Allocation};
-
 #[repr(packed)]
 #[derive(Copy, Clone, Debug)]
 pub struct Vertex {
@@ -23,12 +22,15 @@ pub struct Vertex {
 
 struct SBOTriangleExample {
     frames_in_flight: FramesInFlight,
-    buffer: vk::Buffer,
-    allocation: Allocation,
+
+    _buffer: raii::Buffer,
+
     descriptor_pool: raii::DescriptorPool,
     _descriptor_set_layout: raii::DescriptorSetLayout,
-    pipeline_layout: raii::PipelineLayout,
+
     pipeline: raii::Pipeline,
+    pipeline_layout: raii::PipelineLayout,
+
     color_pass: ColorPass,
     render_device: Arc<RenderDevice>,
 }
@@ -94,20 +96,21 @@ impl State for SBOTriangleExample {
             )?
         };
 
-        let (buffer, allocation) = unsafe {
+        let buffer = unsafe {
             let create_info = vk::BufferCreateInfo {
                 size: (std::mem::size_of::<Vertex>() * 3) as u64,
                 usage: vk::BufferUsageFlags::STORAGE_BUFFER,
                 ..vk::BufferCreateInfo::default()
             };
-            render_device.memory().allocate_buffer(
+            raii::Buffer::new(
+                render_device.clone(),
                 &create_info,
                 vk::MemoryPropertyFlags::HOST_VISIBLE
                     | vk::MemoryPropertyFlags::HOST_COHERENT,
             )?
         };
 
-        let ptr = unsafe { allocation.map(render_device.device())? };
+        let ptr = unsafe { buffer.allocation().map(render_device.device())? };
         let vertices = [
             Vertex {
                 pos: [-0.7, -0.7, 0.0, 1.0],
@@ -120,7 +123,9 @@ impl State for SBOTriangleExample {
             },
         ];
         unsafe {
-            std::ptr::write_unaligned(ptr as *mut [Vertex; 3], vertices);
+            debug_assert!(ptr as usize % std::mem::align_of::<Vertex>() == 0);
+            let data = std::slice::from_raw_parts_mut(ptr as *mut Vertex, 3);
+            data.copy_from_slice(&vertices);
         };
 
         let mut descriptor_pool = unsafe {
@@ -138,9 +143,9 @@ impl State for SBOTriangleExample {
 
         unsafe {
             let buffer_info = vk::DescriptorBufferInfo {
-                buffer,
-                offset: allocation.offset_in_bytes(),
-                range: allocation.size_in_bytes(),
+                buffer: buffer.raw(),
+                offset: 0,
+                range: buffer.allocation().size_in_bytes(),
             };
             render_device.device().update_descriptor_sets(
                 &[vk::WriteDescriptorSet {
@@ -159,8 +164,7 @@ impl State for SBOTriangleExample {
         };
 
         Ok(Self {
-            buffer,
-            allocation,
+            _buffer: buffer,
             descriptor_pool,
             _descriptor_set_layout: descriptor_set_layout,
             pipeline_layout,
@@ -286,20 +290,6 @@ impl SBOTriangleExample {
         };
 
         Ok(())
-    }
-}
-
-impl Drop for SBOTriangleExample {
-    fn drop(&mut self) {
-        unsafe {
-            self.frames_in_flight
-                .wait_for_all_frames_to_complete()
-                .expect("Error waiting for all frame operations to complete");
-
-            self.render_device
-                .memory()
-                .free_buffer(self.buffer, self.allocation.clone());
-        }
     }
 }
 
