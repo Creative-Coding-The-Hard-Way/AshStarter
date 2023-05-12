@@ -12,8 +12,8 @@ use {
 };
 
 struct RenderPassExample {
-    color_pass: ColorPass,
     frames_in_flight: FramesInFlight,
+    color_pass: ColorPass,
     render_device: Arc<RenderDevice>,
 }
 

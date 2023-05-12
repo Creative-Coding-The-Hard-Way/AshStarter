@@ -4,11 +4,11 @@ use {
     ccthw::{
         application::{Application, GlfwWindow, State},
         graphics::vulkan_api::{
-            create_descriptor_set_layout, create_pipeline_layout, ColorPass,
-            FrameStatus, FramesInFlight, RenderDevice,
+            raii, ColorPass, FrameStatus, FramesInFlight, RenderDevice,
         },
     },
     ccthw_ash_instance::PhysicalDeviceFeatures,
+    std::sync::Arc,
 };
 
 mod pipeline;
@@ -16,12 +16,12 @@ mod pipeline;
 use self::pipeline::create_pipeline;
 
 struct FirstTriangleExample {
-    descriptor_set_layout: vk::DescriptorSetLayout,
-    pipeline_layout: vk::PipelineLayout,
+    frames_in_flight: FramesInFlight,
+    _descriptor_set_layout: raii::DescriptorSetLayout,
+    pipeline_layout: raii::PipelineLayout,
     pipeline: vk::Pipeline,
     color_pass: ColorPass,
-    frames_in_flight: FramesInFlight,
-    render_device: RenderDevice,
+    render_device: Arc<RenderDevice>,
 }
 
 impl State for FirstTriangleExample {
@@ -41,7 +41,7 @@ impl State for FirstTriangleExample {
         let frames_in_flight = unsafe {
             // SAFE because the render device is destroyed when state is dropped
             FramesInFlight::new(
-                &render_device,
+                render_device.clone(),
                 window.get_framebuffer_size(),
                 3,
             )?
@@ -49,7 +49,7 @@ impl State for FirstTriangleExample {
 
         let color_pass = unsafe {
             ColorPass::new(
-                render_device.device(),
+                render_device.clone(),
                 frames_in_flight.swapchain().images(),
                 frames_in_flight.swapchain().image_format(),
                 frames_in_flight.swapchain().extent(),
@@ -57,27 +57,30 @@ impl State for FirstTriangleExample {
         };
 
         let descriptor_set_layout = unsafe {
-            create_descriptor_set_layout(render_device.device(), &[])?
+            raii::DescriptorSetLayout::new_with_bindings(
+                render_device.clone(),
+                &[],
+            )?
         };
         let pipeline_layout = unsafe {
-            create_pipeline_layout(
-                render_device.device(),
-                &[descriptor_set_layout],
+            raii::PipelineLayout::new_with_layouts_and_ranges(
+                render_device.clone(),
+                &[descriptor_set_layout.raw()],
                 &[],
             )?
         };
         let pipeline = unsafe {
             create_pipeline(
-                render_device.device(),
+                render_device.clone(),
                 include_bytes!("./shaders/static_triangle.vert.spv"),
                 include_bytes!("./shaders/static_triangle.frag.spv"),
-                pipeline_layout,
+                pipeline_layout.raw(),
                 color_pass.render_pass(),
             )?
         };
 
         Ok(Self {
-            descriptor_set_layout,
+            _descriptor_set_layout: descriptor_set_layout,
             pipeline_layout,
             pipeline,
             color_pass,
@@ -105,13 +108,12 @@ impl State for FirstTriangleExample {
     }
 
     fn update(&mut self, window: &mut GlfwWindow) -> Result<()> {
-        let frame =
-            match self.frames_in_flight.acquire_frame(&self.render_device)? {
-                FrameStatus::FrameAcquired(frame) => frame,
-                FrameStatus::SwapchainNeedsRebuild => {
-                    return self.rebuild_swapchain(window);
-                }
-            };
+        let frame = match self.frames_in_flight.acquire_frame()? {
+            FrameStatus::FrameAcquired(frame) => frame,
+            FrameStatus::SwapchainNeedsRebuild => {
+                return self.rebuild_swapchain(window);
+            }
+        };
 
         unsafe {
             self.color_pass.begin_render_pass(
@@ -163,8 +165,7 @@ impl State for FirstTriangleExample {
                 .cmd_end_render_pass(frame.command_buffer());
         }
 
-        self.frames_in_flight
-            .present_frame(&self.render_device, frame)?;
+        self.frames_in_flight.present_frame(frame)?;
 
         Ok(())
     }
@@ -175,14 +176,11 @@ impl FirstTriangleExample {
     /// out of date.
     fn rebuild_swapchain(&mut self, window: &GlfwWindow) -> Result<()> {
         unsafe {
-            self.frames_in_flight.stall_and_rebuild_swapchain(
-                &self.render_device,
-                window.get_framebuffer_size(),
-            )?;
+            self.frames_in_flight
+                .stall_and_rebuild_swapchain(window.get_framebuffer_size())?;
 
-            self.color_pass.destroy(self.render_device.device());
             self.color_pass = ColorPass::new(
-                self.render_device.device(),
+                self.render_device.clone(),
                 self.frames_in_flight.swapchain().images(),
                 self.frames_in_flight.swapchain().image_format(),
                 self.frames_in_flight.swapchain().extent(),
@@ -193,10 +191,10 @@ impl FirstTriangleExample {
                 .destroy_pipeline(self.pipeline, None);
 
             self.pipeline = create_pipeline(
-                self.render_device.device(),
+                self.render_device.clone(),
                 include_bytes!("./shaders/static_triangle.vert.spv"),
                 include_bytes!("./shaders/static_triangle.frag.spv"),
-                self.pipeline_layout,
+                self.pipeline_layout.raw(),
                 self.color_pass.render_pass(),
             )?;
         };
@@ -209,20 +207,11 @@ impl Drop for FirstTriangleExample {
     fn drop(&mut self) {
         unsafe {
             self.frames_in_flight
-                .wait_for_all_frames_to_complete(&self.render_device)
+                .wait_for_all_frames_to_complete()
                 .expect("Error waiting for all frame operations to complete");
             self.render_device
                 .device()
                 .destroy_pipeline(self.pipeline, None);
-            self.render_device
-                .device()
-                .destroy_pipeline_layout(self.pipeline_layout, None);
-            self.render_device.device().destroy_descriptor_set_layout(
-                self.descriptor_set_layout,
-                None,
-            );
-            self.color_pass.destroy(self.render_device.device());
-            self.frames_in_flight.destroy(&self.render_device);
         }
     }
 }

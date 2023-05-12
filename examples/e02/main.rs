@@ -40,10 +40,18 @@ impl State for CreateSwapchainExample {
         };
         log::info!("{}", swapchain);
 
-        let acquire_semaphore =
-            unsafe { raii::Semaphore::new(render_device.clone())? };
-        let release_semaphore =
-            unsafe { raii::Semaphore::new(render_device.clone())? };
+        let acquire_semaphore = unsafe {
+            raii::Semaphore::new(
+                render_device.clone(),
+                &vk::SemaphoreCreateInfo::default(),
+            )?
+        };
+        let release_semaphore = unsafe {
+            raii::Semaphore::new(
+                render_device.clone(),
+                &vk::SemaphoreCreateInfo::default(),
+            )?
+        };
 
         let mut command_pool = unsafe {
             let create_info = vk::CommandPoolCreateInfo {

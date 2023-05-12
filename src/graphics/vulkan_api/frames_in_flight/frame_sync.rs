@@ -36,13 +36,21 @@ impl FrameSync {
         render_device: Arc<RenderDevice>,
         index: usize,
     ) -> Result<Self, GraphicsError> {
-        let swapchain_image_acquired_semaphore =
-            unsafe { raii::Semaphore::new(render_device.clone())? };
+        let swapchain_image_acquired_semaphore = unsafe {
+            raii::Semaphore::new(
+                render_device.clone(),
+                &vk::SemaphoreCreateInfo::default(),
+            )?
+        };
         swapchain_image_acquired_semaphore
             .set_debug_name(format!("Frame {index} Swapchain Image Acquired"));
 
-        let graphics_commands_completed_semaphore =
-            unsafe { raii::Semaphore::new(render_device.clone())? };
+        let graphics_commands_completed_semaphore = unsafe {
+            raii::Semaphore::new(
+                render_device.clone(),
+                &vk::SemaphoreCreateInfo::default(),
+            )?
+        };
         graphics_commands_completed_semaphore.set_debug_name(format!(
             "Frame {index} Graphics Commands Completed"
         ));
