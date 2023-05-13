@@ -1,44 +1,23 @@
 use {
     crate::graphics::{
-        vulkan_api::{OneTimeSubmitCommandBuffer, RenderDevice},
+        vulkan_api::{raii, OneTimeSubmitCommandBuffer, RenderDevice},
         GraphicsError,
     },
     anyhow::Context,
     ash::vk,
-    ccthw_ash_allocator::{Allocation, AllocatorError},
-    std::path::Path,
+    std::{path::Path, sync::Arc},
 };
 
 /// Represents a 2D rgba texture which can be used by shaders.
 pub struct Texture2D {
-    pub image: vk::Image,
-    pub image_view: vk::ImageView,
-    allocation: Allocation,
-}
-
-impl Texture2D {
-    /// Destroy the texture.
-    ///
-    /// # Safety
-    ///
-    /// Unsafe because:
-    /// - the application must call this before the render device is dropped.
-    /// - the application is responsible for synchronizing access to the
-    ///   texture.
-    pub unsafe fn destroy(&mut self, render_device: &mut RenderDevice) {
-        render_device
-            .device()
-            .destroy_image_view(self.image_view, None);
-        render_device
-            .memory()
-            .free_image(self.image, self.allocation.clone());
-    }
+    pub image_view: raii::ImageView,
+    pub image: raii::Image,
 }
 
 pub struct TextureLoader {
-    staging_buffer: vk::Buffer,
-    staging_memory: Allocation,
+    staging_buffer: raii::Buffer,
     one_time_submit: OneTimeSubmitCommandBuffer,
+    render_device: Arc<RenderDevice>,
 }
 
 impl TextureLoader {
@@ -51,34 +30,23 @@ impl TextureLoader {
     /// - the application must call destroy on this instance before the render
     ///   device is dropped.
     pub unsafe fn new(
-        render_device: &mut RenderDevice,
+        render_device: Arc<RenderDevice>,
     ) -> Result<Self, GraphicsError> {
-        let (staging_buffer, staging_memory) = unsafe {
-            Self::allocate_staging_buffer(render_device, 1024 * 1024 * 4)?
-        };
+        let staging_buffer = Self::allocate_staging_buffer(
+            render_device.clone(),
+            1024 * 1024 * 4,
+        )?;
+
         let one_time_submit = OneTimeSubmitCommandBuffer::new(
-            render_device,
+            render_device.clone(),
             render_device.graphics_queue().clone(),
         )?;
+
         Ok(Self {
             staging_buffer,
-            staging_memory,
             one_time_submit,
+            render_device,
         })
-    }
-
-    /// Destroy all of the underlying Vulkan resources.
-    ///
-    /// # Safety
-    ///
-    /// Unsafe because:
-    /// - the application must not use the TextureLoader after calling destroy.
-    /// - the application must call destroy before the render device is dropped.
-    pub unsafe fn destroy(&mut self, render_device: &mut RenderDevice) {
-        self.one_time_submit.destroy(render_device);
-        render_device
-            .memory()
-            .free_buffer(self.staging_buffer, self.staging_memory.clone());
     }
 
     /// Read image data from a file on disk and create a 2D texture.
@@ -90,7 +58,6 @@ impl TextureLoader {
     ///   render device is dropped
     pub unsafe fn load_texture_2d(
         &mut self,
-        render_device: &mut RenderDevice,
         texture_path: impl AsRef<Path>,
     ) -> Result<Texture2D, GraphicsError> {
         let img = image::io::Reader::open(&texture_path)
@@ -110,13 +77,16 @@ impl TextureLoader {
             .into_rgba8();
 
         self.resize_staging_buffer(
-            render_device,
+            self.render_device.clone(),
             (img.as_raw().len() * std::mem::size_of::<u8>()) as u64,
         )?;
 
         // Write image data into the staging buffer
         unsafe {
-            let ptr = self.staging_memory.map(render_device.device())?;
+            let ptr = self
+                .staging_buffer
+                .allocation()
+                .map(self.render_device.device())?;
             assert!(ptr as usize % std::mem::align_of::<u8>() == 0);
             let data = std::slice::from_raw_parts_mut(
                 ptr as *mut u8,
@@ -125,9 +95,9 @@ impl TextureLoader {
             data.copy_from_slice(img.as_raw());
         };
 
-        let (image, image_allocation) = unsafe {
+        let image = unsafe {
             let queue_family_index =
-                render_device.graphics_queue().family_index();
+                self.render_device.graphics_queue().family_index();
             let create_info = vk::ImageCreateInfo {
                 image_type: vk::ImageType::TYPE_2D,
                 format: vk::Format::R8G8B8A8_UNORM,
@@ -149,7 +119,8 @@ impl TextureLoader {
                 },
                 ..vk::ImageCreateInfo::default()
             };
-            render_device.memory().allocate_image(
+            raii::Image::new(
+                self.render_device.clone(),
                 &create_info,
                 vk::MemoryPropertyFlags::DEVICE_LOCAL,
             )?
@@ -157,7 +128,7 @@ impl TextureLoader {
 
         let image_view = unsafe {
             let create_info = vk::ImageViewCreateInfo {
-                image,
+                image: image.raw(),
                 view_type: vk::ImageViewType::TYPE_2D,
                 format: vk::Format::R8G8B8A8_UNORM,
                 subresource_range: vk::ImageSubresourceRange {
@@ -169,9 +140,7 @@ impl TextureLoader {
                 },
                 ..Default::default()
             };
-            render_device
-                .device()
-                .create_image_view(&create_info, None)?
+            raii::ImageView::new(self.render_device.clone(), &create_info)?
         };
 
         unsafe {
@@ -182,7 +151,7 @@ impl TextureLoader {
                 dst_access_mask: vk::AccessFlags2::TRANSFER_WRITE,
                 old_layout: vk::ImageLayout::UNDEFINED,
                 new_layout: vk::ImageLayout::TRANSFER_DST_OPTIMAL,
-                image,
+                image: image.raw(),
                 subresource_range: vk::ImageSubresourceRange {
                     aspect_mask: vk::ImageAspectFlags::COLOR,
                     base_mip_level: 0,
@@ -200,7 +169,7 @@ impl TextureLoader {
                 p_image_memory_barriers: &image_memory_barrier_before,
                 ..Default::default()
             };
-            render_device.device().cmd_pipeline_barrier2(
+            self.render_device.device().cmd_pipeline_barrier2(
                 self.one_time_submit.command_buffer(),
                 &dependency_info_before,
             );
@@ -224,14 +193,14 @@ impl TextureLoader {
                 ..Default::default()
             };
             let copy_buffer_to_image_info2 = vk::CopyBufferToImageInfo2 {
-                src_buffer: self.staging_buffer,
-                dst_image: image,
+                src_buffer: self.staging_buffer.raw(),
+                dst_image: image.raw(),
                 dst_image_layout: vk::ImageLayout::TRANSFER_DST_OPTIMAL,
                 region_count: 1,
                 p_regions: &regions,
                 ..Default::default()
             };
-            render_device.device().cmd_copy_buffer_to_image2(
+            self.render_device.device().cmd_copy_buffer_to_image2(
                 self.one_time_submit.command_buffer(),
                 &copy_buffer_to_image_info2,
             );
@@ -243,7 +212,7 @@ impl TextureLoader {
                 dst_access_mask: vk::AccessFlags2::SHADER_SAMPLED_READ,
                 old_layout: vk::ImageLayout::TRANSFER_DST_OPTIMAL,
                 new_layout: vk::ImageLayout::SHADER_READ_ONLY_OPTIMAL,
-                image,
+                image: image.raw(),
                 subresource_range: vk::ImageSubresourceRange {
                     aspect_mask: vk::ImageAspectFlags::COLOR,
                     base_mip_level: 0,
@@ -261,22 +230,16 @@ impl TextureLoader {
                 p_image_memory_barriers: &image_memory_barrier_after,
                 ..Default::default()
             };
-            render_device.device().cmd_pipeline_barrier2(
+            self.render_device.device().cmd_pipeline_barrier2(
                 self.one_time_submit.command_buffer(),
                 &dependency_info_after,
             );
         };
 
         // Queue Submission
-        unsafe {
-            self.one_time_submit.sync_submit_and_reset(render_device)?;
-        };
+        self.one_time_submit.sync_submit_and_reset()?;
 
-        Ok(Texture2D {
-            image,
-            image_view,
-            allocation: image_allocation,
-        })
+        Ok(Texture2D { image, image_view })
     }
 }
 
@@ -286,29 +249,22 @@ impl TextureLoader {
 impl TextureLoader {
     unsafe fn resize_staging_buffer(
         &mut self,
-        render_device: &mut RenderDevice,
+        render_device: Arc<RenderDevice>,
         size: u64,
-    ) -> Result<(), AllocatorError> {
-        if self.staging_memory.size_in_bytes() > size {
+    ) -> Result<(), GraphicsError> {
+        if self.staging_buffer.allocation().size_in_bytes() > size {
             return Ok(());
         }
 
-        render_device
-            .memory()
-            .free_buffer(self.staging_buffer, self.staging_memory.clone());
-
-        let (staging_buffer, staging_memory) =
+        self.staging_buffer =
             Self::allocate_staging_buffer(render_device, size)?;
-        self.staging_buffer = staging_buffer;
-        self.staging_memory = staging_memory;
-
         Ok(())
     }
 
     unsafe fn allocate_staging_buffer(
-        render_device: &mut RenderDevice,
+        render_device: Arc<RenderDevice>,
         size: u64,
-    ) -> Result<(vk::Buffer, Allocation), AllocatorError> {
+    ) -> Result<raii::Buffer, GraphicsError> {
         unsafe {
             let index = render_device.graphics_queue().family_index();
             let create_info = vk::BufferCreateInfo {
@@ -319,7 +275,8 @@ impl TextureLoader {
                 usage: vk::BufferUsageFlags::TRANSFER_SRC,
                 ..Default::default()
             };
-            render_device.memory().allocate_buffer(
+            raii::Buffer::new(
+                render_device,
                 &create_info,
                 vk::MemoryPropertyFlags::HOST_VISIBLE
                     | vk::MemoryPropertyFlags::HOST_COHERENT,

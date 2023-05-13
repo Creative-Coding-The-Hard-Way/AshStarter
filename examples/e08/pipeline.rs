@@ -1,37 +1,39 @@
 use {
-    anyhow::Context,
     ash::vk,
-    ccthw::graphics::{vulkan_api::create_shader_module, GraphicsError},
-    scopeguard::defer,
-    std::ffi::CString,
+    ccthw::graphics::{
+        vulkan_api::{raii, RenderDevice},
+        GraphicsError,
+    },
+    std::{ffi::CString, sync::Arc},
 };
 
 /// Create the graphics pipeline for this example.
 pub unsafe fn create_pipeline(
-    device: &ash::Device,
+    render_device: Arc<RenderDevice>,
     vertex_source: &[u8],
     fragment_source: &[u8],
-    layout: vk::PipelineLayout,
-    render_pass: vk::RenderPass,
-) -> Result<vk::Pipeline, GraphicsError> {
-    let vertex_shader_module = create_shader_module(device, vertex_source)
-        .context("Error while creating the vertex shader module")?;
-    defer! { device.destroy_shader_module(vertex_shader_module, None) };
-
-    let fragment_shader_module = create_shader_module(device, fragment_source)
-        .context("Error while creating the fragment shader module")?;
-    defer! { device.destroy_shader_module(fragment_shader_module, None) };
+    layout: &raii::PipelineLayout,
+    render_pass: &raii::RenderPass,
+) -> Result<raii::Pipeline, GraphicsError> {
+    let vertex_shader_module = raii::ShaderModule::new_from_bytes(
+        render_device.clone(),
+        vertex_source,
+    )?;
+    let fragment_shader_module = raii::ShaderModule::new_from_bytes(
+        render_device.clone(),
+        fragment_source,
+    )?;
 
     let shader_entry_name = CString::new("main").unwrap();
     let stages = [
         vk::PipelineShaderStageCreateInfo {
-            module: vertex_shader_module,
+            module: vertex_shader_module.raw(),
             stage: vk::ShaderStageFlags::VERTEX,
             p_name: shader_entry_name.as_ptr(),
             ..Default::default()
         },
         vk::PipelineShaderStageCreateInfo {
-            module: fragment_shader_module,
+            module: fragment_shader_module.raw(),
             stage: vk::ShaderStageFlags::FRAGMENT,
             p_name: shader_entry_name.as_ptr(),
             ..Default::default()
@@ -113,25 +115,13 @@ pub unsafe fn create_pipeline(
         p_tessellation_state: std::ptr::null(),
         p_viewport_state: &viewport_state,
         p_depth_stencil_state: std::ptr::null(),
-        render_pass,
-        layout,
+        render_pass: render_pass.raw(),
+        layout: layout.raw(),
         subpass: 0,
 
         base_pipeline_handle: vk::Pipeline::null(),
         base_pipeline_index: 0,
         ..Default::default()
     };
-    let result = device.create_graphics_pipelines(
-        vk::PipelineCache::null(),
-        &[create_info],
-        None,
-    );
-    let pipeline = match result {
-        Ok(mut pipelines) => pipelines.pop().unwrap(),
-        Err((_, result)) => {
-            return Err(GraphicsError::VulkanError(result))
-                .context("Error creating graphics pipeline")?;
-        }
-    };
-    Ok(pipeline)
+    raii::Pipeline::new_graphics_pipeline(render_device, create_info)
 }

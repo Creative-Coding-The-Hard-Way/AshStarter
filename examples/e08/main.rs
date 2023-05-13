@@ -4,17 +4,17 @@ use {
     ccthw::{
         application::{Application, GlfwWindow, State},
         graphics::vulkan_api::{
-            create_descriptor_set_layout, create_pipeline_layout, ColorPass,
-            FrameStatus, FramesInFlight, RenderDevice, Texture2D,
-            TextureLoader,
+            raii, ColorPass, FrameStatus, FramesInFlight, RenderDevice,
+            Texture2D, TextureLoader,
         },
     },
     ccthw_ash_instance::PhysicalDeviceFeatures,
+    std::sync::Arc,
 };
 
 mod pipeline;
 
-use {self::pipeline::create_pipeline, ccthw_ash_allocator::Allocation};
+use self::pipeline::create_pipeline;
 
 #[repr(packed)]
 #[derive(Copy, Clone, Debug)]
@@ -24,32 +24,32 @@ pub struct Vertex {
 }
 
 struct TextureExample {
+    frames_in_flight: FramesInFlight,
+
     // Image resources
-    texture: Texture2D,
-    sampler: vk::Sampler,
+    _texture: Texture2D,
+    _sampler: raii::Sampler,
 
     // Vertex resources
-    buffer: vk::Buffer,
-    allocation: Allocation,
+    _buffer: raii::Buffer,
 
     // Descriptor Set bindigs
-    descriptor_set: vk::DescriptorSet,
-    descriptor_pool: vk::DescriptorPool,
-    descriptor_set_layout: vk::DescriptorSetLayout,
+    descriptor_pool: raii::DescriptorPool,
+    _descriptor_set_layout: raii::DescriptorSetLayout,
 
     // Pipeline / Per-Frame resources
-    pipeline_layout: vk::PipelineLayout,
-    pipeline: vk::Pipeline,
+    pipeline_layout: raii::PipelineLayout,
+    pipeline: raii::Pipeline,
+
     color_pass: ColorPass,
-    frames_in_flight: FramesInFlight,
-    render_device: RenderDevice,
+    render_device: Arc<RenderDevice>,
 }
 
 impl State for TextureExample {
     fn new(window: &mut GlfwWindow) -> Result<Self> {
         window.set_key_polling(true);
 
-        let mut render_device = unsafe {
+        let render_device = unsafe {
             // SAFE because the render device is destroyed when state is
             // dropped.
             let mut device_features = PhysicalDeviceFeatures::default();
@@ -62,7 +62,7 @@ impl State for TextureExample {
         let frames_in_flight = unsafe {
             // SAFE because the render device is destroyed when state is dropped
             FramesInFlight::new(
-                &render_device,
+                render_device.clone(),
                 window.get_framebuffer_size(),
                 3,
             )?
@@ -70,7 +70,7 @@ impl State for TextureExample {
 
         let color_pass = unsafe {
             ColorPass::new(
-                render_device.device(),
+                render_device.clone(),
                 frames_in_flight.swapchain().images(),
                 frames_in_flight.swapchain().image_format(),
                 frames_in_flight.swapchain().extent(),
@@ -78,8 +78,8 @@ impl State for TextureExample {
         };
 
         let descriptor_set_layout = unsafe {
-            create_descriptor_set_layout(
-                render_device.device(),
+            raii::DescriptorSetLayout::new_with_bindings(
+                render_device.clone(),
                 &[
                     vk::DescriptorSetLayoutBinding {
                         binding: 0,
@@ -100,36 +100,37 @@ impl State for TextureExample {
             )?
         };
         let pipeline_layout = unsafe {
-            create_pipeline_layout(
-                render_device.device(),
-                &[descriptor_set_layout],
+            raii::PipelineLayout::new_with_layouts_and_ranges(
+                render_device.clone(),
+                &[descriptor_set_layout.raw()],
                 &[],
             )?
         };
         let pipeline = unsafe {
             create_pipeline(
-                render_device.device(),
+                render_device.clone(),
                 include_bytes!("./shaders/static_triangle.vert.spv"),
                 include_bytes!("./shaders/static_triangle.frag.spv"),
-                pipeline_layout,
+                &pipeline_layout,
                 color_pass.render_pass(),
             )?
         };
 
-        let (buffer, allocation) = unsafe {
+        let buffer = unsafe {
             let create_info = vk::BufferCreateInfo {
                 size: (std::mem::size_of::<Vertex>() * 6) as u64,
                 usage: vk::BufferUsageFlags::STORAGE_BUFFER,
                 ..vk::BufferCreateInfo::default()
             };
-            render_device.memory().allocate_buffer(
+            raii::Buffer::new(
+                render_device.clone(),
                 &create_info,
                 vk::MemoryPropertyFlags::HOST_VISIBLE
                     | vk::MemoryPropertyFlags::HOST_COHERENT,
             )?
         };
 
-        let ptr = unsafe { allocation.map(render_device.device())? };
+        let ptr = unsafe { buffer.allocation().map(render_device.device())? };
         let vertices = [
             // top triangle
             Vertex {
@@ -163,16 +164,8 @@ impl State for TextureExample {
         };
 
         let texture = unsafe {
-            let mut loader = TextureLoader::new(&mut render_device)?;
-
-            let texture = loader.load_texture_2d(
-                &mut render_device,
-                "examples/e08/my_example_texture.png",
-            )?;
-
-            loader.destroy(&mut render_device);
-
-            texture
+            TextureLoader::new(render_device.clone())?
+                .load_texture_2d("examples/e08/my_example_texture.png")?
         };
 
         let sampler = unsafe {
@@ -182,58 +175,43 @@ impl State for TextureExample {
                 min_filter: vk::Filter::LINEAR,
                 ..Default::default()
             };
-            render_device.device().create_sampler(&create_info, None)?
+            raii::Sampler::new(render_device.clone(), &create_info)?
         };
 
-        let descriptor_pool = unsafe {
-            let pool_sizes = [
-                vk::DescriptorPoolSize {
-                    ty: vk::DescriptorType::STORAGE_BUFFER,
-                    descriptor_count: 1,
-                },
-                vk::DescriptorPoolSize {
-                    ty: vk::DescriptorType::COMBINED_IMAGE_SAMPLER,
-                    descriptor_count: 1,
-                },
-            ];
-            let create_info = vk::DescriptorPoolCreateInfo {
-                max_sets: 1,
-                pool_size_count: pool_sizes.len() as u32,
-                p_pool_sizes: pool_sizes.as_ptr(),
-                ..vk::DescriptorPoolCreateInfo::default()
-            };
-            render_device
-                .device()
-                .create_descriptor_pool(&create_info, None)?
+        let mut descriptor_pool = unsafe {
+            raii::DescriptorPool::new_with_sizes(
+                render_device.clone(),
+                1,
+                &[
+                    vk::DescriptorPoolSize {
+                        ty: vk::DescriptorType::STORAGE_BUFFER,
+                        descriptor_count: 1,
+                    },
+                    vk::DescriptorPoolSize {
+                        ty: vk::DescriptorType::COMBINED_IMAGE_SAMPLER,
+                        descriptor_count: 1,
+                    },
+                ],
+            )?
         };
-
-        let descriptor_set = unsafe {
-            let create_info = vk::DescriptorSetAllocateInfo {
-                descriptor_pool,
-                descriptor_set_count: 1,
-                p_set_layouts: &descriptor_set_layout,
-                ..vk::DescriptorSetAllocateInfo::default()
-            };
-            render_device
-                .device()
-                .allocate_descriptor_sets(&create_info)?[0]
-        };
+        let _ = descriptor_pool
+            .allocate_descriptor_sets(&[&descriptor_set_layout])?;
 
         unsafe {
             let buffer_info = vk::DescriptorBufferInfo {
-                buffer,
-                offset: allocation.offset_in_bytes(),
-                range: allocation.size_in_bytes(),
+                buffer: buffer.raw(),
+                offset: buffer.allocation().offset_in_bytes(),
+                range: buffer.allocation().size_in_bytes(),
             };
             let image_info = vk::DescriptorImageInfo {
-                sampler,
-                image_view: texture.image_view,
+                sampler: sampler.raw(),
+                image_view: texture.image_view.raw(),
                 image_layout: vk::ImageLayout::SHADER_READ_ONLY_OPTIMAL,
             };
             render_device.device().update_descriptor_sets(
                 &[
                     vk::WriteDescriptorSet {
-                        dst_set: descriptor_set,
+                        dst_set: descriptor_pool.descriptor_set(0),
                         dst_binding: 0,
                         dst_array_element: 0,
                         descriptor_type: vk::DescriptorType::STORAGE_BUFFER,
@@ -244,7 +222,7 @@ impl State for TextureExample {
                         ..vk::WriteDescriptorSet::default()
                     },
                     vk::WriteDescriptorSet {
-                        dst_set: descriptor_set,
+                        dst_set: descriptor_pool.descriptor_set(0),
                         dst_binding: 1,
                         dst_array_element: 0,
                         descriptor_type:
@@ -259,18 +237,20 @@ impl State for TextureExample {
         };
 
         Ok(Self {
-            texture,
-            sampler,
+            frames_in_flight,
 
-            buffer,
-            allocation,
-            descriptor_set,
+            _texture: texture,
+            _sampler: sampler,
+
+            _buffer: buffer,
+
             descriptor_pool,
-            descriptor_set_layout,
+            _descriptor_set_layout: descriptor_set_layout,
+
             pipeline_layout,
             pipeline,
+
             color_pass,
-            frames_in_flight,
             render_device,
         })
     }
@@ -294,13 +274,12 @@ impl State for TextureExample {
     }
 
     fn update(&mut self, window: &mut GlfwWindow) -> Result<()> {
-        let frame =
-            match self.frames_in_flight.acquire_frame(&self.render_device)? {
-                FrameStatus::FrameAcquired(frame) => frame,
-                FrameStatus::SwapchainNeedsRebuild => {
-                    return self.rebuild_swapchain(window);
-                }
-            };
+        let frame = match self.frames_in_flight.acquire_frame()? {
+            FrameStatus::FrameAcquired(frame) => frame,
+            FrameStatus::SwapchainNeedsRebuild => {
+                return self.rebuild_swapchain(window);
+            }
+        };
 
         unsafe {
             self.color_pass.begin_render_pass(
@@ -315,7 +294,7 @@ impl State for TextureExample {
             self.render_device.device().cmd_bind_pipeline(
                 frame.command_buffer(),
                 vk::PipelineBindPoint::GRAPHICS,
-                self.pipeline,
+                self.pipeline.raw(),
             );
             let vk::Extent2D { width, height } =
                 self.frames_in_flight.swapchain().extent();
@@ -342,9 +321,9 @@ impl State for TextureExample {
             self.render_device.device().cmd_bind_descriptor_sets(
                 frame.command_buffer(),
                 vk::PipelineBindPoint::GRAPHICS,
-                self.pipeline_layout,
+                self.pipeline_layout.raw(),
                 0,
-                &[self.descriptor_set],
+                &[self.descriptor_pool.descriptor_set(0)],
                 &[],
             );
             self.render_device.device().cmd_draw(
@@ -360,8 +339,7 @@ impl State for TextureExample {
                 .cmd_end_render_pass(frame.command_buffer());
         }
 
-        self.frames_in_flight
-            .present_frame(&self.render_device, frame)?;
+        self.frames_in_flight.present_frame(frame)?;
 
         Ok(())
     }
@@ -372,69 +350,26 @@ impl TextureExample {
     /// out of date.
     fn rebuild_swapchain(&mut self, window: &GlfwWindow) -> Result<()> {
         unsafe {
-            self.frames_in_flight.stall_and_rebuild_swapchain(
-                &self.render_device,
-                window.get_framebuffer_size(),
-            )?;
+            self.frames_in_flight
+                .stall_and_rebuild_swapchain(window.get_framebuffer_size())?;
 
-            self.color_pass.destroy(self.render_device.device());
             self.color_pass = ColorPass::new(
-                self.render_device.device(),
+                self.render_device.clone(),
                 self.frames_in_flight.swapchain().images(),
                 self.frames_in_flight.swapchain().image_format(),
                 self.frames_in_flight.swapchain().extent(),
             )?;
 
-            self.render_device
-                .device()
-                .destroy_pipeline(self.pipeline, None);
-
             self.pipeline = create_pipeline(
-                self.render_device.device(),
+                self.render_device.clone(),
                 include_bytes!("./shaders/static_triangle.vert.spv"),
                 include_bytes!("./shaders/static_triangle.frag.spv"),
-                self.pipeline_layout,
+                &self.pipeline_layout,
                 self.color_pass.render_pass(),
             )?;
         };
 
         Ok(())
-    }
-}
-
-impl Drop for TextureExample {
-    fn drop(&mut self) {
-        unsafe {
-            self.frames_in_flight
-                .wait_for_all_frames_to_complete(&self.render_device)
-                .expect("Error waiting for all frame operations to complete");
-
-            self.render_device
-                .device()
-                .destroy_sampler(self.sampler, None);
-            self.texture.destroy(&mut self.render_device);
-
-            self.render_device
-                .device()
-                .destroy_descriptor_pool(self.descriptor_pool, None);
-
-            self.render_device
-                .memory()
-                .free_buffer(self.buffer, self.allocation.clone());
-
-            self.render_device
-                .device()
-                .destroy_pipeline(self.pipeline, None);
-            self.render_device
-                .device()
-                .destroy_pipeline_layout(self.pipeline_layout, None);
-            self.render_device.device().destroy_descriptor_set_layout(
-                self.descriptor_set_layout,
-                None,
-            );
-            self.color_pass.destroy(self.render_device.device());
-            self.frames_in_flight.destroy(&self.render_device);
-        }
     }
 }
 

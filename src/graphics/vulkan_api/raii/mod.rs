@@ -2,6 +2,7 @@ mod buffer;
 mod command_pool;
 mod descriptor_pool;
 mod descriptor_set_layout;
+mod image;
 mod pipeline;
 mod pipeline_layout;
 mod shader_module;
@@ -14,8 +15,9 @@ use {
 
 pub use self::{
     buffer::Buffer, command_pool::CommandPool, descriptor_pool::DescriptorPool,
-    descriptor_set_layout::DescriptorSetLayout, pipeline::Pipeline,
-    pipeline_layout::PipelineLayout, shader_module::ShaderModule,
+    descriptor_set_layout::DescriptorSetLayout, image::Image,
+    pipeline::Pipeline, pipeline_layout::PipelineLayout,
+    shader_module::ShaderModule,
 };
 
 macro_rules! raii_wrapper {
@@ -113,4 +115,11 @@ raii_wrapper!(
     SEMAPHORE,
     create_semaphore,
     destroy_semaphore
+);
+raii_wrapper!(
+    Sampler,
+    SamplerCreateInfo,
+    SAMPLER,
+    create_sampler,
+    destroy_sampler
 );

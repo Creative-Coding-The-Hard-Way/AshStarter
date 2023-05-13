@@ -1,18 +1,19 @@
 use {
     crate::graphics::{
-        vulkan_api::{Queue, RenderDevice},
+        vulkan_api::{raii, Queue, RenderDevice},
         GraphicsError,
     },
     ash::vk,
     ccthw_ash_instance::VulkanHandle,
+    std::sync::Arc,
 };
 
 /// A utility for managing a small command pool which runs synchronous commands.
 pub struct OneTimeSubmitCommandBuffer {
-    command_pool: vk::CommandPool,
-    command_buffer: vk::CommandBuffer,
-    fence: vk::Fence,
+    command_pool: raii::CommandPool,
+    fence: raii::Fence,
     queue: Queue,
+    render_device: Arc<RenderDevice>,
 }
 
 impl OneTimeSubmitCommandBuffer {
@@ -28,7 +29,7 @@ impl OneTimeSubmitCommandBuffer {
     /// Unsafe because:
     /// - The application must destroy this resource before exiting.
     pub unsafe fn new(
-        render_device: &RenderDevice,
+        render_device: Arc<RenderDevice>,
         queue: Queue,
     ) -> Result<Self, GraphicsError> {
         let pool_create_info = vk::CommandPoolCreateInfo {
@@ -36,38 +37,28 @@ impl OneTimeSubmitCommandBuffer {
             queue_family_index: queue.family_index(),
             ..Default::default()
         };
-        let command_pool = render_device
-            .device()
-            .create_command_pool(&pool_create_info, None)?;
-
-        let buffer_create_info = vk::CommandBufferAllocateInfo {
-            command_pool,
-            level: vk::CommandBufferLevel::PRIMARY,
-            command_buffer_count: 1,
-            ..Default::default()
-        };
-        let command_buffer = render_device
-            .device()
-            .allocate_command_buffers(&buffer_create_info)?[0];
+        let mut command_pool =
+            raii::CommandPool::new(render_device.clone(), &pool_create_info)?;
+        let _ = command_pool.allocate_primary_command_buffers(1)?;
 
         let begin_info = vk::CommandBufferBeginInfo {
             flags: vk::CommandBufferUsageFlags::ONE_TIME_SUBMIT,
             ..Default::default()
         };
-        render_device
-            .device()
-            .begin_command_buffer(command_buffer, &begin_info)?;
+        render_device.device().begin_command_buffer(
+            command_pool.primary_command_buffer(0),
+            &begin_info,
+        )?;
 
         let fence_create_info = vk::FenceCreateInfo::default();
-        let fence = render_device
-            .device()
-            .create_fence(&fence_create_info, None)?;
+        let fence =
+            raii::Fence::new(render_device.clone(), &fence_create_info)?;
 
         Ok(Self {
-            command_buffer,
             command_pool,
             fence,
             queue,
+            render_device,
         })
     }
 
@@ -82,7 +73,7 @@ impl OneTimeSubmitCommandBuffer {
     /// - the command buffer never needs to be explicitly ended by
     ///   vkEndCommandBuffer
     pub unsafe fn command_buffer(&self) -> vk::CommandBuffer {
-        self.command_buffer
+        self.command_pool.primary_command_buffer(0)
     }
 
     /// Submit the current command buffer and block the CPU until all commands
@@ -95,17 +86,16 @@ impl OneTimeSubmitCommandBuffer {
     ///   resources referenced by the commands as they execute.
     pub unsafe fn sync_submit_and_reset(
         &mut self,
-        render_device: &RenderDevice,
     ) -> Result<(), GraphicsError> {
-        render_device
+        self.render_device
             .device()
-            .end_command_buffer(self.command_buffer)?;
+            .end_command_buffer(self.command_pool.primary_command_buffer(0))?;
 
         let command_buffer_info = vk::CommandBufferSubmitInfo {
-            command_buffer: self.command_buffer,
+            command_buffer: self.command_pool.primary_command_buffer(0),
             ..Default::default()
         };
-        render_device.device().queue_submit2(
+        self.render_device.device().queue_submit2(
             *self.queue.raw(),
             &[vk::SubmitInfo2 {
                 wait_semaphore_info_count: 0,
@@ -114,44 +104,26 @@ impl OneTimeSubmitCommandBuffer {
                 p_command_buffer_infos: &command_buffer_info,
                 ..Default::default()
             }],
-            self.fence,
+            self.fence.raw(),
         )?;
-        render_device.device().wait_for_fences(
-            &[self.fence],
+        self.render_device.device().wait_for_fences(
+            &[self.fence.raw()],
             true,
             u64::MAX,
         )?;
 
-        render_device.device().reset_command_pool(
-            self.command_pool,
+        self.render_device.device().reset_command_pool(
+            self.command_pool.raw(),
             vk::CommandPoolResetFlags::empty(),
         )?;
         let begin_info = vk::CommandBufferBeginInfo {
             flags: vk::CommandBufferUsageFlags::ONE_TIME_SUBMIT,
             ..Default::default()
         };
-        render_device
-            .device()
-            .begin_command_buffer(self.command_buffer, &begin_info)?;
+        self.render_device.device().begin_command_buffer(
+            self.command_pool.primary_command_buffer(0),
+            &begin_info,
+        )?;
         Ok(())
-    }
-
-    /// Destroy all of the underlying Vulkan resources.
-    ///
-    /// # Param
-    ///
-    /// - render_device: the render device is used to destroy the Vulkan
-    ///   resources
-    ///
-    /// # Safety
-    ///
-    /// Unsafe because:
-    /// - the OneTimeSubmitCommandBuffer must not be used after calling destroy
-    /// - destroy must be called before the render device is dropped
-    pub unsafe fn destroy(&mut self, render_device: &RenderDevice) {
-        render_device
-            .device()
-            .destroy_command_pool(self.command_pool, None);
-        render_device.device().destroy_fence(self.fence, None);
     }
 }
