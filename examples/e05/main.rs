@@ -48,12 +48,7 @@ impl State for FirstTriangleExample {
         };
 
         let color_pass = unsafe {
-            ColorPass::new(
-                render_device.clone(),
-                frames_in_flight.swapchain().images(),
-                frames_in_flight.swapchain().image_format(),
-                frames_in_flight.swapchain().extent(),
-            )?
+            ColorPass::new(render_device.clone(), frames_in_flight.swapchain())?
         };
 
         let descriptor_set_layout = unsafe {
@@ -116,13 +111,8 @@ impl State for FirstTriangleExample {
         };
 
         unsafe {
-            self.color_pass.begin_render_pass(
-                self.render_device.device(),
-                frame.command_buffer(),
-                vk::SubpassContents::INLINE,
-                frame.swapchain_image_index(),
-                [0.2, 0.2, 0.3, 1.0],
-            );
+            self.color_pass
+                .begin_render_pass_inline(&frame, [0.2, 0.2, 0.3, 1.0]);
 
             // draw commands go here
             self.render_device.device().cmd_bind_pipeline(
@@ -181,9 +171,7 @@ impl FirstTriangleExample {
 
             self.color_pass = ColorPass::new(
                 self.render_device.clone(),
-                self.frames_in_flight.swapchain().images(),
-                self.frames_in_flight.swapchain().image_format(),
-                self.frames_in_flight.swapchain().extent(),
+                self.frames_in_flight.swapchain(),
             )?;
 
             self.pipeline = create_pipeline(

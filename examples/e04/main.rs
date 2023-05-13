@@ -41,12 +41,7 @@ impl State for RenderPassExample {
         };
 
         let color_pass = unsafe {
-            ColorPass::new(
-                render_device.clone(),
-                frames_in_flight.swapchain().images(),
-                frames_in_flight.swapchain().image_format(),
-                frames_in_flight.swapchain().extent(),
-            )?
+            ColorPass::new(render_device.clone(), frames_in_flight.swapchain())?
         };
 
         Ok(Self {
@@ -83,13 +78,8 @@ impl State for RenderPassExample {
         };
 
         unsafe {
-            self.color_pass.begin_render_pass(
-                self.render_device.device(),
-                frame.command_buffer(),
-                vk::SubpassContents::INLINE,
-                frame.swapchain_image_index(),
-                [0.5, 0.0, 0.0, 1.0],
-            );
+            self.color_pass
+                .begin_render_pass_inline(&frame, [0.5, 0.0, 0.0, 1.0]);
 
             // draw commands go here
 
@@ -114,9 +104,7 @@ impl RenderPassExample {
 
             self.color_pass = ColorPass::new(
                 self.render_device.clone(),
-                self.frames_in_flight.swapchain().images(),
-                self.frames_in_flight.swapchain().image_format(),
-                self.frames_in_flight.swapchain().extent(),
+                self.frames_in_flight.swapchain(),
             )?;
         };
 

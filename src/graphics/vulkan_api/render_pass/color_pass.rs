@@ -1,9 +1,8 @@
 use {
     crate::graphics::{
-        vulkan_api::{raii, RenderDevice},
+        vulkan_api::{raii, Frame, RenderDevice, Swapchain},
         GraphicsError,
     },
-    anyhow::Context,
     ash::vk,
     std::sync::Arc,
 };
@@ -19,6 +18,7 @@ pub struct ColorPass {
     render_pass: raii::RenderPass,
     framebuffers: Vec<raii::Framebuffer>,
     _image_views: Vec<raii::ImageView>,
+    render_device: Arc<RenderDevice>,
 }
 
 // Public API
@@ -30,7 +30,7 @@ impl ColorPass {
     ///
     /// # Params
     ///
-    /// * `device` - the render device used to create Vulkan resources
+    /// * `render_device` - the render device used to create Vulkan resources
     /// * `images` - the images that can be targeted by this render pass
     /// * `format` - the image format for all provided images
     /// * `extent` - the extent for all provided images
@@ -44,28 +44,32 @@ impl ColorPass {
     ///  - the targeted images MUST outlive the ColorPass.
     pub unsafe fn new(
         render_device: Arc<RenderDevice>,
-        images: &[vk::Image],
-        format: vk::Format,
-        extent: vk::Extent2D,
+        swapchain: &Swapchain,
     ) -> Result<Self, GraphicsError> {
-        let render_pass =
-            Self::create_render_pass(render_device.clone(), format)?;
-        let image_views =
-            Self::create_image_views(render_device.clone(), format, images)?;
+        let render_pass = Self::create_render_pass(
+            render_device.clone(),
+            swapchain.image_format(),
+        )?;
+        let image_views = Self::create_image_views(
+            render_device.clone(),
+            swapchain.image_format(),
+            swapchain.images(),
+        )?;
 
         let framebuffers = Self::create_framebuffers(
-            render_device,
+            render_device.clone(),
             render_pass.raw(),
-            extent,
+            swapchain.extent(),
             &image_views,
         )?;
 
         Ok(Self {
-            extent,
-            format,
+            extent: swapchain.extent(),
+            format: swapchain.image_format(),
             render_pass,
             framebuffers,
             _image_views: image_views,
+            render_device,
         })
     }
 
@@ -86,11 +90,6 @@ impl ColorPass {
 
     /// Begin a render pass for the given image index.
     ///
-    /// # Params
-    ///
-    /// * `device` - the render device used to create Vulkan resources
-    /// * `command_buffer` - the command buffer to start the subpass in
-    ///
     /// # Safety
     ///
     /// Unsafe because:
@@ -98,12 +97,9 @@ impl ColorPass {
     ///     number of images given when the CololPass was created.
     ///   - the ColorPass must not be destroyed until the command buffer
     ///     finishes executing or is discarded.
-    pub unsafe fn begin_render_pass(
+    pub unsafe fn begin_render_pass_inline(
         &self,
-        device: &ash::Device,
-        command_buffer: vk::CommandBuffer,
-        subpass_contents: vk::SubpassContents,
-        image_index: usize,
+        frame: &Frame,
         clear_color: [f32; 4],
     ) {
         let clear_values = [vk::ClearValue {
@@ -113,7 +109,7 @@ impl ColorPass {
         }];
         let begin_info = vk::RenderPassBeginInfo {
             render_pass: self.render_pass.raw(),
-            framebuffer: self.framebuffers[image_index].raw(),
+            framebuffer: self.framebuffers[frame.swapchain_image_index()].raw(),
             render_area: vk::Rect2D {
                 offset: vk::Offset2D { x: 0, y: 0 },
                 extent: self.extent(),
@@ -122,10 +118,10 @@ impl ColorPass {
             p_clear_values: clear_values.as_ptr(),
             ..Default::default()
         };
-        device.cmd_begin_render_pass(
-            command_buffer,
+        self.render_device.device().cmd_begin_render_pass(
+            frame.command_buffer(),
             &begin_info,
-            subpass_contents,
+            vk::SubpassContents::INLINE,
         );
     }
 }
@@ -305,7 +301,6 @@ impl ColorPass {
             flags: vk::RenderPassCreateFlags::empty(),
             ..Default::default()
         };
-        Ok(raii::RenderPass::new(render_device, &create_info)
-            .context("Unexpected creating a single pass render pass!")?)
+        raii::RenderPass::new(render_device, &create_info)
     }
 }
