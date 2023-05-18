@@ -16,6 +16,7 @@ pub struct BindlessVertex {
     pub pos: [f32; 4],
     pub uv: [f32; 2],
     pub pad: [f32; 2],
+    pub color: [f32; 4],
 }
 
 /// A utility for rendering high-performance textured triangles using bindless
