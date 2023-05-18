@@ -152,7 +152,7 @@ dependencies = [
 [[package]]
 name = "ccthw_ash_allocator"
 version = "0.1.0"
-source = "git+https://github.com/Creative-Coding-The-Hard-Way/ash_allocator.git#76af1fe77bf5b52d6232795687cae5193dc6b462"
+source = "git+https://github.com/Creative-Coding-The-Hard-Way/ash_allocator.git#6af652bb765a8fddb1b2d43891dbc48143d0bb45"
 dependencies = [
  "anyhow",
  "ash",

@@ -88,7 +88,10 @@ fn compile_shader(shader_file_path: &Path) -> Result<()> {
 fn main() -> Result<()> {
     let all_paths = glob::glob("./examples/**/*.vert")?
         .chain(glob::glob("./examples/**/*.frag")?)
-        .chain(glob::glob("./examples/**/*.comp")?);
+        .chain(glob::glob("./examples/**/*.comp")?)
+        .chain(glob::glob("./src/**/*.frag")?)
+        .chain(glob::glob("./src/**/*.vert")?)
+        .chain(glob::glob("./src/**/*.comp")?);
     for path_entry in all_paths {
         compile_shader(path_entry?.as_path())?;
     }
