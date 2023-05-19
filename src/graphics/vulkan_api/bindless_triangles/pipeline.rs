@@ -9,6 +9,7 @@ use {
 
 pub unsafe fn create_layouts(
     render_device: Arc<RenderDevice>,
+    texture_count: u32,
 ) -> Result<(raii::DescriptorSetLayout, raii::PipelineLayout), GraphicsError> {
     let descriptor_set_layout = raii::DescriptorSetLayout::new_with_bindings(
         render_device.clone(),
@@ -23,7 +24,7 @@ pub unsafe fn create_layouts(
             vk::DescriptorSetLayoutBinding {
                 binding: 1,
                 descriptor_type: vk::DescriptorType::COMBINED_IMAGE_SAMPLER,
-                descriptor_count: 1,
+                descriptor_count: texture_count,
                 stage_flags: vk::ShaderStageFlags::FRAGMENT,
                 ..vk::DescriptorSetLayoutBinding::default()
             },

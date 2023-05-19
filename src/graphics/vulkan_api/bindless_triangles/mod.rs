@@ -11,18 +11,18 @@ use {
 mod pipeline;
 
 #[derive(Debug, Copy, Clone, PartialEq, Default)]
-#[repr(packed)]
+#[repr(C)]
 pub struct BindlessVertex {
     pub pos: [f32; 4],
-    pub uv: [f32; 2],
-    pub pad: [f32; 2],
+    pub uv: [f32; 3],
+    pub pad: [f32; 1],
     pub color: [f32; 4],
 }
 
 /// A utility for rendering high-performance textured triangles using bindless
 /// textures.
 pub struct BindlessTriangles {
-    texture: Texture2D,
+    textures: Vec<Arc<Texture2D>>,
 
     vertex_count: u32,
     vertex_buffers: Vec<raii::Buffer>,
@@ -48,10 +48,13 @@ impl BindlessTriangles {
         render_device: Arc<RenderDevice>,
         render_pass: &raii::RenderPass,
         frames_in_flight: &FramesInFlight,
-        texture: Texture2D,
+        textures: &[Arc<Texture2D>],
     ) -> Result<Self, GraphicsError> {
         let (descriptor_set_layout, pipeline_layout) =
-            pipeline::create_layouts(render_device.clone())?;
+            pipeline::create_layouts(
+                render_device.clone(),
+                textures.len() as u32,
+            )?;
 
         let pipeline = pipeline::create_pipeline(
             render_device.clone(),
@@ -107,13 +110,13 @@ impl BindlessTriangles {
                 &descriptor_pool,
                 index,
                 vertex_buffer,
-                &texture,
+                textures,
                 &sampler,
             );
         }
 
         Ok(Self {
-            texture,
+            textures: textures.to_owned(),
             vertex_count: 0,
             vertex_buffers,
             vertex_buffer_ptrs,
@@ -143,7 +146,7 @@ impl BindlessTriangles {
                     &self.descriptor_pool,
                     frame.frame_index(),
                     &self.vertex_buffers[frame.frame_index()],
-                    &self.texture,
+                    &self.textures,
                     &self.sampler,
                 );
             };
@@ -294,7 +297,7 @@ impl BindlessTriangles {
         descriptor_pool: &raii::DescriptorPool,
         index: usize,
         vertex_buffer: &raii::Buffer,
-        texture: &Texture2D,
+        textures: &[Arc<Texture2D>],
         sampler: &raii::Sampler,
     ) {
         let buffer_info = vk::DescriptorBufferInfo {
@@ -302,11 +305,14 @@ impl BindlessTriangles {
             offset: 0,
             range: vertex_buffer.allocation().size_in_bytes(),
         };
-        let image_info = vk::DescriptorImageInfo {
-            sampler: sampler.raw(),
-            image_view: texture.image_view.raw(),
-            image_layout: vk::ImageLayout::SHADER_READ_ONLY_OPTIMAL,
-        };
+        let image_infos = textures
+            .iter()
+            .map(|texture| vk::DescriptorImageInfo {
+                sampler: sampler.raw(),
+                image_view: texture.image_view.raw(),
+                image_layout: vk::ImageLayout::SHADER_READ_ONLY_OPTIMAL,
+            })
+            .collect::<Vec<vk::DescriptorImageInfo>>();
         render_device.device().update_descriptor_sets(
             &[
                 vk::WriteDescriptorSet {
@@ -316,8 +322,6 @@ impl BindlessTriangles {
                     descriptor_type: vk::DescriptorType::STORAGE_BUFFER,
                     descriptor_count: 1,
                     p_buffer_info: &buffer_info,
-                    p_image_info: std::ptr::null(),
-                    p_texel_buffer_view: std::ptr::null(),
                     ..vk::WriteDescriptorSet::default()
                 },
                 vk::WriteDescriptorSet {
@@ -325,10 +329,8 @@ impl BindlessTriangles {
                     dst_binding: 1,
                     dst_array_element: 0,
                     descriptor_type: vk::DescriptorType::COMBINED_IMAGE_SAMPLER,
-                    descriptor_count: 1,
-                    p_buffer_info: std::ptr::null(),
-                    p_image_info: &image_info,
-                    p_texel_buffer_view: std::ptr::null(),
+                    descriptor_count: image_infos.len() as u32,
+                    p_image_info: image_infos.as_ptr(),
                     ..vk::WriteDescriptorSet::default()
                 },
             ],

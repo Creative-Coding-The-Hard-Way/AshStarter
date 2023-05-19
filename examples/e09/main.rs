@@ -30,6 +30,15 @@ impl State for BindlessTrianglesExample {
             // enable synchronization2 for queue_submit2
             device_features.vulkan_13_features_mut().synchronization2 =
                 vk::TRUE;
+
+            // enable descriptor indexing for bindless graphics
+            device_features
+                .descriptor_indexing_features_mut()
+                .shader_sampled_image_array_non_uniform_indexing = vk::TRUE;
+            device_features
+                .descriptor_indexing_features_mut()
+                .runtime_descriptor_array = vk::TRUE;
+
             window.create_default_render_device(device_features)?
         };
 
@@ -46,17 +55,25 @@ impl State for BindlessTrianglesExample {
             ColorPass::new(render_device.clone(), frames_in_flight.swapchain())?
         };
 
-        let texture = unsafe {
-            TextureLoader::new(render_device.clone())?
-                .load_texture_2d("examples/e09/my_example_texture.png")?
-        };
+        let textures =
+            unsafe {
+                let mut loader = TextureLoader::new(render_device.clone())?;
+                vec![
+                    Arc::new(loader.load_texture_2d(
+                        "examples/e09/my_example_texture.png",
+                    )?),
+                    Arc::new(loader.load_texture_2d(
+                        "examples/e09/my_example_texture_2.png",
+                    )?),
+                ]
+            };
 
         let bindless_triangles = unsafe {
             BindlessTriangles::new(
                 render_device.clone(),
                 color_pass.render_pass(),
                 &frames_in_flight,
-                texture,
+                &textures,
             )?
         };
 
@@ -94,33 +111,69 @@ impl State for BindlessTrianglesExample {
             }
         };
 
+        let quad_at =
+            |x: f32, y: f32, texture_index: i32| -> [BindlessVertex; 6] {
+                let w = 0.5;
+                let h = 0.5;
+                let top = 0.0;
+                let bottom = 1.0;
+                let left = 0.0;
+                let right = 1.0;
+                let tex = texture_index as f32;
+                [
+                    // --------------
+                    // upper triangle
+                    BindlessVertex {
+                        pos: [x, y, 0.0, 1.0],
+                        uv: [left, top, tex],
+                        color: [1.0, 1.0, 1.0, 1.0],
+                        ..Default::default()
+                    },
+                    BindlessVertex {
+                        pos: [x + w, y, 0.0, 1.0],
+                        uv: [right, top, tex],
+                        color: [1.0, 1.0, 1.0, 1.0],
+                        ..Default::default()
+                    },
+                    BindlessVertex {
+                        pos: [x, y + h, 0.0, 1.0],
+                        uv: [left, bottom, tex],
+                        color: [1.0, 1.0, 1.0, 1.0],
+                        ..Default::default()
+                    },
+                    // --------------
+                    // lower triangle
+                    BindlessVertex {
+                        pos: [x, y + h, 0.0, 1.0],
+                        uv: [left, bottom, tex],
+                        color: [1.0, 1.0, 1.0, 1.0],
+                        ..Default::default()
+                    },
+                    BindlessVertex {
+                        pos: [x + w, y, 0.0, 1.0],
+                        uv: [right, top, tex],
+                        color: [1.0, 1.0, 1.0, 1.0],
+                        ..Default::default()
+                    },
+                    BindlessVertex {
+                        pos: [x + w, y + h, 0.0, 1.0],
+                        uv: [right, bottom, tex],
+                        color: [1.0, 1.0, 1.0, 1.0],
+                        ..Default::default()
+                    },
+                ]
+            };
+
+        let mut vertices = vec![];
+        vertices.extend_from_slice(&quad_at(-0.75, -0.25, 0));
+        vertices.extend_from_slice(&quad_at(0.25, -0.25, 1));
+
         unsafe {
             self.color_pass
                 .begin_render_pass_inline(&frame, [0.2, 0.2, 0.3, 1.0]);
 
-            self.bindless_triangles.write_vertices_for_frame(
-                &frame,
-                &[
-                    BindlessVertex {
-                        pos: [-0.5, -0.5, 0.0, 1.0],
-                        uv: [0.0, 0.0],
-                        color: [1.0, 1.0, 1.0, 1.0],
-                        ..Default::default()
-                    },
-                    BindlessVertex {
-                        pos: [0.0, 0.5, 0.0, 1.0],
-                        uv: [0.5, 1.0],
-                        color: [1.0, 1.0, 1.0, 1.0],
-                        ..Default::default()
-                    },
-                    BindlessVertex {
-                        pos: [0.5, -0.5, 0.0, 1.0],
-                        uv: [1.0, 0.0],
-                        color: [0.0, 0.0, 1.0, 1.0],
-                        ..Default::default()
-                    },
-                ],
-            )?;
+            self.bindless_triangles
+                .write_vertices_for_frame(&frame, &vertices)?;
 
             self.bindless_triangles.draw_vertices(
                 &frame,

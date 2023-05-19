@@ -111,6 +111,9 @@ impl OneTimeSubmitCommandBuffer {
             true,
             u64::MAX,
         )?;
+        self.render_device
+            .device()
+            .reset_fences(&[self.fence.raw()])?;
 
         self.render_device.device().reset_command_pool(
             self.command_pool.raw(),
