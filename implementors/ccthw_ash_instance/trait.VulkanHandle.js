@@ -1,0 +1,4 @@
+(function() {var implementors = {
+"ccthw":[["impl <a class=\"trait\" href=\"ccthw_ash_instance/trait.VulkanHandle.html\" title=\"trait ccthw_ash_instance::VulkanHandle\">VulkanHandle</a> for <a class=\"struct\" href=\"ccthw/graphics/vulkan_api/struct.Swapchain.html\" title=\"struct ccthw::graphics::vulkan_api::Swapchain\">Swapchain</a>"],["impl <a class=\"trait\" href=\"ccthw_ash_instance/trait.VulkanHandle.html\" title=\"trait ccthw_ash_instance::VulkanHandle\">VulkanHandle</a> for <a class=\"struct\" href=\"ccthw/graphics/vulkan_api/struct.Queue.html\" title=\"struct ccthw::graphics::vulkan_api::Queue\">Queue</a>"]],
+"ccthw_ash_instance":[]
+};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

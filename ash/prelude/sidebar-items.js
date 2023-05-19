@@ -1,1 +1,1 @@
-initSidebarItems({"type":[["VkResult",""]]});
+window.SIDEBAR_ITEMS = {"type":["VkResult"]};

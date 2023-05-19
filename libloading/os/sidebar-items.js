@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["windows","Windows implementation of dynamic library loading."]]});
+window.SIDEBAR_ITEMS = {"mod":["unix"]};

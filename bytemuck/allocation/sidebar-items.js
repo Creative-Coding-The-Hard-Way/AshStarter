@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["cast_box","cast_slice_box","cast_vec","pod_collect_to_vec","try_cast_box","try_cast_slice_box","try_cast_vec","try_zeroed_box","try_zeroed_slice_box","try_zeroed_vec","zeroed_box","zeroed_slice_box","zeroed_vec"],"trait":["TransparentWrapperAlloc"]};

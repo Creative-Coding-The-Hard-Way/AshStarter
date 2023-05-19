@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["frame_pipeline",""],["glfw_window",""],["math",""],["renderer",""],["timing",""],["vulkan",""],["vulkan_ext",""]]});
+window.SIDEBAR_ITEMS = {"mod":["application","graphics","math"]};

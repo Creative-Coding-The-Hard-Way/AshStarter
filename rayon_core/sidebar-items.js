@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["current_num_threads","current_thread_has_pending_tasks","current_thread_index","in_place_scope","in_place_scope_fifo","initialize","join","join_context","max_num_threads","scope","scope_fifo","spawn","spawn_fifo"],"struct":["Configuration","FnContext","Scope","ScopeFifo","ThreadBuilder","ThreadPool","ThreadPoolBuildError","ThreadPoolBuilder"]};

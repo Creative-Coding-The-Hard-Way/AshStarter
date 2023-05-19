@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["amd",""]]});
+window.SIDEBAR_ITEMS = {"mod":["amd"]};

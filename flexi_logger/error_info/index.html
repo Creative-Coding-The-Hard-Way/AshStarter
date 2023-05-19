@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Error codes of `flexi_logger`."><title>flexi_logger::error_info - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-c4dbdcde0fbd8430.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../../static.files/light-db279b6232be9c13.css"><link rel="stylesheet" disabled href="../../static.files/dark-cf923f49f397b216.css"><link rel="stylesheet" disabled href="../../static.files/ayu-be46fdc453a55015.css"><script src="../../static.files/storage-3891ce972e3a2bf8.js"></script><script defer src="../../static.files/main-98a684e84ae5b08b.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="logo-container" href="../../flexi_logger/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><h2></h2></nav><nav class="sidebar"><a class="logo-container" href="../../flexi_logger/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><h2 class="location"><a href="#">Module error_info</a></h2><div class="sidebar-elems"></div></nav><main><div class="width-limiter"><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="main-heading"><h1>Module <a href="../index.html">flexi_logger</a>::<wbr><a class="mod" href="#">error_info</a><button id="copy-path" title="Copy item path to clipboard"><img src="../../static.files/clipboard-7571035ce49a181d.svg" width="19" height="18" alt="Copy item path"></button></h1><span class="out-of-band"><a class="srclink" href="../../src/flexi_logger/error_info.rs.html#1-96">source</a> · <button id="toggle-all-docs" title="collapse all docs">[<span>&#x2212;</span>]</button></span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Error codes of <code>flexi_logger</code>.</p>
+<p>The following error codes are used to indicate the reason of an error.
+More details on them can be found here.</p>
+<h3 id="write"><a href="#write"><code>Write</code></a></h3>
+<p>Writing the log line to the output failed.</p>
+<p>Example:</p>
+<div class="example-wrap"><pre class="language-text"><code>[flexi_logger][ERRCODE::Write] writing log line failed, caused by Send
+</code></pre></div>
+<p>Possible reasons depend on the <code>WriteMode</code> and the output channel.</p>
+<p>With an asynchronous <code>WriteMode</code>, the root cause can be that the logger handle that was returned
+from the logger initialization was not assigned to a variable to keep it alive (see also
+<a href="https://docs.rs/flexi_logger/latest/flexi_logger/struct.Logger.html#method.start"><code>Logger::start()</code></a>).
+It is then dropped immediately, and in its <code>Drop</code> impl it cleans up all resources,
+including the asynchronous writer. So the next log output will fail with this error.</p>
+<h3 id="flush"><a href="#flush"><code>Flush</code></a></h3>
+<p>Explicit or automatic flushing of buffered log lines to the output failed.</p>
+<p>Example:</p>
+<div class="example-wrap"><pre class="language-text"><code>[flexi_logger][ERRCODE::Flush] flushing primary writer failed, caused by Send
+</code></pre></div>
+<p>For possible reasons, see <a href="#write">Write</a>.</p>
+<h3 id="format"><a href="#format"><code>Format</code></a></h3>
+<p>The chosen format function had produced an error.</p>
+<p>Example:</p>
+<div class="example-wrap"><pre class="language-text"><code>[flexi_logger][ERRCODE::Format] formatting failed, caused by ...
+</code></pre></div>
+<p>If this happens with one of <code>flexi_logger</code>s provided format functions, please open an issue.</p>
+<h3 id="poison"><a href="#poison"><code>Poison</code></a></h3>
+<p>Log entries can be written by all threads of your program. Loggers thus must be thread-safe,
+by guarding their mutable parts with <code>Mutex</code>es, <code>RwLocks</code>, etc. In case that a thread panics
+while owning one of these locks, the lock is subsequently considered “poisoned”.</p>
+<p>A typical root cause for this is some <code>panic!</code> in a <code>Debug</code> or <code>Display</code> implementation
+of a logged object.</p>
+<h3 id="logfile"><a href="#logfile"><code>LogFile</code></a></h3>
+<p>The <code>FileLogWriter</code> is not able to rotate the log file. The reason should be printed as well.</p>
+<h3 id="logfilewatcher"><a href="#logfilewatcher"><code>LogFileWatcher</code></a></h3>
+<p>The <code>FileLogWriter</code> is not able to watch the log file. The reason should be printed as well.</p>
+<h3 id="logspecfile"><a href="#logspecfile"><code>LogSpecFile</code></a></h3>
+<p>This error can only occur if you use <code>Logger::start_with_specfile</code>, where you specify a
+log-specification-file that you can edit, while the program is running, to influence
+which log lines it should write.</p>
+<p>Examples:</p>
+<div class="example-wrap"><pre class="language-text"><code>[flexi_logger][ERRCODE::LogSpecFile] continuing with previous log specification,
+because rereading the log specification file failed, caused by ...
+</code></pre></div>
+<p>The log-specification-file you chose with <code>Logger::start_with_specfile</code> cannot be opened,
+read, or successfully parsed.</p>
+<div class="example-wrap"><pre class="language-text"><code>[flexi_logger][ERRCODE::LogSpecFile] error while watching the specfile, caused by ...
+</code></pre></div>
+<p>Watching the log-specification-file failed.</p>
+<h3 id="symlink"><a href="#symlink"><code>Symlink</code></a></h3>
+<p>This error can only occur on unix systems, and when you use <code>Logger::create_symlink</code>, and
+indicates an issue with creating or replacing the symbolic link to the log file.</p>
+<h3 id="writerspec"><a href="#writerspec"><code>WriterSpec</code></a></h3>
+<p>The code uses in some log macro call the syntax to send the log line to a certain <code>LogWriter</code>,
+but this log writer does not exist.</p>
+</div></details></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="flexi_logger" data-themes="" data-resource-suffix="" data-rustdoc-version="1.69.0 (84c898d65 2023-04-16)" data-search-js="search-8a59a8356673ec1f.js" data-settings-js="settings-f0c5c39777a9a2f6.js" data-settings-css="settings-0bcba95ff279c1db.css" ></div></body></html>

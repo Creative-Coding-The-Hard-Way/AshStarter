@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["ortho","Build an orthographic projection matrix which transforms the given coordinate bounds to the Vulkan view volume. e.g. Input Values will be bounded by:"]]});

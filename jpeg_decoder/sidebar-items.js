@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["CodingProcess","Error","PixelFormat","UnsupportedFeature"],"struct":["Decoder","ImageInfo"]};

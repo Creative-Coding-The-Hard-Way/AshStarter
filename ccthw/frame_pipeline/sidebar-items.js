@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["FrameError",""]],"struct":[["FramePipeline","A frame pipeline aids with the swapchain acquire->render->present workflow."],["PerFrame","All per-frame resources required for coordinating the swapchain with multiple frames in-flight."]]});

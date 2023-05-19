@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["terminal_size","Returns the size of the terminal defaulting to STDOUT, if available."],["terminal_size_using_handle","Returns the size of the terminal using the given handle, if available."]],"struct":[["Height",""],["Width",""]]});
+window.SIDEBAR_ITEMS = {"fn":["terminal_size","terminal_size_using_fd"],"struct":["Height","Width"]};

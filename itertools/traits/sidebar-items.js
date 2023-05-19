@@ -1,1 +1,1 @@
-initSidebarItems({"trait":[["HomogeneousTuple","Implemented for homogeneous tuples of size up to 4."]]});
+window.SIDEBAR_ITEMS = {"trait":["HomogeneousTuple"]};

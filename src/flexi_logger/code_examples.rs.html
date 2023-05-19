@@ -1,718 +1,994 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `C:\Users\Bradley\.cargo\registry\src\github.com-1ecc6299db9ec823\flexi_logger-0.17.1\src\code_examples.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>code_examples.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script>
-    <noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../flexi_logger/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div>
-        </a><h2 class="location"></h2>
-    </nav>
-    <nav class="sidebar"><a class="sidebar-logo" href="../../flexi_logger/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div>
-        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../flexi_logger/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><div class="theme-picker hidden"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="22" height="22" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
-<span id="2">  2</span>
-<span id="3">  3</span>
-<span id="4">  4</span>
-<span id="5">  5</span>
-<span id="6">  6</span>
-<span id="7">  7</span>
-<span id="8">  8</span>
-<span id="9">  9</span>
-<span id="10"> 10</span>
-<span id="11"> 11</span>
-<span id="12"> 12</span>
-<span id="13"> 13</span>
-<span id="14"> 14</span>
-<span id="15"> 15</span>
-<span id="16"> 16</span>
-<span id="17"> 17</span>
-<span id="18"> 18</span>
-<span id="19"> 19</span>
-<span id="20"> 20</span>
-<span id="21"> 21</span>
-<span id="22"> 22</span>
-<span id="23"> 23</span>
-<span id="24"> 24</span>
-<span id="25"> 25</span>
-<span id="26"> 26</span>
-<span id="27"> 27</span>
-<span id="28"> 28</span>
-<span id="29"> 29</span>
-<span id="30"> 30</span>
-<span id="31"> 31</span>
-<span id="32"> 32</span>
-<span id="33"> 33</span>
-<span id="34"> 34</span>
-<span id="35"> 35</span>
-<span id="36"> 36</span>
-<span id="37"> 37</span>
-<span id="38"> 38</span>
-<span id="39"> 39</span>
-<span id="40"> 40</span>
-<span id="41"> 41</span>
-<span id="42"> 42</span>
-<span id="43"> 43</span>
-<span id="44"> 44</span>
-<span id="45"> 45</span>
-<span id="46"> 46</span>
-<span id="47"> 47</span>
-<span id="48"> 48</span>
-<span id="49"> 49</span>
-<span id="50"> 50</span>
-<span id="51"> 51</span>
-<span id="52"> 52</span>
-<span id="53"> 53</span>
-<span id="54"> 54</span>
-<span id="55"> 55</span>
-<span id="56"> 56</span>
-<span id="57"> 57</span>
-<span id="58"> 58</span>
-<span id="59"> 59</span>
-<span id="60"> 60</span>
-<span id="61"> 61</span>
-<span id="62"> 62</span>
-<span id="63"> 63</span>
-<span id="64"> 64</span>
-<span id="65"> 65</span>
-<span id="66"> 66</span>
-<span id="67"> 67</span>
-<span id="68"> 68</span>
-<span id="69"> 69</span>
-<span id="70"> 70</span>
-<span id="71"> 71</span>
-<span id="72"> 72</span>
-<span id="73"> 73</span>
-<span id="74"> 74</span>
-<span id="75"> 75</span>
-<span id="76"> 76</span>
-<span id="77"> 77</span>
-<span id="78"> 78</span>
-<span id="79"> 79</span>
-<span id="80"> 80</span>
-<span id="81"> 81</span>
-<span id="82"> 82</span>
-<span id="83"> 83</span>
-<span id="84"> 84</span>
-<span id="85"> 85</span>
-<span id="86"> 86</span>
-<span id="87"> 87</span>
-<span id="88"> 88</span>
-<span id="89"> 89</span>
-<span id="90"> 90</span>
-<span id="91"> 91</span>
-<span id="92"> 92</span>
-<span id="93"> 93</span>
-<span id="94"> 94</span>
-<span id="95"> 95</span>
-<span id="96"> 96</span>
-<span id="97"> 97</span>
-<span id="98"> 98</span>
-<span id="99"> 99</span>
-<span id="100">100</span>
-<span id="101">101</span>
-<span id="102">102</span>
-<span id="103">103</span>
-<span id="104">104</span>
-<span id="105">105</span>
-<span id="106">106</span>
-<span id="107">107</span>
-<span id="108">108</span>
-<span id="109">109</span>
-<span id="110">110</span>
-<span id="111">111</span>
-<span id="112">112</span>
-<span id="113">113</span>
-<span id="114">114</span>
-<span id="115">115</span>
-<span id="116">116</span>
-<span id="117">117</span>
-<span id="118">118</span>
-<span id="119">119</span>
-<span id="120">120</span>
-<span id="121">121</span>
-<span id="122">122</span>
-<span id="123">123</span>
-<span id="124">124</span>
-<span id="125">125</span>
-<span id="126">126</span>
-<span id="127">127</span>
-<span id="128">128</span>
-<span id="129">129</span>
-<span id="130">130</span>
-<span id="131">131</span>
-<span id="132">132</span>
-<span id="133">133</span>
-<span id="134">134</span>
-<span id="135">135</span>
-<span id="136">136</span>
-<span id="137">137</span>
-<span id="138">138</span>
-<span id="139">139</span>
-<span id="140">140</span>
-<span id="141">141</span>
-<span id="142">142</span>
-<span id="143">143</span>
-<span id="144">144</span>
-<span id="145">145</span>
-<span id="146">146</span>
-<span id="147">147</span>
-<span id="148">148</span>
-<span id="149">149</span>
-<span id="150">150</span>
-<span id="151">151</span>
-<span id="152">152</span>
-<span id="153">153</span>
-<span id="154">154</span>
-<span id="155">155</span>
-<span id="156">156</span>
-<span id="157">157</span>
-<span id="158">158</span>
-<span id="159">159</span>
-<span id="160">160</span>
-<span id="161">161</span>
-<span id="162">162</span>
-<span id="163">163</span>
-<span id="164">164</span>
-<span id="165">165</span>
-<span id="166">166</span>
-<span id="167">167</span>
-<span id="168">168</span>
-<span id="169">169</span>
-<span id="170">170</span>
-<span id="171">171</span>
-<span id="172">172</span>
-<span id="173">173</span>
-<span id="174">174</span>
-<span id="175">175</span>
-<span id="176">176</span>
-<span id="177">177</span>
-<span id="178">178</span>
-<span id="179">179</span>
-<span id="180">180</span>
-<span id="181">181</span>
-<span id="182">182</span>
-<span id="183">183</span>
-<span id="184">184</span>
-<span id="185">185</span>
-<span id="186">186</span>
-<span id="187">187</span>
-<span id="188">188</span>
-<span id="189">189</span>
-<span id="190">190</span>
-<span id="191">191</span>
-<span id="192">192</span>
-<span id="193">193</span>
-<span id="194">194</span>
-<span id="195">195</span>
-<span id="196">196</span>
-<span id="197">197</span>
-<span id="198">198</span>
-<span id="199">199</span>
-<span id="200">200</span>
-<span id="201">201</span>
-<span id="202">202</span>
-<span id="203">203</span>
-<span id="204">204</span>
-<span id="205">205</span>
-<span id="206">206</span>
-<span id="207">207</span>
-<span id="208">208</span>
-<span id="209">209</span>
-<span id="210">210</span>
-<span id="211">211</span>
-<span id="212">212</span>
-<span id="213">213</span>
-<span id="214">214</span>
-<span id="215">215</span>
-<span id="216">216</span>
-<span id="217">217</span>
-<span id="218">218</span>
-<span id="219">219</span>
-<span id="220">220</span>
-<span id="221">221</span>
-<span id="222">222</span>
-<span id="223">223</span>
-<span id="224">224</span>
-<span id="225">225</span>
-<span id="226">226</span>
-<span id="227">227</span>
-<span id="228">228</span>
-<span id="229">229</span>
-<span id="230">230</span>
-<span id="231">231</span>
-<span id="232">232</span>
-<span id="233">233</span>
-<span id="234">234</span>
-<span id="235">235</span>
-<span id="236">236</span>
-<span id="237">237</span>
-<span id="238">238</span>
-<span id="239">239</span>
-<span id="240">240</span>
-<span id="241">241</span>
-<span id="242">242</span>
-<span id="243">243</span>
-<span id="244">244</span>
-<span id="245">245</span>
-<span id="246">246</span>
-<span id="247">247</span>
-<span id="248">248</span>
-<span id="249">249</span>
-<span id="250">250</span>
-<span id="251">251</span>
-<span id="252">252</span>
-<span id="253">253</span>
-<span id="254">254</span>
-<span id="255">255</span>
-<span id="256">256</span>
-<span id="257">257</span>
-<span id="258">258</span>
-<span id="259">259</span>
-<span id="260">260</span>
-<span id="261">261</span>
-<span id="262">262</span>
-<span id="263">263</span>
-<span id="264">264</span>
-<span id="265">265</span>
-<span id="266">266</span>
-<span id="267">267</span>
-<span id="268">268</span>
-<span id="269">269</span>
-<span id="270">270</span>
-<span id="271">271</span>
-<span id="272">272</span>
-<span id="273">273</span>
-<span id="274">274</span>
-<span id="275">275</span>
-<span id="276">276</span>
-<span id="277">277</span>
-<span id="278">278</span>
-<span id="279">279</span>
-<span id="280">280</span>
-<span id="281">281</span>
-<span id="282">282</span>
-<span id="283">283</span>
-<span id="284">284</span>
-<span id="285">285</span>
-<span id="286">286</span>
-<span id="287">287</span>
-<span id="288">288</span>
-<span id="289">289</span>
-<span id="290">290</span>
-<span id="291">291</span>
-<span id="292">292</span>
-<span id="293">293</span>
-<span id="294">294</span>
-<span id="295">295</span>
-<span id="296">296</span>
-<span id="297">297</span>
-<span id="298">298</span>
-<span id="299">299</span>
-<span id="300">300</span>
-<span id="301">301</span>
-<span id="302">302</span>
-<span id="303">303</span>
-<span id="304">304</span>
-<span id="305">305</span>
-<span id="306">306</span>
-<span id="307">307</span>
-<span id="308">308</span>
-<span id="309">309</span>
-<span id="310">310</span>
-<span id="311">311</span>
-<span id="312">312</span>
-<span id="313">313</span>
-<span id="314">314</span>
-<span id="315">315</span>
-<span id="316">316</span>
-<span id="317">317</span>
-<span id="318">318</span>
-<span id="319">319</span>
-<span id="320">320</span>
-<span id="321">321</span>
-<span id="322">322</span>
-<span id="323">323</span>
-<span id="324">324</span>
-<span id="325">325</span>
-<span id="326">326</span>
-<span id="327">327</span>
-<span id="328">328</span>
-<span id="329">329</span>
-<span id="330">330</span>
-<span id="331">331</span>
-<span id="332">332</span>
-<span id="333">333</span>
-<span id="334">334</span>
-<span id="335">335</span>
-<span id="336">336</span>
-<span id="337">337</span>
-<span id="338">338</span>
-<span id="339">339</span>
-<span id="340">340</span>
-<span id="341">341</span>
-<span id="342">342</span>
-<span id="343">343</span>
-<span id="344">344</span>
-<span id="345">345</span>
-<span id="346">346</span>
-<span id="347">347</span>
-<span id="348">348</span>
-<span id="349">349</span>
-<span id="350">350</span>
-<span id="351">351</span>
-<span id="352">352</span>
-<span id="353">353</span>
-<span id="354">354</span>
-<span id="355">355</span>
-</pre><pre class="rust"><code><span class="doccomment">//! Here are some examples for the `flexi_logger` initialization.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ## Contents</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! - [Write logs to stderr](#write-logs-to-stderr)</span>
-<span class="doccomment">//! - [Choose the log output channel](#choose-the-log-output-channel)</span>
-<span class="doccomment">//! - [Use buffering to reduce I/O overhead](#use-buffering-to-reduce-io-overhead)</span>
-<span class="doccomment">//! - [Influence the location and name of the log file](#influence-the-location-and-name-of-the-log-file)</span>
-<span class="doccomment">//! - [Specify the format for the log lines explicitly](#specify-the-format-for-the-log-lines-explicitly)</span>
-<span class="doccomment">//! - [Use a fixed log file, and truncate or append the file on each program start](#use-a-fixed-log-file-and-truncate-or-append-the-file-on-each-program-start)</span>
-<span class="doccomment">//! - [Rotate the log file](#rotate-the-log-file)</span>
-<span class="doccomment">//! - [Reconfigure the log specification programmatically](#reconfigure-the-log-specification-programmatically)</span>
-<span class="doccomment">//! - [Reconfigure the log specification dynamically by editing a spec-file](#reconfigure-the-log-specification-dynamically-by-editing-a-spec-file)</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ## Write logs to stderr</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Expect the log specification in the environment variable `RUST_LOG`:</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ` Logger::`[`with_env()`](crate::Logger::with_env)`.start()?;`</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! (if `RUST_LOG` is not set, or if its value cannot be interpreted, nothing is logged)</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! or provide the log spec programmatically:</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ` Logger::`[`with_str(&quot;info&quot;)`](crate::Logger::with_str)`.start()?;`</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! or combine both options:</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ` Logger::`[`with_env_or_str(&quot;info&quot;)`](crate::Logger::with_env_or_str)`.start()?;`</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! After that, you just use the log-macros from the log crate.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ## Choose the log output channel</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! By default, logs are written to `stderr`.</span>
-<span class="doccomment">//! With [`Logger::log_target`](crate::Logger::log_target)</span>
-<span class="doccomment">//! you can send the logs to `stdout`, a file, an implementation of `LogWriter`,</span>
-<span class="doccomment">//! or write them not at all.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! When writing to files, you sometimes want to have parts of the log still on the terminal;</span>
-<span class="doccomment">//! this can be achieved with</span>
-<span class="doccomment">//! [`Logger::duplicate_to_stderr`](crate::Logger::duplicate_to_stderr) or</span>
-<span class="doccomment">//! [`Logger::duplicate_to_stdout`](crate::Logger::duplicate_to_stdout),</span>
-<span class="doccomment">//! which duplicate log messages to the terminal.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ```rust</span>
-<span class="doccomment">//! # use flexi_logger::{LogTarget,Logger,Duplicate};</span>
-<span class="doccomment">//! # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {</span>
-<span class="doccomment">//! Logger::with_str(&quot;info&quot;)</span>
-<span class="doccomment">//!    .log_target(LogTarget::File)              // write logs to file</span>
-<span class="doccomment">//!    .duplicate_to_stderr(Duplicate::Warn)     // print warnings and errors also to the console</span>
-<span class="doccomment">//!    .start()?;</span>
-<span class="doccomment">//! # Ok(())</span>
-<span class="doccomment">//! # }</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ## Use buffering to reduce I/O overhead</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! By default, every log line is directly written to the output, without buffering.</span>
-<span class="doccomment">//! This allows seeing new log lines in real time.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Using buffering reduces the program&#39;s I/O overhead, and thus increases overall performance,</span>
-<span class="doccomment">//! which can be important if logging is used heavily.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! **Note** that with buffering you should keep the [`LoggerHandle`](crate::LoggerHandle) and call</span>
-<span class="doccomment">//! [`shutdown`](crate::LoggerHandle::shutdown) at the very end of your program</span>
-<span class="doccomment">//! to ensure that all buffered log lines are flushed before the program terminates.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ```rust</span>
-<span class="doccomment">//! # use flexi_logger::{LogTarget,Logger,Duplicate};</span>
-<span class="doccomment">//! fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {</span>
-<span class="doccomment">//!     let logger = Logger::with_str(&quot;info&quot;)</span>
-<span class="doccomment">//!        .log_target(LogTarget::File)</span>
-<span class="doccomment">//!        .use_buffering(true)</span>
-<span class="doccomment">//!        .start()?;</span>
-<span class="doccomment">//!     // ... do all your work ...</span>
-<span class="doccomment">//!     logger.shutdown();</span>
-<span class="doccomment">//!     Ok(())</span>
-<span class="doccomment">//! }</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! If logging is used with low frequency, buffering can delay the appearance of log lines</span>
-<span class="doccomment">//! significantly. To avoid that, you can get the buffers flushed automatically in regular</span>
-<span class="doccomment">//! intervals.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ```rust</span>
-<span class="doccomment">//! # use flexi_logger::{LogTarget,Logger,Duplicate};</span>
-<span class="doccomment">//! fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {</span>
-<span class="doccomment">//!     let logger = Logger::with_str(&quot;info&quot;)</span>
-<span class="doccomment">//!        .log_target(LogTarget::File)</span>
-<span class="doccomment">//!        .buffer_and_flush()</span>
-<span class="doccomment">//!        .start()?;</span>
-<span class="doccomment">//!     // ... do all your work ...</span>
-<span class="doccomment">//!     logger.shutdown();</span>
-<span class="doccomment">//!     Ok(())</span>
-<span class="doccomment">//! }</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ## Influence the location and name of the log file</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! By default, the log files are created in the current directory (where the program was started).</span>
-<span class="doccomment">//! With [`Logger:directory`](crate::Logger::directory)</span>
-<span class="doccomment">//! you can specify a concrete folder in which the files should be created.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Using [`Logger::discriminant`](crate::Logger::discriminant)</span>
-<span class="doccomment">//! you can add a discriminating infix to the log file name.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! With [`Logger::suffix`](crate::Logger::suffix)</span>
-<span class="doccomment">//! you can change the suffix that is used for the log files.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! When writing to files, especially when they are in a distant folder, you may want to let the</span>
-<span class="doccomment">//! user know where the log file is.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! [`Logger::print_message`](crate::Logger::print_message)</span>
-<span class="doccomment">//! prints an info to `stdout` to which file the log is written.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! `create_symlink(path)` creates (on unix-systems only) a symbolic link at the</span>
-<span class="doccomment">//! specified path that points to the log file.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ```rust</span>
-<span class="doccomment">//! # use flexi_logger::Logger;</span>
-<span class="doccomment">//! # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {</span>
-<span class="doccomment">//! Logger::with_str(&quot;info&quot;)</span>
-<span class="doccomment">//!    .log_to_file()                            // write logs to file</span>
-<span class="doccomment">//!    .directory(&quot;traces&quot;)                      // create files in folder ./traces</span>
-<span class="doccomment">//!    .discriminant(&quot;Sample4711A&quot;)              // use infix in log file name</span>
-<span class="doccomment">//!    .suffix(&quot;trc&quot;)                            // use suffix .trc instead of .log</span>
-<span class="doccomment">//!    .print_message()                          //</span>
-<span class="doccomment">//!    .create_symlink(&quot;current_run&quot;)            // create a symbolic link to the current log file</span>
-<span class="doccomment">//!    .start()?;</span>
-<span class="doccomment">//! # Ok(())</span>
-<span class="doccomment">//! # }</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! This example will print a message</span>
-<span class="doccomment">//! &quot;Log is written to `./traces/foo_Sample4711A_2020-11-17_19-24-35.trc`&quot;</span>
-<span class="doccomment">//! and, on unix, create a symbolic link called `current_run`.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ## Specify the format for the log lines explicitly</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! With [`Logger::format`](crate::Logger::format)</span>
-<span class="doccomment">//! you set the format for all used output channels of `flexi_logger`.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! `flexi_logger` provides a couple of format functions, and you can also create and use your own,</span>
-<span class="doccomment">//! e.g. by copying and modifying one of the provided format functions.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Depending on the configuration, `flexi_logger` can write logs to multiple channels</span>
-<span class="doccomment">//! (stdout, stderr, files, or additional writers)</span>
-<span class="doccomment">//! at the same time. You can control the format for each output channel individually, using</span>
-<span class="doccomment">//! [`Logger::format_for_files`](crate::Logger::format_for_files),</span>
-<span class="doccomment">//! [`Logger::format_for_stderr`](crate::Logger::format_for_stderr),</span>
-<span class="doccomment">//! [`Logger::format_for_stdout`](crate::Logger::format_for_stdout), or</span>
-<span class="doccomment">//! [`Logger::format_for_writer`](crate::Logger::format_for_writer).</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//!  As argument for these functions you can use one of the provided non-coloring format functions</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//!  - [`default_format`](crate::default_format)</span>
-<span class="doccomment">//!  - [`detailed_format`](crate::detailed_format)</span>
-<span class="doccomment">//!  - [`opt_format`](crate::opt_format)</span>
-<span class="doccomment">//!  - [`with_thread`](crate::with_thread),</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! or one of their coloring pendants</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//!  - [`colored_default_format`](crate::colored_default_format)</span>
-<span class="doccomment">//!  - [`colored_detailed_format`](crate::colored_detailed_format)</span>
-<span class="doccomment">//!  - [`colored_opt_format`](crate::colored_opt_format).</span>
-<span class="doccomment">//!  - [`colored_with_thread`](crate::colored_with_thread).</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ### Adaptive Coloring</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! You can use coloring for `stdout` and/or `stderr`</span>
-<span class="doccomment">//! conditionally, such that colors are used when the output goes to a tty,</span>
-<span class="doccomment">//! and suppressed if you e.g. pipe the output to some other program.</span>
-<span class="doccomment">//! With</span>
-<span class="doccomment">//! [`Logger::adaptive_format_for_stderr`](crate::Logger::adaptive_format_for_stderr) or</span>
-<span class="doccomment">//! [`Logger::adaptive_format_for_stdout`](crate::Logger::adaptive_format_for_stdout)</span>
-<span class="doccomment">//! you can specify one of the provided format pairs</span>
-<span class="doccomment">//! (which are based on the format functions listed above),</span>
-<span class="doccomment">//! or you can provide your own colored and non-colored format functions.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ### Defaults</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! `flexi_logger` initializes by default equivalently to this:</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ```rust,ignore</span>
-<span class="doccomment">//! # use flexi_logger::{Logger,AdaptiveFormat,default_format};</span>
-<span class="doccomment">//! # use log::{debug, error, info, trace, warn};</span>
-<span class="doccomment">//! # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {</span>
-<span class="doccomment">//! # Logger::with_str(&quot;info&quot;)      // Write all error, warn, and info messages</span>
-<span class="doccomment">//! #   .directory(std::env::temp_dir())</span>
-<span class="doccomment">//!     .adaptive_format_for_stderr(AdaptiveFormat::Default)</span>
-<span class="doccomment">//!     .adaptive_format_for_stdout(AdaptiveFormat::Default)</span>
-<span class="doccomment">//!     .format_for_files(default_format)</span>
-<span class="doccomment">//!     .format_for_writer(default_format)</span>
-<span class="doccomment">//! #    .start()?;</span>
-<span class="doccomment">//! # error!(&quot;This is an error message&quot;);</span>
-<span class="doccomment">//! # warn!(&quot;This is a warning&quot;);</span>
-<span class="doccomment">//! # info!(&quot;This is an info message&quot;);</span>
-<span class="doccomment">//! # debug!(&quot;This is a debug message - you must not see it!&quot;);</span>
-<span class="doccomment">//! # trace!(&quot;This is a trace message - you must not see it!&quot;);</span>
-<span class="doccomment">//! #  run()</span>
-<span class="doccomment">//! # }</span>
-<span class="doccomment">//! # fn run() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {Ok(())}</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ## Use a fixed log file, and truncate or append the file on each program start</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! With [`Logger::log_to_file`](crate::Logger::log_to_file) and without rotation,</span>
-<span class="doccomment">//! `flexi_logger` uses by default files with a timestamp in the name, like</span>
-<span class="doccomment">//! `foo_2020-11-16_08-37-44.log` (for a program called `foo`), which are quite unique for each</span>
-<span class="doccomment">//! program start.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! With [`Logger::suppress_timestamp`](crate::Logger::suppress_timestamp)</span>
-<span class="doccomment">//! you get a simple fixed filename, like `foo.log`.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! In that case, a restart of the program will truncate an existing log file.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Use additionally [`Logger::append`](crate::Logger::append)</span>
-<span class="doccomment">//! to append the logs of each new run to the existing file.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ```rust</span>
-<span class="doccomment">//! # use flexi_logger::Logger;</span>
-<span class="doccomment">//! # use log::{debug, error, info, trace, warn};</span>
-<span class="doccomment">//! # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {</span>
-<span class="doccomment">//! Logger::with_str(&quot;info&quot;)      // Write all error, warn, and info messages</span>
-<span class="doccomment">//! #   .directory(std::env::temp_dir())</span>
-<span class="doccomment">//!     .log_to_file()            // Write the log to a file</span>
-<span class="doccomment">//!     .suppress_timestamp()     // use a simple filename without a timestamp</span>
-<span class="doccomment">//!     .append()                 // do not truncate the log file when the program is restarted</span>
-<span class="doccomment">//!     .start()?;</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! # error!(&quot;This is an error message&quot;);</span>
-<span class="doccomment">//! # warn!(&quot;This is a warning&quot;);</span>
-<span class="doccomment">//! # info!(&quot;This is an info message&quot;);</span>
-<span class="doccomment">//! # debug!(&quot;This is a debug message - you must not see it!&quot;);</span>
-<span class="doccomment">//! # trace!(&quot;This is a trace message - you must not see it!&quot;);</span>
-<span class="doccomment">//! #  run()</span>
-<span class="doccomment">//! # }</span>
-<span class="doccomment">//! # fn run() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {Ok(())}</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ## Rotate the log file</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! With rotation, the logs are always written to a file</span>
-<span class="doccomment">//! with the infix `rCURRENT`, like e.g. `foo_rCURRENT.log`.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! [`Logger::rotate`](crate::Logger::rotate)</span>
-<span class="doccomment">//! takes three enum arguments to define its behavior:</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! - [`Criterion`](crate::Criterion)</span>
-<span class="doccomment">//!    - with `Criterion::Age` the rotation happens</span>
-<span class="doccomment">//!      when the clock switches to a new day, hour, minute, or second</span>
-<span class="doccomment">//!    - with `Criterion::Size` the rotation happens when the current log file exceeds</span>
-<span class="doccomment">//!      the specified limit</span>
-<span class="doccomment">//!    - with `Criterion::AgeOrSize` the rotation happens when either of the two limits is reached</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! - [`Naming`](crate::Naming)&lt;br&gt;The current file is then renamed</span>
-<span class="doccomment">//!   - with `Naming::Timestamps` to something like `foo_r2020-11-16_08-56-52.log`</span>
-<span class="doccomment">//!   - with `Naming::Numbers` to something like `foo_r00000.log`</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//!   and a fresh `rCURRENT` file is created.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! - [`Cleanup`](crate::Cleanup) defines if and how you</span>
-<span class="doccomment">//!   avoid accumulating log files indefinitely:</span>
-<span class="doccomment">//!   - with `Cleanup::KeepLogFiles` you specify the number of log files that should be retained;</span>
-<span class="doccomment">//!     if there are more, the older ones are getting deleted</span>
-<span class="doccomment">//!   - with `Cleanup::KeepCompressedFiles` you specify the number of log files that should be</span>
-<span class="doccomment">//!     retained, and these are being compressed additionally</span>
-<span class="doccomment">//!   - with `Cleanup::KeepLogAndCompressedFiles` you specify the number of log files that should be</span>
-<span class="doccomment">//!     retained as is, and an additional number that are being compressed</span>
-<span class="doccomment">//!   - with `Cleanup::Never` no cleanup is done, all files are retained.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ```rust</span>
-<span class="doccomment">//! # use flexi_logger::{Age, Cleanup, Criterion, Logger, Naming};</span>
-<span class="doccomment">//! # use log::{debug, error, info, trace, warn};</span>
-<span class="doccomment">//! # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {</span>
-<span class="doccomment">//! Logger::with_str(&quot;info&quot;)          // Write all error, warn, and info messages</span>
-<span class="doccomment">//! #   .directory(std::env::temp_dir())</span>
-<span class="doccomment">//!     .log_to_file()                // Write the log to a file</span>
-<span class="doccomment">//!     .rotate(                      // If the program runs long enough,</span>
-<span class="doccomment">//!         Criterion::Age(Age::Day), // - create a new file every day</span>
-<span class="doccomment">//!         Naming::Timestamps,       // - let the rotated files have a timestamp in their name</span>
-<span class="doccomment">//!         Cleanup::KeepLogFiles(7), // - keep at most 7 log files</span>
-<span class="doccomment">//!     )</span>
-<span class="doccomment">//!     .start()?;</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! #   error!(&quot;This is an error message&quot;);</span>
-<span class="doccomment">//! #   warn!(&quot;This is a warning&quot;);</span>
-<span class="doccomment">//! #   info!(&quot;This is an info message&quot;);</span>
-<span class="doccomment">//! #   debug!(&quot;This is a debug message - you must not see it!&quot;);</span>
-<span class="doccomment">//! #   trace!(&quot;This is a trace message - you must not see it!&quot;);</span>
-<span class="doccomment">//! #    run()</span>
-<span class="doccomment">//! # }</span>
-<span class="doccomment">//! # fn run() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {Ok(())}</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ## Reconfigure the log specification programmatically</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! This can be especially handy in debugging situations where you want to see</span>
-<span class="doccomment">//! traces only for a short instant.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Obtain the `LoggerHandle`</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ```rust</span>
-<span class="doccomment">//! # use flexi_logger::Logger;</span>
-<span class="doccomment">//! let mut logger = Logger::with_str(&quot;info&quot;)</span>
-<span class="doccomment">//!     // ... logger configuration ...</span>
-<span class="doccomment">//!     .start()</span>
-<span class="doccomment">//!     .unwrap();</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! and modify the effective log specification from within your code:</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ```rust, ignore</span>
-<span class="doccomment">//! // ...</span>
-<span class="doccomment">//! logger.parse_and_push_temp_spec(&quot;info, critical_mod = trace&quot;);</span>
-<span class="doccomment">//! // ... critical calls ...</span>
-<span class="doccomment">//! logger.pop_temp_spec();</span>
-<span class="doccomment">//! // ... continue with the log spec you had before.</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ## Reconfigure the log specification dynamically by editing a spec-file</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! If you start `flexi_logger` with a specfile,</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ```rust,ignore</span>
-<span class="doccomment">//! # use flexi_logger::Logger;</span>
-<span class="doccomment">//! Logger::with_str(&quot;info&quot;)</span>
-<span class="doccomment">//!     // ... logger configuration ...</span>
-<span class="doccomment">//!    .start_with_specfile(&quot;/server/config/logspec.toml&quot;)</span>
-<span class="doccomment">//!    .unwrap();</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! then you can change the log specification dynamically, *while your program is running*,</span>
-<span class="doccomment">//! by editing the specfile. This can be a great help e.g. if you want to get detailed traces</span>
-<span class="doccomment">//! for _some_ requests to a long running server.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! See [`Logger::start_with_specfile`](crate::Logger::start_with_specfile)</span>
-<span class="doccomment">//! for more information.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ## Miscellaneous</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! For the sake of completeness, we refer here to some more configuration methods.</span>
-<span class="doccomment">//! See their documentation for more details.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! [`Logger::check_parser_error`](crate::Logger::check_parser_error)</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! [`Logger::set_palette`](crate::Logger::set_palette)</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! [`Logger::cleanup_in_background_thread`](crate::Logger::cleanup_in_background_thread)</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! [`Logger::use_windows_line_ending`](crate::Logger::use_windows_line_ending)</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! [`Logger::add_writer`](crate::Logger::add_writer)</span>
-</code></pre></div>
-</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="flexi_logger" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.60.0-nightly (88fb06a1f 2022-02-05)" ></div>
-</body></html>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/flexi_logger-0.24.0/src/code_examples.rs`."><title>code_examples.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-c4dbdcde0fbd8430.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../../static.files/light-db279b6232be9c13.css"><link rel="stylesheet" disabled href="../../static.files/dark-cf923f49f397b216.css"><link rel="stylesheet" disabled href="../../static.files/ayu-be46fdc453a55015.css"><script src="../../static.files/storage-3891ce972e3a2bf8.js"></script><script defer src="../../static.files/source-script-1b95b7cca98b26e5.js"></script><script defer src="../../source-files.js"></script><script defer src="../../static.files/main-98a684e84ae5b08b.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../flexi_logger/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<a href="#2" id="2">2</a>
+<a href="#3" id="3">3</a>
+<a href="#4" id="4">4</a>
+<a href="#5" id="5">5</a>
+<a href="#6" id="6">6</a>
+<a href="#7" id="7">7</a>
+<a href="#8" id="8">8</a>
+<a href="#9" id="9">9</a>
+<a href="#10" id="10">10</a>
+<a href="#11" id="11">11</a>
+<a href="#12" id="12">12</a>
+<a href="#13" id="13">13</a>
+<a href="#14" id="14">14</a>
+<a href="#15" id="15">15</a>
+<a href="#16" id="16">16</a>
+<a href="#17" id="17">17</a>
+<a href="#18" id="18">18</a>
+<a href="#19" id="19">19</a>
+<a href="#20" id="20">20</a>
+<a href="#21" id="21">21</a>
+<a href="#22" id="22">22</a>
+<a href="#23" id="23">23</a>
+<a href="#24" id="24">24</a>
+<a href="#25" id="25">25</a>
+<a href="#26" id="26">26</a>
+<a href="#27" id="27">27</a>
+<a href="#28" id="28">28</a>
+<a href="#29" id="29">29</a>
+<a href="#30" id="30">30</a>
+<a href="#31" id="31">31</a>
+<a href="#32" id="32">32</a>
+<a href="#33" id="33">33</a>
+<a href="#34" id="34">34</a>
+<a href="#35" id="35">35</a>
+<a href="#36" id="36">36</a>
+<a href="#37" id="37">37</a>
+<a href="#38" id="38">38</a>
+<a href="#39" id="39">39</a>
+<a href="#40" id="40">40</a>
+<a href="#41" id="41">41</a>
+<a href="#42" id="42">42</a>
+<a href="#43" id="43">43</a>
+<a href="#44" id="44">44</a>
+<a href="#45" id="45">45</a>
+<a href="#46" id="46">46</a>
+<a href="#47" id="47">47</a>
+<a href="#48" id="48">48</a>
+<a href="#49" id="49">49</a>
+<a href="#50" id="50">50</a>
+<a href="#51" id="51">51</a>
+<a href="#52" id="52">52</a>
+<a href="#53" id="53">53</a>
+<a href="#54" id="54">54</a>
+<a href="#55" id="55">55</a>
+<a href="#56" id="56">56</a>
+<a href="#57" id="57">57</a>
+<a href="#58" id="58">58</a>
+<a href="#59" id="59">59</a>
+<a href="#60" id="60">60</a>
+<a href="#61" id="61">61</a>
+<a href="#62" id="62">62</a>
+<a href="#63" id="63">63</a>
+<a href="#64" id="64">64</a>
+<a href="#65" id="65">65</a>
+<a href="#66" id="66">66</a>
+<a href="#67" id="67">67</a>
+<a href="#68" id="68">68</a>
+<a href="#69" id="69">69</a>
+<a href="#70" id="70">70</a>
+<a href="#71" id="71">71</a>
+<a href="#72" id="72">72</a>
+<a href="#73" id="73">73</a>
+<a href="#74" id="74">74</a>
+<a href="#75" id="75">75</a>
+<a href="#76" id="76">76</a>
+<a href="#77" id="77">77</a>
+<a href="#78" id="78">78</a>
+<a href="#79" id="79">79</a>
+<a href="#80" id="80">80</a>
+<a href="#81" id="81">81</a>
+<a href="#82" id="82">82</a>
+<a href="#83" id="83">83</a>
+<a href="#84" id="84">84</a>
+<a href="#85" id="85">85</a>
+<a href="#86" id="86">86</a>
+<a href="#87" id="87">87</a>
+<a href="#88" id="88">88</a>
+<a href="#89" id="89">89</a>
+<a href="#90" id="90">90</a>
+<a href="#91" id="91">91</a>
+<a href="#92" id="92">92</a>
+<a href="#93" id="93">93</a>
+<a href="#94" id="94">94</a>
+<a href="#95" id="95">95</a>
+<a href="#96" id="96">96</a>
+<a href="#97" id="97">97</a>
+<a href="#98" id="98">98</a>
+<a href="#99" id="99">99</a>
+<a href="#100" id="100">100</a>
+<a href="#101" id="101">101</a>
+<a href="#102" id="102">102</a>
+<a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
+<a href="#111" id="111">111</a>
+<a href="#112" id="112">112</a>
+<a href="#113" id="113">113</a>
+<a href="#114" id="114">114</a>
+<a href="#115" id="115">115</a>
+<a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
+<a href="#119" id="119">119</a>
+<a href="#120" id="120">120</a>
+<a href="#121" id="121">121</a>
+<a href="#122" id="122">122</a>
+<a href="#123" id="123">123</a>
+<a href="#124" id="124">124</a>
+<a href="#125" id="125">125</a>
+<a href="#126" id="126">126</a>
+<a href="#127" id="127">127</a>
+<a href="#128" id="128">128</a>
+<a href="#129" id="129">129</a>
+<a href="#130" id="130">130</a>
+<a href="#131" id="131">131</a>
+<a href="#132" id="132">132</a>
+<a href="#133" id="133">133</a>
+<a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
+<a href="#136" id="136">136</a>
+<a href="#137" id="137">137</a>
+<a href="#138" id="138">138</a>
+<a href="#139" id="139">139</a>
+<a href="#140" id="140">140</a>
+<a href="#141" id="141">141</a>
+<a href="#142" id="142">142</a>
+<a href="#143" id="143">143</a>
+<a href="#144" id="144">144</a>
+<a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
+<a href="#147" id="147">147</a>
+<a href="#148" id="148">148</a>
+<a href="#149" id="149">149</a>
+<a href="#150" id="150">150</a>
+<a href="#151" id="151">151</a>
+<a href="#152" id="152">152</a>
+<a href="#153" id="153">153</a>
+<a href="#154" id="154">154</a>
+<a href="#155" id="155">155</a>
+<a href="#156" id="156">156</a>
+<a href="#157" id="157">157</a>
+<a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
+<a href="#160" id="160">160</a>
+<a href="#161" id="161">161</a>
+<a href="#162" id="162">162</a>
+<a href="#163" id="163">163</a>
+<a href="#164" id="164">164</a>
+<a href="#165" id="165">165</a>
+<a href="#166" id="166">166</a>
+<a href="#167" id="167">167</a>
+<a href="#168" id="168">168</a>
+<a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a>
+<a href="#171" id="171">171</a>
+<a href="#172" id="172">172</a>
+<a href="#173" id="173">173</a>
+<a href="#174" id="174">174</a>
+<a href="#175" id="175">175</a>
+<a href="#176" id="176">176</a>
+<a href="#177" id="177">177</a>
+<a href="#178" id="178">178</a>
+<a href="#179" id="179">179</a>
+<a href="#180" id="180">180</a>
+<a href="#181" id="181">181</a>
+<a href="#182" id="182">182</a>
+<a href="#183" id="183">183</a>
+<a href="#184" id="184">184</a>
+<a href="#185" id="185">185</a>
+<a href="#186" id="186">186</a>
+<a href="#187" id="187">187</a>
+<a href="#188" id="188">188</a>
+<a href="#189" id="189">189</a>
+<a href="#190" id="190">190</a>
+<a href="#191" id="191">191</a>
+<a href="#192" id="192">192</a>
+<a href="#193" id="193">193</a>
+<a href="#194" id="194">194</a>
+<a href="#195" id="195">195</a>
+<a href="#196" id="196">196</a>
+<a href="#197" id="197">197</a>
+<a href="#198" id="198">198</a>
+<a href="#199" id="199">199</a>
+<a href="#200" id="200">200</a>
+<a href="#201" id="201">201</a>
+<a href="#202" id="202">202</a>
+<a href="#203" id="203">203</a>
+<a href="#204" id="204">204</a>
+<a href="#205" id="205">205</a>
+<a href="#206" id="206">206</a>
+<a href="#207" id="207">207</a>
+<a href="#208" id="208">208</a>
+<a href="#209" id="209">209</a>
+<a href="#210" id="210">210</a>
+<a href="#211" id="211">211</a>
+<a href="#212" id="212">212</a>
+<a href="#213" id="213">213</a>
+<a href="#214" id="214">214</a>
+<a href="#215" id="215">215</a>
+<a href="#216" id="216">216</a>
+<a href="#217" id="217">217</a>
+<a href="#218" id="218">218</a>
+<a href="#219" id="219">219</a>
+<a href="#220" id="220">220</a>
+<a href="#221" id="221">221</a>
+<a href="#222" id="222">222</a>
+<a href="#223" id="223">223</a>
+<a href="#224" id="224">224</a>
+<a href="#225" id="225">225</a>
+<a href="#226" id="226">226</a>
+<a href="#227" id="227">227</a>
+<a href="#228" id="228">228</a>
+<a href="#229" id="229">229</a>
+<a href="#230" id="230">230</a>
+<a href="#231" id="231">231</a>
+<a href="#232" id="232">232</a>
+<a href="#233" id="233">233</a>
+<a href="#234" id="234">234</a>
+<a href="#235" id="235">235</a>
+<a href="#236" id="236">236</a>
+<a href="#237" id="237">237</a>
+<a href="#238" id="238">238</a>
+<a href="#239" id="239">239</a>
+<a href="#240" id="240">240</a>
+<a href="#241" id="241">241</a>
+<a href="#242" id="242">242</a>
+<a href="#243" id="243">243</a>
+<a href="#244" id="244">244</a>
+<a href="#245" id="245">245</a>
+<a href="#246" id="246">246</a>
+<a href="#247" id="247">247</a>
+<a href="#248" id="248">248</a>
+<a href="#249" id="249">249</a>
+<a href="#250" id="250">250</a>
+<a href="#251" id="251">251</a>
+<a href="#252" id="252">252</a>
+<a href="#253" id="253">253</a>
+<a href="#254" id="254">254</a>
+<a href="#255" id="255">255</a>
+<a href="#256" id="256">256</a>
+<a href="#257" id="257">257</a>
+<a href="#258" id="258">258</a>
+<a href="#259" id="259">259</a>
+<a href="#260" id="260">260</a>
+<a href="#261" id="261">261</a>
+<a href="#262" id="262">262</a>
+<a href="#263" id="263">263</a>
+<a href="#264" id="264">264</a>
+<a href="#265" id="265">265</a>
+<a href="#266" id="266">266</a>
+<a href="#267" id="267">267</a>
+<a href="#268" id="268">268</a>
+<a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
+<a href="#271" id="271">271</a>
+<a href="#272" id="272">272</a>
+<a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
+<a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
+<a href="#312" id="312">312</a>
+<a href="#313" id="313">313</a>
+<a href="#314" id="314">314</a>
+<a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
+<a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
+<a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
+<a href="#327" id="327">327</a>
+<a href="#328" id="328">328</a>
+<a href="#329" id="329">329</a>
+<a href="#330" id="330">330</a>
+<a href="#331" id="331">331</a>
+<a href="#332" id="332">332</a>
+<a href="#333" id="333">333</a>
+<a href="#334" id="334">334</a>
+<a href="#335" id="335">335</a>
+<a href="#336" id="336">336</a>
+<a href="#337" id="337">337</a>
+<a href="#338" id="338">338</a>
+<a href="#339" id="339">339</a>
+<a href="#340" id="340">340</a>
+<a href="#341" id="341">341</a>
+<a href="#342" id="342">342</a>
+<a href="#343" id="343">343</a>
+<a href="#344" id="344">344</a>
+<a href="#345" id="345">345</a>
+<a href="#346" id="346">346</a>
+<a href="#347" id="347">347</a>
+<a href="#348" id="348">348</a>
+<a href="#349" id="349">349</a>
+<a href="#350" id="350">350</a>
+<a href="#351" id="351">351</a>
+<a href="#352" id="352">352</a>
+<a href="#353" id="353">353</a>
+<a href="#354" id="354">354</a>
+<a href="#355" id="355">355</a>
+<a href="#356" id="356">356</a>
+<a href="#357" id="357">357</a>
+<a href="#358" id="358">358</a>
+<a href="#359" id="359">359</a>
+<a href="#360" id="360">360</a>
+<a href="#361" id="361">361</a>
+<a href="#362" id="362">362</a>
+<a href="#363" id="363">363</a>
+<a href="#364" id="364">364</a>
+<a href="#365" id="365">365</a>
+<a href="#366" id="366">366</a>
+<a href="#367" id="367">367</a>
+<a href="#368" id="368">368</a>
+<a href="#369" id="369">369</a>
+<a href="#370" id="370">370</a>
+<a href="#371" id="371">371</a>
+<a href="#372" id="372">372</a>
+<a href="#373" id="373">373</a>
+<a href="#374" id="374">374</a>
+<a href="#375" id="375">375</a>
+<a href="#376" id="376">376</a>
+<a href="#377" id="377">377</a>
+<a href="#378" id="378">378</a>
+<a href="#379" id="379">379</a>
+<a href="#380" id="380">380</a>
+<a href="#381" id="381">381</a>
+<a href="#382" id="382">382</a>
+<a href="#383" id="383">383</a>
+<a href="#384" id="384">384</a>
+<a href="#385" id="385">385</a>
+<a href="#386" id="386">386</a>
+<a href="#387" id="387">387</a>
+<a href="#388" id="388">388</a>
+<a href="#389" id="389">389</a>
+<a href="#390" id="390">390</a>
+<a href="#391" id="391">391</a>
+<a href="#392" id="392">392</a>
+<a href="#393" id="393">393</a>
+<a href="#394" id="394">394</a>
+<a href="#395" id="395">395</a>
+<a href="#396" id="396">396</a>
+<a href="#397" id="397">397</a>
+<a href="#398" id="398">398</a>
+<a href="#399" id="399">399</a>
+<a href="#400" id="400">400</a>
+<a href="#401" id="401">401</a>
+<a href="#402" id="402">402</a>
+<a href="#403" id="403">403</a>
+<a href="#404" id="404">404</a>
+<a href="#405" id="405">405</a>
+<a href="#406" id="406">406</a>
+<a href="#407" id="407">407</a>
+<a href="#408" id="408">408</a>
+<a href="#409" id="409">409</a>
+<a href="#410" id="410">410</a>
+<a href="#411" id="411">411</a>
+<a href="#412" id="412">412</a>
+<a href="#413" id="413">413</a>
+<a href="#414" id="414">414</a>
+<a href="#415" id="415">415</a>
+<a href="#416" id="416">416</a>
+<a href="#417" id="417">417</a>
+<a href="#418" id="418">418</a>
+<a href="#419" id="419">419</a>
+<a href="#420" id="420">420</a>
+<a href="#421" id="421">421</a>
+<a href="#422" id="422">422</a>
+<a href="#423" id="423">423</a>
+<a href="#424" id="424">424</a>
+<a href="#425" id="425">425</a>
+<a href="#426" id="426">426</a>
+<a href="#427" id="427">427</a>
+<a href="#428" id="428">428</a>
+<a href="#429" id="429">429</a>
+<a href="#430" id="430">430</a>
+<a href="#431" id="431">431</a>
+<a href="#432" id="432">432</a>
+<a href="#433" id="433">433</a>
+<a href="#434" id="434">434</a>
+<a href="#435" id="435">435</a>
+<a href="#436" id="436">436</a>
+<a href="#437" id="437">437</a>
+<a href="#438" id="438">438</a>
+<a href="#439" id="439">439</a>
+<a href="#440" id="440">440</a>
+<a href="#441" id="441">441</a>
+<a href="#442" id="442">442</a>
+<a href="#443" id="443">443</a>
+<a href="#444" id="444">444</a>
+<a href="#445" id="445">445</a>
+<a href="#446" id="446">446</a>
+<a href="#447" id="447">447</a>
+<a href="#448" id="448">448</a>
+<a href="#449" id="449">449</a>
+<a href="#450" id="450">450</a>
+<a href="#451" id="451">451</a>
+<a href="#452" id="452">452</a>
+<a href="#453" id="453">453</a>
+<a href="#454" id="454">454</a>
+<a href="#455" id="455">455</a>
+<a href="#456" id="456">456</a>
+<a href="#457" id="457">457</a>
+<a href="#458" id="458">458</a>
+<a href="#459" id="459">459</a>
+<a href="#460" id="460">460</a>
+<a href="#461" id="461">461</a>
+<a href="#462" id="462">462</a>
+<a href="#463" id="463">463</a>
+<a href="#464" id="464">464</a>
+<a href="#465" id="465">465</a>
+<a href="#466" id="466">466</a>
+<a href="#467" id="467">467</a>
+<a href="#468" id="468">468</a>
+<a href="#469" id="469">469</a>
+<a href="#470" id="470">470</a>
+<a href="#471" id="471">471</a>
+<a href="#472" id="472">472</a>
+<a href="#473" id="473">473</a>
+<a href="#474" id="474">474</a>
+<a href="#475" id="475">475</a>
+<a href="#476" id="476">476</a>
+<a href="#477" id="477">477</a>
+<a href="#478" id="478">478</a>
+<a href="#479" id="479">479</a>
+<a href="#480" id="480">480</a>
+<a href="#481" id="481">481</a>
+<a href="#482" id="482">482</a>
+<a href="#483" id="483">483</a>
+<a href="#484" id="484">484</a>
+<a href="#485" id="485">485</a>
+<a href="#486" id="486">486</a>
+<a href="#487" id="487">487</a>
+<a href="#488" id="488">488</a>
+<a href="#489" id="489">489</a>
+<a href="#490" id="490">490</a>
+<a href="#491" id="491">491</a>
+<a href="#492" id="492">492</a>
+<a href="#493" id="493">493</a>
+<a href="#494" id="494">494</a>
+<a href="#495" id="495">495</a>
+<a href="#496" id="496">496</a>
+</pre><pre class="rust"><code><span class="doccomment">//! Here are some examples for the `flexi_logger` initialization.
+//!
+//! ## Contents
+//!
+//! - [Start minimally: Initialize, and write logs to stderr](#start-minimally-initialize-and-write-logs-to-stderr)
+//! - [Choose the log output channel](#choose-the-log-output-channel)
+//! - [Choose the write mode](#choose-the-write-mode)
+//! - [Influence the location and name of the log file](#influence-the-location-and-name-of-the-log-file)
+//! - [Specify the format for the log lines explicitly](#specify-the-format-for-the-log-lines-explicitly)
+//! - [Use a fixed log file, and truncate or append the file on each program start](#use-a-fixed-log-file-and-truncate-or-append-the-file-on-each-program-start)
+//! - [Rotate the log file](#rotate-the-log-file)
+//! - [Reconfigure the log specification programmatically](#reconfigure-the-log-specification-programmatically)
+//! - [Reconfigure the log specification dynamically by editing a spec-file](#reconfigure-the-log-specification-dynamically-by-editing-a-spec-file)
+//! - [Reconfigure the file log writer](#reconfigure-the-file-log-writer)
+//! - [External file rotators](#external-file-rotators)
+//! - [Miscellaneous](#miscellaneous)
+//!
+//! ## Start minimally: Initialize, and write logs to stderr
+//!
+//! Initialize by choosing one of three options to specify which log output you want to see,
+//! and call `start()` immediately:
+//!
+//! - Use [`Logger::try_with_env`](crate::Logger::try_with_env) to
+//!   provide the log specification in the environment variable `RUST_LOG`:
+//!
+//!   ```rust
+//!   # use flexi_logger::{Logger,FlexiLoggerError};
+//!   # fn main() -&gt; Result&lt;(), FlexiLoggerError&gt; {
+//!   Logger::try_with_env()?.start()?;
+//!   # Ok(())}
+//!   ```
+//!
+//! - Use [`Logger::try_with_str`](crate::Logger::try_with_str) to
+//!   provide the log specification programmatically:
+//!
+//!   ```rust
+//!   # use flexi_logger::{Logger,FlexiLoggerError};
+//!   # fn main() -&gt; Result&lt;(), FlexiLoggerError&gt; {
+//!   Logger::try_with_str(&quot;info&quot;)?.start()?;
+//!   # Ok(())}
+//!   ```
+//!
+//! - or use [`Logger::try_with_env_or_str`](crate::Logger::try_with_env_or_str) to
+//!   combine both options:
+//!
+//!   ```rust
+//!   # use flexi_logger::{Logger,FlexiLoggerError};
+//!   # fn main() -&gt; Result&lt;(), FlexiLoggerError&gt; {
+//!   Logger::try_with_env_or_str(&quot;info&quot;)?.start()?;
+//!   # Ok(())}
+//!   ```
+//!
+//! After that, you just use the log-macros from the log crate. Those log lines that match the
+//! log specification are then written to the default output channel (stderr).
+//!
+//! ## Choose the log output channel
+//!
+//! By default, logs are written to `stderr`.
+//! With one of
+//! [`Logger::log_to_stdout`](crate::Logger::log_to_stdout),
+//! [`Logger::log_to_file`](crate::Logger::log_to_file),
+//! [`Logger::log_to_writer`](crate::Logger::log_to_writer),
+//! [`Logger::log_to_file_and_writer`](crate::Logger::log_to_file_and_writer),
+//! or [`Logger::do_not_log`](crate::Logger::do_not_log),
+//! you can send the logs to other destinations, or write them not at all.
+//!
+//! When writing to files or to a writer,
+//! you sometimes want to see some parts of the log additionally on the terminal;
+//! this can be achieved with
+//! [`Logger::duplicate_to_stderr`](crate::Logger::duplicate_to_stderr) or
+//! [`Logger::duplicate_to_stdout`](crate::Logger::duplicate_to_stdout),
+//! which duplicate log messages to the terminal.
+//!
+//! ```rust
+//! # use flexi_logger::{Logger,Duplicate, FileSpec};
+//! # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
+//! Logger::try_with_str(&quot;info&quot;)?
+//!     .log_to_file(FileSpec::default())         // write logs to file
+//!     .duplicate_to_stderr(Duplicate::Warn)     // print warnings and errors also to the console
+//!     .start()?;
+//! # Ok(())
+//! # }
+//! ```
+//!
+//! ## Choose the write mode
+//!
+//! By default, every log line is directly written to the output, without buffering.
+//! This allows seeing new log lines in real time.
+//!
+//! With [`Logger::write_mode`](crate::Logger::write_mode)
+//! you have some options to change this behavior, e.g.
+//! - with [`WriteMode::BufferAndFlush`](crate::WriteMode::BufferAndFlush),
+//!   or [`WriteMode::BufferAndFlushWith`](crate::WriteMode::BufferAndFlushWith),
+//!   you can reduce the program&#39;s I/O overhead and thus increase overall performance,
+//!   which can be relevant if logging is used heavily.
+//!   In addition, to keep a short maximum wait time
+//!   until a log line is visible in the output channel,
+//!   an extra thread is created that flushes the buffers regularly.
+//!
+//!   ```rust
+//!   # use flexi_logger::{WriteMode,FileSpec,Logger,Duplicate};
+//!   fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
+//!       let _logger = Logger::try_with_str(&quot;info&quot;)?
+//!          .log_to_file(FileSpec::default())
+//!          .write_mode(WriteMode::BufferAndFlush)
+//!          .start()?;
+//!       // ... do all your work ...
+//!       Ok(())
+//!   }
+//!   ```
+//!
+//! - with [`WriteMode::Async`](crate::WriteMode::Async)
+//!   or [`WriteMode::AsyncWith`](crate::WriteMode::AsyncWith),
+//!   logs are sent from your application threads through an unbounded channel
+//!   to an output thread, which does the output (and the rotation and the cleanup, if applicable).
+//!   Additionally the output is buffered, and a bounded message pool is used to reduce allocations,
+//!   and flushing is used to avoid long delays.
+//!   If duplication is used, the messages to `stdout` or `stderr` are written synchronously.
+//!
+//!   ```rust
+//!   # use flexi_logger::{WriteMode, Duplicate, FileSpec, Logger};
+//!   fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
+//!   # #[cfg(feature=&quot;async&quot;)]
+//!       let _logger = Logger::try_with_str(&quot;info&quot;)?
+//!          .log_to_file(FileSpec::default())
+//!          .write_mode(WriteMode::Async)
+//!          .start()?;
+//!       // ... do all your work ...
+//!       Ok(())
+//!   }
+//!   ```
+//!
+//! **Note** that with all write modes
+//! except [`WriteMode::Direct`](crate::WriteMode::Direct) (which is the default)
+//! you should keep the [`LoggerHandle`](crate::LoggerHandle) alive
+//! up to the very end of your program, because it will, when its last instance is dropped
+//! (in case you use `LoggerHandle::clone()` you can have multiple instances), flush all writers
+//! to ensure that all buffered log lines are written before the program terminates,
+//! and then it calls their shutdown method.
+//!
+//! ## Influence the location and name of the log file
+//!
+//! By default, the log files are created in the current directory (where the program was started).
+//! With [`FileSpec:directory`](crate::FileSpec::directory)
+//! you can specify a concrete folder in which the files should be created.
+//!
+//! Using [`FileSpec::discriminant`](crate::FileSpec::discriminant)
+//! you can add a discriminating infix to the log file name.
+//!
+//! With [`FileSpec::suffix`](crate::FileSpec::suffix)
+//! you can change the suffix that is used for the log files.
+//!
+//! When writing to files, especially when they are in a distant folder, you may want to let the
+//! user know where the log file is.
+//!
+//! [`Logger::print_message`](crate::Logger::print_message)
+//! prints an info to `stdout` to which file the log is written.
+//!
+//! [`Logger::create_symlink`](crate::Logger::create_symlink)
+//! creates (on unix-systems only) a symbolic link at the specified path that points to the log file.
+//!
+//! ```rust
+//! # use flexi_logger::{FileSpec,Logger};
+//! # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
+//! Logger::try_with_str(&quot;info&quot;)?
+//!     .log_to_file(
+//!         FileSpec::default()
+//!             .directory(&quot;log_files&quot;)          // create files in folder ./log_files
+//!             .basename(&quot;foo&quot;)
+//!             .discriminant(&quot;Sample4711A&quot;)     // use infix in log file name
+//!             .suffix(&quot;trc&quot;)                   // use suffix .trc instead of .log
+//!     )
+//!     .print_message()                         //
+//!     .create_symlink(&quot;current_run&quot;)           // create a symbolic link to the current log file
+//!     .start()?;
+//! # Ok(())
+//! # }
+//! ```
+//!
+//! This example will print a message like
+//! &quot;Log is written to `./log_files/foo_Sample4711A_2020-11-17_19-24-35.trc`&quot;
+//! and, on unix, create a symbolic link called `current_run`.
+//!
+//! ## Specify the format for the log lines explicitly
+//!
+//! With [`Logger::format`](crate::Logger::format)
+//! you set the format for all used output channels of `flexi_logger`.
+//!
+//! `flexi_logger` provides a couple of format functions, and you can also create and use your own,
+//! e.g. by copying and modifying one of the provided format functions.
+//!
+//! Depending on the configuration, `flexi_logger` can write logs to multiple channels
+//! (stdout, stderr, files, or additional writers)
+//! at the same time. You can control the format for each output channel individually, using
+//! [`Logger::format_for_files`](crate::Logger::format_for_files),
+//! [`Logger::format_for_stderr`](crate::Logger::format_for_stderr),
+//! [`Logger::format_for_stdout`](crate::Logger::format_for_stdout), or
+//! [`Logger::format_for_writer`](crate::Logger::format_for_writer).
+//!
+//!  As argument for these functions you can use one of the provided non-coloring format functions
+//!
+//!  - [`default_format`](crate::default_format)
+//!  - [`detailed_format`](crate::detailed_format)
+//!  - [`opt_format`](crate::opt_format)
+//!  - [`with_thread`](crate::with_thread),
+//!
+//! or one of their coloring pendants
+//!
+//!  - [`colored_default_format`](crate::colored_default_format)
+//!  - [`colored_detailed_format`](crate::colored_detailed_format)
+//!  - [`colored_opt_format`](crate::colored_opt_format)
+//!  - [`colored_with_thread`](crate::colored_with_thread),
+//!
+//! or your own method.
+//!
+//! ### Adaptive Coloring
+//!
+//! You can use coloring for `stdout` and/or `stderr`
+//! _conditionally_, such that colors
+//!
+//! * are used when the output goes to a tty,
+//! * are suppressed when you e.g. pipe the output to some other program.
+//!
+//! You achieve that
+//! by providing one of the variants of [`AdaptiveFormat`](crate::AdaptiveFormat) to the respective
+//! format method, e.g.
+//! ```rust
+//! # #[cfg(feature = &quot;atty&quot;)]
+//! # use flexi_logger::AdaptiveFormat;
+//! # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
+//! # #[cfg(feature = &quot;atty&quot;)]
+//! # {
+//!       flexi_logger::Logger::try_with_str(&quot;info&quot;)?
+//!           .adaptive_format_for_stderr(AdaptiveFormat::Detailed);
+//! # }
+//! #     Ok(())
+//! # }
+//! ```
+//!
+//! ### Defaults
+//!
+//! `flexi_logger` initializes by default equivalently to this:
+//!
+//! ```rust
+//! # #[cfg(feature = &quot;atty&quot;)]
+//! # mod example {
+//! # use flexi_logger::{Logger,AdaptiveFormat,default_format, FileSpec};
+//! # use log::{debug, error, info, trace, warn};
+//! # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
+//! # Logger::try_with_str(&quot;info&quot;)?      // Write all error, warn, and info messages
+//! #     .log_to_file(FileSpec::default().directory(std::env::temp_dir()))
+//!       // ...
+//!       .adaptive_format_for_stderr(AdaptiveFormat::Default)
+//!       .adaptive_format_for_stdout(AdaptiveFormat::Default)
+//!       .format_for_files(default_format)
+//!       .format_for_writer(default_format)
+//! #     .start()?;
+//! # error!(&quot;This is an error message&quot;);
+//! # warn!(&quot;This is a warning&quot;);
+//! # info!(&quot;This is an info message&quot;);
+//! # debug!(&quot;This is a debug message - you must not see it!&quot;);
+//! # trace!(&quot;This is a trace message - you must not see it!&quot;);
+//! #  run()
+//! # }
+//! # fn run() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {Ok(())}
+//! # }
+//! ```
+//!
+//! ## Use a fixed log file, and truncate or append the file on each program start
+//!
+//! With [`Logger::log_to_file`](crate::Logger::log_to_file) and without rotation,
+//! `flexi_logger` uses by default files with a timestamp in the name, like
+//! `foo_2020-11-16_08-37-44.log` (for a program called `foo`), which are quite unique for each
+//! program start.
+//!
+//! With [`FileSpec::suppress_timestamp`](crate::FileSpec::suppress_timestamp)
+//! you get a simple fixed filename, like `foo.log`.
+//!
+//! In that case, a restart of the program will truncate an existing log file.
+//!
+//! Use additionally [`Logger::append`](crate::Logger::append)
+//! to append the logs of each new run to the existing file.
+//!
+//! ```rust
+//! # use flexi_logger::{FileSpec, Logger};
+//! # use log::{debug, error, info, trace, warn};
+//! # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
+//! Logger::try_with_str(&quot;info&quot;)? // Write all error, warn, and info messages
+//!     // use a simple filename without a timestamp
+//!     .log_to_file(
+//!         FileSpec::default().suppress_timestamp()
+//! #           .directory(std::env::temp_dir())
+//!     )
+//!     // do not truncate the log file when the program is restarted
+//!     .append()
+//!     .start()?;
+//!
+//! # error!(&quot;This is an error message&quot;);
+//! # warn!(&quot;This is a warning&quot;);
+//! # info!(&quot;This is an info message&quot;);
+//! # debug!(&quot;This is a debug message - you must not see it!&quot;);
+//! # trace!(&quot;This is a trace message - you must not see it!&quot;);
+//! #  run()
+//! # }
+//! # fn run() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {Ok(())}
+//! ```
+//!
+//! ## Rotate the log file
+//!
+//! With rotation, the logs are always written to a file
+//! with the infix `rCURRENT`, like e.g. `foo_rCURRENT.log`.
+//!
+//! [`Logger::rotate`](crate::Logger::rotate)
+//! takes three enum arguments that define its behavior:
+//!
+//! - [`Criterion`](crate::Criterion)
+//!    - with [`Criterion::Age`](crate::Criterion::Age) the rotation happens
+//!      when the clock switches to a new day, hour, minute, or second
+//!    - with [`Criterion::Size`](crate::Criterion::Size) the rotation happens
+//!      when the current log file exceeds the specified limit
+//!    - with [`Criterion::AgeOrSize`](crate::Criterion::AgeOrSize) the rotation happens
+//!      when either of the two limits is reached
+//!
+//! - [`Naming`](crate::Naming)&lt;br&gt;The current file is then renamed
+//!   - with [`Naming::Timestamps`](crate::Naming::Timestamps) to something
+//!     like `foo_r2020-11-16_08-56-52.log`
+//!   - with [`Naming::Numbers`](crate::Naming::Numbers) to something like `foo_r00000.log`
+//!
+//!   and a fresh `rCURRENT` file is created.
+//!
+//! - [`Cleanup`](crate::Cleanup) defines if and how you
+//!   avoid accumulating log files indefinitely:
+//!   - with [`Cleanup::KeepLogFiles`](crate::Cleanup::KeepLogFiles) you specify
+//!     the number of log files that should be retained;
+//!     if there are more, the older ones are getting deleted
+//!   - with [`Cleanup::KeepCompressedFiles`](crate::Cleanup::KeepCompressedFiles) you specify
+//!     the number of log files that should be
+//!     retained, and these are being compressed additionally
+//!   - with [`Cleanup::KeepLogAndCompressedFiles`](crate::Cleanup::KeepLogAndCompressedFiles)
+//!     you specify the number of log files that should be
+//!     retained as is, and an additional number that are being compressed
+//!   - with [`Cleanup::Never`](crate::Cleanup::Never) no cleanup is done, all files are retained.
+//!
+//! ```rust
+//! # use flexi_logger::{Age, Cleanup, Criterion, FileSpec, Logger, Naming};
+//! # use log::{debug, error, info, trace, warn};
+//! # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
+//! Logger::try_with_str(&quot;info&quot;)?      // Write all error, warn, and info messages
+//!     .log_to_file(
+//!         FileSpec::default()
+//! #           .directory(std::env::temp_dir())
+//!     )
+//!     .rotate(                      // If the program runs long enough,
+//!         Criterion::Age(Age::Day), // - create a new file every day
+//!         Naming::Timestamps,       // - let the rotated files have a timestamp in their name
+//!         Cleanup::KeepLogFiles(7), // - keep at most 7 log files
+//!     )
+//!     .start()?;
+//!
+//! #   error!(&quot;This is an error message&quot;);
+//! #   warn!(&quot;This is a warning&quot;);
+//! #   info!(&quot;This is an info message&quot;);
+//! #   debug!(&quot;This is a debug message - you must not see it!&quot;);
+//! #   trace!(&quot;This is a trace message - you must not see it!&quot;);
+//! #    run()
+//! # }
+//! # fn run() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {Ok(())}
+//! ```
+//!
+//! ## Reconfigure the log specification programmatically
+//!
+//! This can be especially handy in debugging situations where you want to see
+//! log output only for a short instant.
+//!
+//! Obtain the [`LoggerHandle`](crate::LoggerHandle)
+//!
+//! ```rust
+//! # use flexi_logger::Logger;
+//! let mut logger = Logger::try_with_str(&quot;info&quot;).unwrap()
+//!     // ... logger configuration ...
+//!     .start()
+//!     .unwrap();
+//! ```
+//!
+//! and modify the effective log specification from within your code:
+//!
+//! ```rust, ignore
+//! # use flexi_logger::Logger;
+//! # let mut logger = Logger::try_with_str(&quot;info&quot;).unwrap().start().unwrap();
+//! // ...
+//! logger.parse_and_push_temp_spec(&quot;info, critical_mod = trace&quot;);
+//! // ... critical calls ...
+//! logger.pop_temp_spec();
+//! // ... continue with the log spec you had before.
+//! ```
+//!
+//! ## Reconfigure the log specification dynamically by editing a spec-file
+//!
+//! If you start `flexi_logger` with a specfile,
+//!
+//! ```rust
+//! # use flexi_logger::Logger;
+//! # let logger =
+//! Logger::try_with_str(&quot;info&quot;).unwrap()
+//!     // ... logger configuration ...
+//! # ;
+//! # #[cfg(feature = &quot;specfile&quot;)]
+//! # logger
+//!    .start_with_specfile(&quot;./server/config/logspec.toml&quot;)
+//!    .unwrap();
+//! ```
+//!
+//! then you can change the log specification dynamically, *while your program is running*,
+//! by editing the specfile. This can be a great help e.g. if you want to get detailed log output
+//! for _some_ requests to a long running server.
+//!
+//! See [`Logger::start_with_specfile`](crate::Logger::start_with_specfile)
+//! for more information.
+//!
+//! ## [Reconfigure the file log writer](#reconfigure-the-file-log-writer)
+//! When using `Logger::log_to_file()`, you can change most of the properties of the
+//! embedded `FileLogWriter` while the program is running using
+//! [`Logger::reset_flw`](crate::LoggerHandle::reset_flw).
+//!
+//! Obtain the [`LoggerHandle`](crate::LoggerHandle) when the program is started
+//!
+//! ```rust
+//! use flexi_logger::{writers::FileLogWriter, Cleanup, Criterion, FileSpec, Naming};
+//!
+//! # use std::error::Error;
+//! # fn main() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
+//! let logger = flexi_logger::Logger::try_with_str(&quot;info&quot;)?
+//!     .log_to_file(
+//!         FileSpec::default()
+//!             .basename(&quot;phase1&quot;)
+//!             .directory(&quot;./log_files&quot;)
+//!     )
+//!     .start()?;
+//!
+//! log::info!(&quot;start of phase 1&quot;);
+//! # Ok(())
+//! # }
+//! ```
+//!
+//! and modify the file log writer later:
+//!
+//! ```rust
+//! # use std::error::Error;
+//! # use flexi_logger::{writers::FileLogWriter, Cleanup, Criterion, FileSpec, Naming};
+//! # fn main() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
+//! #    let logger = flexi_logger::Logger::try_with_str(&quot;info&quot;)?
+//! #       .log_to_file(FileSpec::default().basename(&quot;phase1&quot;).directory(&quot;./log_files&quot;))
+//! #       .start()?;
+//! logger.reset_flw(
+//!     &amp;FileLogWriter::builder(
+//!         FileSpec::default()
+//!             .basename(&quot;phase2&quot;)
+//!             .directory(&quot;./log_files&quot;)
+//!     )
+//!     .append()
+//!     .rotate(
+//!         Criterion::Size(1024 * 1000 * 1),
+//!         Naming::Numbers,
+//!         Cleanup::KeepLogFiles(3),
+//!     ),
+//! )?;
+//!
+//! log::info!(&quot;start of phase 2&quot;);
+//! # Ok(())
+//! # }
+//! ```
+//!
+//! ## External file rotators
+//!
+//! If the log is written to files, `flexi_logger` decides, based on your configuration,
+//! to which file(s) the log is written, and expects that nobody else modifies these files.
+//! It offers quite some functionality to rotate, compress, and clean up log files.
+//!
+//! Alternatively, tools like linux&#39; `logrotate` can be used to rotate, compress or remove
+//! log files. But renaming or deleting the current output file e.g. might not stop
+//! `flexi_logger` from writing to the now renamed file!
+//! See [`LoggerHandle::reopen_outputfile`](../struct.LoggerHandle.html#method.reopen_outputfile)
+//! to understand how to cope with external rotators.
+//!
+//! ## Miscellaneous
+//!
+//! For the sake of completeness, we refer here to some more configuration methods.
+//! See their documentation for more details.
+//!
+//! [`Logger::set_palette`](crate::Logger::set_palette)
+//!
+//! [`Logger::cleanup_in_background_thread`](crate::Logger::cleanup_in_background_thread)
+//!
+//! [`Logger::use_windows_line_ending`](crate::Logger::use_windows_line_ending)
+//!
+//! [`Logger::add_writer`](crate::Logger::add_writer)
+</span></code></pre></div>
+</section></main><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="flexi_logger" data-themes="" data-resource-suffix="" data-rustdoc-version="1.69.0 (84c898d65 2023-04-16)" data-search-js="search-8a59a8356673ec1f.js" data-settings-js="settings-f0c5c39777a9a2f6.js" data-settings-css="settings-0bcba95ff279c1db.css" ></div></body></html>

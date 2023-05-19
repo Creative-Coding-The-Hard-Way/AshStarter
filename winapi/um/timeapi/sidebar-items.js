@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["timeBeginPeriod",""],["timeEndPeriod",""],["timeGetDevCaps",""],["timeGetTime",""]]});

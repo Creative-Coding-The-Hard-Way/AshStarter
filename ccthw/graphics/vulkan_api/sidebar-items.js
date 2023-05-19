@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["FrameStatus","SwapchainStatus"],"mod":["raii"],"struct":["BindlessTriangles","BindlessVertex","ColorPass","Frame","FramesInFlight","OneTimeSubmitCommandBuffer","Queue","RenderDevice","Swapchain","Texture2D","TextureLoader"]};
