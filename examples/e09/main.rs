@@ -13,6 +13,7 @@ use {
 };
 
 struct BindlessTrianglesExample {
+    vertices: Vec<BindlessVertex>,
     frames_in_flight: FramesInFlight,
     color_pass: ColorPass,
     bindless_triangles: BindlessTriangles,
@@ -78,6 +79,7 @@ impl State for BindlessTrianglesExample {
         };
 
         Ok(Self {
+            vertices: Vec::with_capacity(10_000),
             frames_in_flight,
             color_pass,
             bindless_triangles,
@@ -164,16 +166,16 @@ impl State for BindlessTrianglesExample {
                 ]
             };
 
-        let mut vertices = vec![];
-        vertices.extend_from_slice(&quad_at(-0.75, -0.25, 0));
-        vertices.extend_from_slice(&quad_at(0.25, -0.25, 1));
+        self.vertices.clear();
+        self.vertices.extend_from_slice(&quad_at(-0.75, -0.25, 0));
+        self.vertices.extend_from_slice(&quad_at(0.25, -0.25, 1));
 
         unsafe {
             self.color_pass
                 .begin_render_pass_inline(&frame, [0.2, 0.2, 0.3, 1.0]);
 
             self.bindless_triangles
-                .write_vertices_for_frame(&frame, &vertices)?;
+                .write_vertices_for_frame(&frame, &self.vertices)?;
 
             self.bindless_triangles.draw_vertices(
                 &frame,
