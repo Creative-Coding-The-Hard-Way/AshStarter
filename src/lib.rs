@@ -1,9 +1,6 @@
-mod markdown;
+//! A toy library for getting started with creative coding with Vulkan using the
+//! Ash library.
 
-pub mod frame_pipeline;
-pub mod glfw_window;
+pub mod application;
+pub mod graphics;
 pub mod math;
-pub mod renderer;
-pub mod timing;
-pub mod vulkan;
-pub mod vulkan_ext;
